@@ -3,19 +3,15 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ROUTES } from "@/lib/utils/constants";
 import { useUser } from "@/context/UserContext";
 import ThemeToggle from "./ThemeToggle";
 import { LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useGetMyStoreQuery } from "@/redux/features/Store/store.api";
 
 export default function Navbar() {
   const { user, logout } = useUser();
   const router = useRouter();
-  const { data: myStore } = useGetMyStoreQuery();
-  // console.log(myStore);
 
   const handleLogout = async () => {
     try {
@@ -41,11 +37,10 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center gap-4">
-          <Link href={ROUTES.PRICING}>Pricing</Link>
 
           <ThemeToggle />
 
-          {user ? (
+          {/* {user ? (
             <>
               <Link
                 href={
@@ -76,7 +71,7 @@ export default function Navbar() {
                 <Button>Get Started</Button>
               </Link>
             </>
-          )}
+          )} */}
         </div>
       </div>
     </nav>
