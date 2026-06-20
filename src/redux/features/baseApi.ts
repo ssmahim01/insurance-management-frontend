@@ -10,7 +10,12 @@ export const baseApi = createApi({
     "ME",
     "PLAN",
     "PLANS",
-
+    "PARTNERS",
+    "BRANCHES",
+    "PACKAGES",
+    "PACKAGE",
+    "BRANCH",
+    "PARTNER",
     "SUBSCRIPTION",
     "SUBSCRIPTIONS",
     "CATEGORIES",
