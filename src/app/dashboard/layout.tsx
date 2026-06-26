@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { DashboardLayoutWrapper } from '@/components/features/dashboard/layout/DashboardLayout';
+import ReduxProvider from '@/providers/ReduxProvider';
 
 export const metadata: Metadata = {
   title: 'Dashboard | Shurokkha',
@@ -18,7 +19,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       user={mockUser}
       defaultOpen={true}
     >
+<ReduxProvider>
       {children}
+</ReduxProvider>
     </DashboardLayoutWrapper>
   );
 }
