@@ -70,6 +70,18 @@ export const dashboardNavigation: NavGroup[] = [
   {
     label: "Management",
     items: [
+                  {
+        id: "agentLeader",
+        label: "Agent Leader",
+        href: "/dashboard/agent-leader",
+        icon: Handshake,
+      },
+      {
+        id: "agents",
+        label: "Agents",
+        href: "/dashboard/agents",
+        icon: Handshake,
+      },
       {
         id: "partners",
         label: "Partners",

@@ -1,52 +1,143 @@
-import { IsActive } from ".";
-import { UserRole } from "./auth.types";
-import { UserStatus } from "./auth.types";
-
-export interface UserManagement {
-  id: string;
-  name: string;
-  phone: string;
-  role: UserRole;
-  status?: UserStatus;
-  createdAt: string;
-  lastLoginAt?: string;
-  storeId?: string;
-}
-
-export interface CreateUserPayload {
-  name: string;
-  phone: string;
-  password?: string;
-  status?: UserStatus;
-  role: UserRole;
-  storeId?: string;
-}
-
-export interface UpdateUserPayload {
-  name?: string;
-  phone?: string;
-  role?: UserRole;
-  status?: UserStatus;
-  storeId?: string;
-}
+// ─── Enums ──────────────────────────────────────────────────────────────────
 
 export enum Role {
+  SUPER_ADMIN = "SUPER_ADMIN",
   ADMIN = "ADMIN",
-  OWNER = "OWNER",
+  AGENT_LEADER = "AGENT_LEADER",
+  AGENT = "AGENT",
+  CUSTOMER = "CUSTOMER",
+}
+
+export enum IsActive {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  BLOCKED = "BLOCKED"
+}
+
+// ─── Sub-interfaces ──────────────────────────────────────────────────────────
+
+export interface IAddress {
+  division?: string;
+  district?: string;
+  thana?: string;
+  union?: string;
+}
+
+export interface INominee {
+  name?: string;
+  age?: number;
+  relationship?: string;
+  phone?: string;
+}
+
+// ─── Core User Interface ─────────────────────────────────────────────────────
+
+// Populated variants returned by the API after .populate()
+export interface IPopulatedAgentLeader {
+  _id: string;
+  name: string;
+  phone: string;
+}
+
+export interface IPopulatedCreatedBy {
+  _id: string;
+  name: string;
+  phone: string;
+  role: Role;
 }
 
 export interface IUser {
   _id?: string;
+
+  createdBy?: string | IPopulatedCreatedBy;
+  agentLeader?: string | IPopulatedAgentLeader; // only for agents
+
+  // BASIC INFO
   name: string;
+  phone: string;
+  email?: string;
   password?: string;
-  phone?: string;
-  address: string;
-  status?: string;
   picture?: string;
+  role: Role;
+
+  // CUSTOMER SPECIFIC INFO
+  nid?: string;
+  dateOfBirth?: string; // ISO string from API (Date serialised)
+  gender?: "MALE" | "FEMALE" | "OTHER";
+  address?: IAddress;
+
+  // NOMINEE INFO
+  nominee?: INominee;
+
+  // EMPLOYEE RELATED
+  salary?: string;
+  salaryPerCustomer?: string;
+
+  // SYSTEM FLAGS
   isActive?: IsActive;
   isVerified?: boolean;
   isDeleted?: boolean;
-  role?: Role;
+  lastLoginAt?: string; // ISO string from API
+
+  // Mongoose timestamps
   createdAt?: string;
   updatedAt?: string;
+}
+
+// ─── Query Params ────────────────────────────────────────────────────────────
+
+export interface GetUsersParams {
+  page?: number;
+  limit?: number;
+  searchTerm?: string;
+  sort?: string;
+  fields?: string;
+  startDate?: string; // YYYY-MM-DD
+  endDate?: string; // YYYY-MM-DD
+  role?: Role;
+  isActive?: IsActive;
+  gender?: "MALE" | "FEMALE" | "OTHER";
+}
+
+export interface IPaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPage: number;
+}
+
+export interface IStats {
+  total: number;
+  active: number;
+  inactive: number;
+  blocked: number;
+}
+
+export interface IUserListResponse {
+  success: boolean;
+  message: string;
+  data: IUser[];
+  meta: IPaginationMeta;
+  stats: IStats;
+}
+
+export interface IAllUsersResponse {
+  success: boolean;
+  message: string;
+  data: IUser[];
+  meta: IPaginationMeta;
+  stats: {
+    total: number;
+    superAdmin: IStats;
+    admin: IStats;
+    agentLeader: IStats;
+    agent: IStats;
+    customer: IStats;
+  };
+}
+
+export interface ISingleUserResponse {
+  success: boolean;
+  message: string;
+  data: IUser;
 }
