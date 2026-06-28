@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Edit2,
   Trash2,
@@ -10,11 +10,10 @@ import {
   ChevronDown,
   ChevronsUpDown,
   X,
-  Users,
-  UserCheck,
-  UserX,
-  ShieldAlert,
-  Crown,
+  Handshake,
+  CheckCircle2,
+  XCircle,
+  LayoutGrid,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -45,50 +44,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  useGetAllAgentLeadersQuery,
-  useDeleteUserMutation,
-} from "@/redux/features/user/user.api";
 
 import { PageHeader } from "../shared/PageHeader";
 import { Pagination } from "../pagination/Pagination";
-import { IsActive, IUser } from "@/types/user.types";
-import { UpdateAgentLeaderModal } from "./UpdateAgentLeader";
-import { AgentLeaderDetailsModal } from "./AgentLeaderDetailsModal";
-import { CreateAgentLeaderModal } from "./CreateAgentLeader";
+import { CreatePartnerModal } from "./CreatePartner";
+import { UpdatePartnerModal } from "./UpdatePartner";
+import { PartnerDetailsModal } from "./PartnerDetailsModal";
 
-// ─── TODO: create these three modals mirroring the Agent ones ────────────────
-// import { CreateAgentLeaderModal } from "./CreateAgentLeader";
-// import { AgentLeaderDetailsModal } from "./AgentLeaderDetailsModal";
-// import { UpdateAgentLeaderModal } from "./UpdateAgentLeader";
+// ─── Replace with your actual RTK Query hooks ─────────────────────────────────
+import {
+  useGetAllPartnersQuery,
+  useSoftDeletePartnerMutation,
+} from "@/redux/features/partner/partner.api";
+import { IPartner } from "@/types/partner.types";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 type SortField = "name" | "phone" | "isActive" | "createdAt";
-type SortDir = "asc" | "desc" | null;
+type SortDir   = "asc" | "desc" | null;
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-const STATUS_LABELS: Record<IsActive, string> = {
-  [IsActive.ACTIVE]:   "Active",
-  [IsActive.INACTIVE]: "Inactive",
-  [IsActive.BLOCKED]:  "Blocked",
-};
-
-const STATUS_STYLES: Record<IsActive, string> = {
-  [IsActive.ACTIVE]:
-    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400",
-  [IsActive.INACTIVE]:
-    "border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
-  [IsActive.BLOCKED]:
-    "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400",
-};
-
-const STATUS_DOT: Record<IsActive, string> = {
-  [IsActive.ACTIVE]:   "bg-emerald-500",
-  [IsActive.INACTIVE]: "bg-slate-400",
-  [IsActive.BLOCKED]:  "bg-red-500",
-};
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const formatDate = (iso?: string) => {
   if (!iso) return "—";
@@ -99,17 +74,17 @@ const formatDate = (iso?: string) => {
   });
 };
 
-// ─── Skeleton Row ─────────────────────────────────────────────────────────────
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
 
-function LeaderRowSkeleton() {
+function PartnerRowSkeleton() {
   return (
     <TableRow>
       <TableCell>
         <div className="flex items-center gap-3">
-          <Skeleton className="w-9 h-9 rounded-full shrink-0" />
+          <Skeleton className="w-10 h-10 rounded-lg shrink-0" />
           <div className="space-y-1.5">
             <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-3 w-20" />
           </div>
         </div>
       </TableCell>
@@ -144,13 +119,13 @@ function StatCardSkeleton() {
   );
 }
 
-type StatColor = "blue" | "emerald" | "slate" | "red";
+type StatColor = "violet" | "emerald" | "slate";
 
 const STAT_COLOR_MAP: Record<StatColor, { bg: string; icon: string; text: string }> = {
-  blue: {
-    bg:   "bg-blue-50 dark:bg-blue-900/20",
-    icon: "text-blue-600 dark:text-blue-400",
-    text: "text-blue-600 dark:text-blue-400",
+  violet: {
+    bg:   "bg-violet-50 dark:bg-violet-900/20",
+    icon: "text-violet-600 dark:text-violet-400",
+    text: "text-violet-600 dark:text-violet-400",
   },
   emerald: {
     bg:   "bg-emerald-50 dark:bg-emerald-900/20",
@@ -161,11 +136,6 @@ const STAT_COLOR_MAP: Record<StatColor, { bg: string; icon: string; text: string
     bg:   "bg-slate-100 dark:bg-slate-800",
     icon: "text-slate-500 dark:text-slate-400",
     text: "text-slate-500 dark:text-slate-400",
-  },
-  red: {
-    bg:   "bg-red-50 dark:bg-red-900/20",
-    icon: "text-red-500 dark:text-red-400",
-    text: "text-red-500 dark:text-red-400",
   },
 };
 
@@ -211,18 +181,18 @@ function SortIcon({
   if (sortField !== field)
     return <ChevronsUpDown className="w-3.5 h-3.5 ml-1 text-slate-400" />;
   return sortDir === "asc" ? (
-    <ChevronUp className="w-3.5 h-3.5 ml-1 text-blue-500" />
+    <ChevronUp className="w-3.5 h-3.5 ml-1 text-violet-500" />
   ) : (
-    <ChevronDown className="w-3.5 h-3.5 ml-1 text-blue-500" />
+    <ChevronDown className="w-3.5 h-3.5 ml-1 text-violet-500" />
   );
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function AgentLeaderManagement() {
-  // ── filters & pagination ──
+export default function PartnerManagement() {
+  // ── filters ──
   const [searchTerm, setSearchTerm]     = useState("");
-  const [statusFilter, setStatusFilter] = useState<IsActive | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "true" | "false">("all");
   const [startDate, setStartDate]       = useState("");
   const [endDate, setEndDate]           = useState("");
   const [page, setPage]                 = useState(1);
@@ -233,18 +203,17 @@ export default function AgentLeaderManagement() {
   const [sortDir, setSortDir]     = useState<SortDir>(null);
 
   // ── modals ──
-  const [editingLeader, setEditingLeader]   = useState<IUser | null>(null);
-  const [isUpdateOpen, setIsUpdateOpen]     = useState(false);
-  const [viewingLeader, setViewingLeader]   = useState<IUser | null>(null);
-  const [isDetailsOpen, setIsDetailsOpen]   = useState(false);
-  const [deletingLeader, setDeletingLeader] = useState<IUser | null>(null);
-  const [isDeleteOpen, setIsDeleteOpen]     = useState(false);
+  const [viewingPartner, setViewingPartner]   = useState<IPartner | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen]     = useState(false);
+  const [editingPartner, setEditingPartner]   = useState<IPartner | null>(null);
+  const [isUpdateOpen, setIsUpdateOpen]       = useState(false);
+  const [deletingPartner, setDeletingPartner] = useState<IPartner | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen]       = useState(false);
 
-  // ── reset page on filter change ──
   useEffect(() => { setPage(1); }, [searchTerm, statusFilter]);
 
   // ── API ──
-  const { data, isLoading, refetch } = useGetAllAgentLeadersQuery({
+  const { data, isLoading, refetch } = useGetAllPartnersQuery({
     searchTerm: searchTerm || undefined,
     isActive:   statusFilter !== "all" ? statusFilter : undefined,
     page,
@@ -253,30 +222,30 @@ export default function AgentLeaderManagement() {
     ...(endDate   && { endDate }),
   });
 
-  const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
+  const [softDeletePartner, { isLoading: isDeleting }] = useSoftDeletePartnerMutation();
 
   // ── derived ──
-  const leaders: IUser[] = data?.data ?? [];
-  const stats            = data?.stats;
-  const meta             = data?.meta;
-  const totalPage        = meta?.totalPage ?? 1;
+  const partners: IPartner[] = data?.data ?? [];
+  const stats                = data?.stats;
+  const meta                 = data?.meta;
+  const totalPage            = meta?.totalPage ?? 1;
 
   const hasActiveFilters = statusFilter !== "all";
   const hasDateFilter    = !!(startDate || endDate);
 
-  // ── client-side sort ──
-  const sortedLeaders = useMemo(() => {
-    if (!sortField || !sortDir) return leaders;
-    return [...leaders].sort((a, b) => {
+  // ── client sort ──
+  const sortedPartners = React.useMemo(() => {
+    if (!sortField || !sortDir) return partners;
+    return [...partners].sort((a, b) => {
       let aVal = "";
       let bVal = "";
       if (sortField === "name")      { aVal = a.name ?? ""; bVal = b.name ?? ""; }
       if (sortField === "phone")     { aVal = a.phone ?? ""; bVal = b.phone ?? ""; }
-      if (sortField === "isActive")  { aVal = a.isActive ?? ""; bVal = b.isActive ?? ""; }
+      if (sortField === "isActive")  { aVal = String(a.isActive); bVal = String(b.isActive); }
       if (sortField === "createdAt") { aVal = a.createdAt ?? ""; bVal = b.createdAt ?? ""; }
       return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
     });
-  }, [leaders, sortField, sortDir]);
+  }, [partners, sortField, sortDir]);
 
   // ── handlers ──
   const handleSort = (field: SortField) => {
@@ -285,34 +254,27 @@ export default function AgentLeaderManagement() {
     setSortField(null); setSortDir(null);
   };
 
-  const clearFilters    = () => setStatusFilter("all");
+  const clearFilters    = () => { setStatusFilter("all"); };
   const clearDateFilter = () => { setStartDate(""); setEndDate(""); };
 
-  const openEditDialog    = (l: IUser) => { setEditingLeader(l); setIsUpdateOpen(true); };
-  const openDetailsDialog = (l: IUser) => { setViewingLeader(l); setIsDetailsOpen(true); };
-  const openDeleteDialog  = (l: IUser) => { setDeletingLeader(l); setIsDeleteOpen(true); };
+  const openDetailsDialog = (p: IPartner) => { setViewingPartner(p); setIsDetailsOpen(true); };
+  const openEditDialog    = (p: IPartner) => { setEditingPartner(p); setIsUpdateOpen(true); };
+  const openDeleteDialog  = (p: IPartner) => { setDeletingPartner(p); setIsDeleteOpen(true); };
 
   const handleDelete = async () => {
-    if (!deletingLeader?._id) return;
+    if (!deletingPartner?._id) return;
     try {
-      await deleteUser(String(deletingLeader._id)).unwrap();
-      toast.success("Agent Leader deleted successfully");
+      await softDeletePartner(String(deletingPartner._id)).unwrap();
+      toast.success("Partner moved to trash");
       setIsDeleteOpen(false);
-      setDeletingLeader(null);
+      setDeletingPartner(null);
       refetch();
     } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to delete agent leader");
+      toast.error(err?.data?.message || "Failed to delete partner");
     }
   };
 
-  const getCreatedByName = (u: IUser): string => {
-    const c = u.createdBy;
-    if (!c) return "—";
-    if (typeof c === "string") return c;
-    return c.name ?? "—";
-  };
-
-  // ── sortable th ──
+  // ── sortable header ──
   const SortableTh = ({ field, label }: { field: SortField; label: string }) => (
     <TableHead
       className="cursor-pointer select-none whitespace-nowrap"
@@ -331,19 +293,19 @@ export default function AgentLeaderManagement() {
     <div className="space-y-6">
       {/* Page Header */}
       <PageHeader
-        title="Agent Leader Management"
-        description="Manage all agent leaders and monitor their activity"
+        title="Partner Management"
+        description="Manage insurance partners and their details"
         breadcrumbs={[
           { label: "Dashboard", href: "/dashboard" },
-          { label: "Agent Leader Management" },
+          { label: "Partner Management" },
         ]}
-        action={<CreateAgentLeaderModal onSuccess={refetch} />}
+        action={<CreatePartnerModal onSuccess={refetch} />}
       />
 
       {/* ── Stat Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Date filter row */}
-        <div className="sm:col-span-2 lg:col-span-4 flex flex-wrap items-center gap-3">
+        <div className="sm:col-span-3 flex flex-wrap items-center gap-3">
           <p className="text-sm text-slate-500 dark:text-slate-400 shrink-0">
             Filter stats by date:
           </p>
@@ -380,37 +342,29 @@ export default function AgentLeaderManagement() {
             <StatCardSkeleton />
             <StatCardSkeleton />
             <StatCardSkeleton />
-            <StatCardSkeleton />
           </>
         ) : (
           <>
             <StatCard
-              label="Total Leaders"
+              label="Total Partners"
               value={stats?.total ?? 0}
-              sub="registered in the system"
-              icon={Users}
-              color="blue"
+              sub="registered partners"
+              icon={LayoutGrid}
+              color="violet"
             />
             <StatCard
-              label="Active Leaders"
+              label="Active Partners"
               value={stats?.active ?? 0}
               sub={`${stats?.total ? Math.round(((stats?.active ?? 0) / stats.total) * 100) : 0}% of total`}
-              icon={UserCheck}
+              icon={CheckCircle2}
               color="emerald"
             />
             <StatCard
-              label="Inactive Leaders"
+              label="Inactive Partners"
               value={stats?.inactive ?? 0}
-              sub="not currently active"
-              icon={UserX}
+              sub="currently disabled"
+              icon={XCircle}
               color="slate"
-            />
-            <StatCard
-              label="Blocked Leaders"
-              value={stats?.blocked ?? 0}
-              sub="access restricted"
-              icon={ShieldAlert}
-              color="red"
             />
           </>
         )}
@@ -421,7 +375,7 @@ export default function AgentLeaderManagement() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
-            placeholder="Search by name or phone..."
+            placeholder="Search by name, phone or email..."
             className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -430,20 +384,21 @@ export default function AgentLeaderManagement() {
 
         <Select
           value={statusFilter}
-          onValueChange={(v) => setStatusFilter(v as IsActive | "all")}
+          onValueChange={(v) => setStatusFilter(v as "all" | "true" | "false")}
         >
           <SelectTrigger className="w-40 h-9 text-sm">
             <span>
               {statusFilter === "all"
                 ? "All Status"
-                : STATUS_LABELS[statusFilter as IsActive]}
+                : statusFilter === "true"
+                ? "Active"
+                : "Inactive"}
             </span>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value={IsActive.ACTIVE}>Active</SelectItem>
-            <SelectItem value={IsActive.INACTIVE}>Inactive</SelectItem>
-            <SelectItem value={IsActive.BLOCKED}>Blocked</SelectItem>
+            <SelectItem value="true">Active</SelectItem>
+            <SelectItem value="false">Inactive</SelectItem>
           </SelectContent>
         </Select>
 
@@ -466,11 +421,11 @@ export default function AgentLeaderManagement() {
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50 dark:bg-slate-800/50">
-                <SortableTh field="name"      label="Agent Leader" />
+                <SortableTh field="name"      label="Partner" />
                 <SortableTh field="phone"     label="Phone" />
-                <TableHead className="whitespace-nowrap">Created By</TableHead>
-                <SortableTh field="createdAt" label="Joined" />
-                <TableHead className="whitespace-nowrap">Last Login</TableHead>
+                <TableHead className="whitespace-nowrap">Email</TableHead>
+                <TableHead className="whitespace-nowrap">Website</TableHead>
+                <SortableTh field="createdAt" label="Added" />
                 <SortableTh field="isActive"  label="Status" />
                 <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
               </TableRow>
@@ -479,13 +434,13 @@ export default function AgentLeaderManagement() {
             <TableBody>
               {isLoading ? (
                 Array.from({ length: 6 }).map((_, i) => (
-                  <LeaderRowSkeleton key={i} />
+                  <PartnerRowSkeleton key={i} />
                 ))
-              ) : sortedLeaders.length === 0 ? (
+              ) : sortedPartners.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7}>
                     <div className="flex flex-col items-center justify-center py-16 text-slate-400">
-                      <Crown className="w-12 h-12 mb-4 opacity-30" />
+                      <Handshake className="w-12 h-12 mb-4 opacity-30" />
                       {searchTerm || hasActiveFilters ? (
                         <>
                           <p className="text-base font-medium">No results found</p>
@@ -493,118 +448,132 @@ export default function AgentLeaderManagement() {
                         </>
                       ) : (
                         <>
-                          <p className="text-base font-medium">No agent leaders added yet</p>
-                          <p className="text-sm mt-1">Click the Add Agent Leader button to get started</p>
+                          <p className="text-base font-medium">No partners added yet</p>
+                          <p className="text-sm mt-1">Click the Add Partner button to get started</p>
                         </>
                       )}
                     </div>
                   </TableCell>
                 </TableRow>
               ) : (
-                sortedLeaders.map((leader) => {
-                  const status = leader.isActive ?? IsActive.INACTIVE;
-                  return (
-                    <TableRow
-                      key={String(leader._id)}
-                      className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
-                    >
-                      {/* Name + phone */}
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          {leader.picture ? (
-                            <img
-                              src={leader.picture}
-                              alt={leader.name}
-                              className="w-9 h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 shrink-0"
-                            />
-                          ) : (
-                            <div className="w-9 h-9 rounded-full bg-linear-to-br from-indigo-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                              {leader.name?.charAt(0)?.toUpperCase() ?? "L"}
-                            </div>
-                          )}
-                          <div className="min-w-0">
-                            <p className="font-medium text-slate-900 dark:text-white truncate max-w-36">
-                              {leader.name ?? "—"}
-                            </p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate max-w-36">
-                              {leader.phone ?? "—"}
-                            </p>
-                          </div>
-                        </div>
-                      </TableCell>
-
-                      {/* Phone */}
-                      <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
-                        {leader.phone ?? "—"}
-                      </TableCell>
-
-                      {/* Created By */}
-                      <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
-                        {getCreatedByName(leader)}
-                      </TableCell>
-
-                      {/* Joined */}
-                      <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
-                        {formatDate(leader.createdAt)}
-                      </TableCell>
-
-                      {/* Last Login */}
-                      <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
-                        {leader.lastLoginAt ? (
-                          formatDate(leader.lastLoginAt)
+                sortedPartners.map((partner) => (
+                  <TableRow
+                    key={String(partner._id)}
+                    className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+                  >
+                    {/* Partner name + logo */}
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        {partner.logo ? (
+                          <img
+                            src={partner.logo}
+                            alt={partner.name}
+                            className="w-10 h-10 rounded-lg object-contain border border-slate-200 dark:border-slate-700 bg-white p-1 shrink-0"
+                          />
                         ) : (
-                          <span className="text-slate-300 dark:text-slate-600 italic text-xs">Never</span>
+                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                            {partner.name?.charAt(0)?.toUpperCase() ?? "P"}
+                          </div>
                         )}
-                      </TableCell>
+                        <div className="min-w-0">
+                          <p className="font-medium text-slate-900 dark:text-white truncate max-w-40">
+                            {partner.name}
+                          </p>
+                          {partner.description && (
+                            <p className="text-xs text-slate-400 truncate max-w-40">
+                              {partner.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </TableCell>
 
-                      {/* Status */}
-                      <TableCell>
+                    {/* Phone */}
+                    <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
+                      {partner.phone ?? "—"}
+                    </TableCell>
+
+                    {/* Email */}
+                    <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
+                      {partner.email ?? "—"}
+                    </TableCell>
+
+                    {/* Website */}
+                    <TableCell>
+                      {partner.website ? (
+                        <a
+                          href={partner.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-violet-600 dark:text-violet-400 text-sm hover:underline truncate max-w-36 inline-block"
+                        >
+                          {partner.website.replace(/^https?:\/\//, "")}
+                        </a>
+                      ) : (
+                        <span className="text-slate-400 text-sm">—</span>
+                      )}
+                    </TableCell>
+
+                    {/* Added date */}
+                    <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
+                      {formatDate(partner.createdAt)}
+                    </TableCell>
+
+                    {/* Status */}
+                    <TableCell>
+                      {partner.isActive ? (
                         <Badge
                           variant="outline"
-                          className={STATUS_STYLES[status as IsActive] ?? STATUS_STYLES[IsActive.INACTIVE]}
+                          className="border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400"
                         >
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full mr-1.5 inline-block ${STATUS_DOT[status as IsActive] ?? STATUS_DOT[IsActive.INACTIVE]}`}
-                          />
-                          {STATUS_LABELS[status as IsActive] ?? "Unknown"}
+                          <span className="h-1.5 w-1.5 rounded-full mr-1.5 inline-block bg-emerald-500" />
+                          Active
                         </Badge>
-                      </TableCell>
+                      ) : (
+                        <Badge
+                          variant="outline"
+                          className="border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full mr-1.5 inline-block bg-slate-400" />
+                          Inactive
+                        </Badge>
+                      )}
+                    </TableCell>
 
-                      {/* Actions */}
-                      <TableCell>
-                        <div className="flex gap-1.5 justify-end">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8"
-                            title="View details"
-                            onClick={() => openDetailsDialog(leader)}
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8"
-                            title="Edit agent leader"
-                            onClick={() => openEditDialog(leader)}
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            className="h-8 w-8"
-                            title="Delete agent leader"
-                            onClick={() => openDeleteDialog(leader)}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
+                    {/* Actions */}
+                    <TableCell>
+                      <div className="flex gap-1.5 justify-end">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8"
+                          title="View details"
+                          onClick={() => openDetailsDialog(partner)}
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8"
+                          title="Edit partner"
+                          onClick={() => openEditDialog(partner)}
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          className="h-8 w-8"
+                          title="Delete partner"
+                          onClick={() => openDeleteDialog(partner)}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
               )}
             </TableBody>
           </Table>
@@ -616,15 +585,15 @@ export default function AgentLeaderManagement() {
           />
         </div>
 
-        {/* Footer */}
-        {!isLoading && sortedLeaders.length > 0 && (
+        {/* Footer count */}
+        {!isLoading && sortedPartners.length > 0 && (
           <div className="px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Showing{" "}
               <span className="font-semibold text-slate-700 dark:text-slate-300">
-                {sortedLeaders.length}
+                {sortedPartners.length}
               </span>{" "}
-              leader{sortedLeaders.length !== 1 ? "s" : ""}
+              partner{sortedPartners.length !== 1 ? "s" : ""}
               {hasActiveFilters && " (filtered)"}
             </p>
             {totalPage > 1 && (
@@ -637,20 +606,20 @@ export default function AgentLeaderManagement() {
       </div>
 
       {/* ── Modals ── */}
-      {/* Uncomment once modals are created: */}
-      {editingLeader && (
-        <UpdateAgentLeaderModal
-          open={isUpdateOpen}
-          onOpenChange={setIsUpdateOpen}
-          item={editingLeader}
-          onSuccess={refetch}
-        />
-      )}
-      {viewingLeader && (
-        <AgentLeaderDetailsModal
+      {viewingPartner && (
+        <PartnerDetailsModal
           open={isDetailsOpen}
           onOpenChange={setIsDetailsOpen}
-          item={viewingLeader}
+          item={viewingPartner}
+        />
+      )}
+
+      {editingPartner && (
+        <UpdatePartnerModal
+          open={isUpdateOpen}
+          onOpenChange={setIsUpdateOpen}
+          item={editingPartner}
+          onSuccess={refetch}
         />
       )}
 
@@ -658,10 +627,11 @@ export default function AgentLeaderManagement() {
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Agent Leader</AlertDialogTitle>
+            <AlertDialogTitle>Move to Trash</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete{" "}
-              <strong>{deletingLeader?.name}</strong>? This action cannot be undone.
+              Are you sure you want to move{" "}
+              <strong>{deletingPartner?.name}</strong> to trash? This can be
+              restored later.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex gap-2">
@@ -671,7 +641,7 @@ export default function AgentLeaderManagement() {
               disabled={isDeleting}
               className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
             >
-              {isDeleting ? "Deleting..." : "Delete"}
+              {isDeleting ? "Moving..." : "Move to Trash"}
             </AlertDialogAction>
           </div>
         </AlertDialogContent>
