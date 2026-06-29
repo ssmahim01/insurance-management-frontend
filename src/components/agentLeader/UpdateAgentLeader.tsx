@@ -1,3 +1,380 @@
+// "use client";
+
+// import { useEffect, useState } from "react";
+// import { z } from "zod";
+// import { zodResolver } from "@hookform/resolvers/zod";
+// import { useForm } from "react-hook-form";
+// import { toast } from "sonner";
+// import { Crown, Upload, X } from "lucide-react";
+
+// import { Button } from "@/components/ui/button";
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogHeader,
+//   DialogTitle,
+//   DialogDescription,
+// } from "@/components/ui/dialog";
+// import { Input } from "@/components/ui/input";
+// import { Label } from "@/components/ui/label";
+// import { Separator } from "@/components/ui/separator";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+// } from "@/components/ui/select";
+// import { useUpdateUserMutation } from "@/redux/features/user/user.api";
+// import { IsActive, IUser } from "@/types/user.types";
+
+// // ─── Schema ───────────────────────────────────────────────────────────────────
+
+// const schema = z.object({
+//   name: z.string().min(2, "Name must be at least 2 characters").max(100),
+//   phone: z.string().min(11, "Enter a valid phone number").max(15),
+//   email: z
+//     .string()
+//     .email("Enter a valid email address")
+//     .optional()
+//     .or(z.literal("")),
+//   isActive: z.nativeEnum(IsActive),
+//   salary: z.preprocess(
+//     (val) => (val !== "" && val !== undefined ? Number(val) : undefined),
+//     z.number().min(0).optional(),
+//   ),
+//   salaryPerCustomer: z.preprocess(
+//     (val) => (val !== "" && val !== undefined ? Number(val) : undefined),
+//     z.number().min(0).optional(),
+//   ),
+//   division: z.string().optional(),
+//   district: z.string().optional(),
+//   thana: z.string().optional(),
+//   union: z.string().optional(),
+// });
+
+// type FormValues = z.infer<typeof schema>;
+
+// interface Props {
+//   open: boolean;
+//   onOpenChange: (open: boolean) => void;
+//   item: IUser;
+//   onSuccess?: () => void;
+// }
+
+// const STATUS_META: Record<IsActive, { label: string; dot: string }> = {
+//   [IsActive.ACTIVE]:   { label: "Active",   dot: "bg-emerald-500" },
+//   [IsActive.INACTIVE]: { label: "Inactive", dot: "bg-slate-400" },
+//   [IsActive.BLOCKED]:  { label: "Blocked",  dot: "bg-red-500" },
+// };
+
+// // ─── Component ────────────────────────────────────────────────────────────────
+
+// export function UpdateAgentLeaderModal({ open, onOpenChange, item, onSuccess }: Props) {
+//   const [imageFile, setImageFile] = useState<File | null>(null);
+//   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+//   const [updateUser, { isLoading }] = useUpdateUserMutation();
+
+//   const {
+//     register,
+//     handleSubmit,
+//     setValue,
+//     watch,
+//     formState: { errors },
+//     reset,
+//   } = useForm<FormValues>({
+//     resolver: zodResolver(schema) as any,
+//   });
+
+//   const selectedStatus = watch("isActive");
+
+//   useEffect(() => {
+//     if (open && item) {
+//       reset({
+//         name: item.name ?? "",
+//         phone: item.phone ?? "",
+//         email: item.email ?? "",
+//         isActive: item.isActive ?? IsActive.ACTIVE,
+//         salary: item.salary ? Number(item.salary) : undefined,
+//         salaryPerCustomer: item.salaryPerCustomer ? Number(item.salaryPerCustomer) : undefined,
+//         division: item.address?.division ?? "",
+//         district: item.address?.district ?? "",
+//         thana: item.address?.thana ?? "",
+//         union: item.address?.union ?? "",
+//       });
+//       setImagePreview(item.picture ?? null);
+//       setImageFile(null);
+//     }
+//   }, [open, item, reset]);
+
+//   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     const file = e.target.files?.[0];
+//     if (!file) return;
+//     if (file.size > 2 * 1024 * 1024) { toast.error("Image must be under 2MB"); return; }
+//     setImageFile(file);
+//     setImagePreview(URL.createObjectURL(file));
+//   };
+
+//   const clearImage = () => { setImageFile(null); setImagePreview(null); };
+
+//   const handleClose = () => { clearImage(); onOpenChange(false); };
+
+//   const onSubmit = async (data: FormValues) => {
+//     try {
+//       const formData = new FormData();
+//       const payload = {
+//         name: data.name,
+//         phone: data.phone,
+//         ...(data.email && { email: data.email }),
+//         isActive: data.isActive,
+//         ...(data.salary !== undefined && { salary: String(data.salary) }),
+//         ...(data.salaryPerCustomer !== undefined && { salaryPerCustomer: String(data.salaryPerCustomer) }),
+//         address: {
+//           division: data.division || "",
+//           district: data.district || "",
+//           thana: data.thana || "",
+//           union: data.union || "",
+//         },
+//       };
+//       formData.append("data", JSON.stringify(payload));
+//       if (imageFile) formData.append("picture", imageFile);
+
+//       await updateUser({ id: String(item._id), data: formData }).unwrap();
+//       toast.success("Agent Leader updated successfully!");
+//       handleClose();
+//       onSuccess?.();
+//     } catch (error: any) {
+//       toast.error(error?.data?.message || "Failed to update agent leader");
+//     }
+//   };
+
+//   return (
+//     <Dialog open={open} onOpenChange={(val) => { if (!val) handleClose(); else onOpenChange(true); }}>
+//       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+//         <DialogHeader className="flex flex-col items-center gap-2 pb-2">
+//           <div className="w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md mb-1">
+//             <Crown className="w-6 h-6 text-white" />
+//           </div>
+//           <DialogTitle className="text-xl font-bold tracking-widest uppercase">
+//             Edit Agent Leader
+//           </DialogTitle>
+//           <DialogDescription className="text-[#96999A] text-sm tracking-wide">
+//             Update the agent leader&apos;s information below
+//           </DialogDescription>
+//         </DialogHeader>
+
+//         <Separator />
+
+//         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 pt-1">
+
+//           {/* Personal Information */}
+//           <div>
+//             <p className="text-xs font-bold tracking-widest uppercase text-slate-400 mb-3">
+//               Personal Information
+//             </p>
+//             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+//               <div className="space-y-1.5">
+//                 <Label htmlFor="ual-name" className="text-xs font-semibold tracking-widest uppercase">
+//                   Full Name <span className="text-red-500">*</span>
+//                 </Label>
+//                 <Input id="ual-name" placeholder="e.g. Md. Karimul Islam" {...register("name")} />
+//                 {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
+//               </div>
+
+//               <div className="space-y-1.5">
+//                 <Label htmlFor="ual-phone" className="text-xs font-semibold tracking-widest uppercase">
+//                   Phone Number <span className="text-red-500">*</span>
+//                 </Label>
+//                 <Input id="ual-phone" placeholder="01XXXXXXXXX" {...register("phone")} />
+//                 {errors.phone && <p className="text-xs text-red-400">{errors.phone.message}</p>}
+//               </div>
+
+//               <div className="space-y-1.5 sm:col-span-2">
+//                 <Label htmlFor="ual-email" className="text-xs font-semibold tracking-widest uppercase">
+//                   Email{" "}
+//                   <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+//                 </Label>
+//                 <Input id="ual-email" type="email" placeholder="example@email.com" {...register("email")} />
+//                 {errors.email && <p className="text-xs text-red-400">{errors.email.message}</p>}
+//               </div>
+
+//             </div>
+//           </div>
+
+//           <Separator />
+
+//           {/* Status */}
+//           <div>
+//             <p className="text-xs font-bold tracking-widest uppercase text-slate-400 mb-3">
+//               Status
+//             </p>
+//             <div className="space-y-1.5">
+//               <Label className="text-xs font-semibold tracking-widest uppercase">
+//                 Account Status <span className="text-red-500">*</span>
+//               </Label>
+//               <Select
+//                 value={selectedStatus}
+//                 onValueChange={(v) => setValue("isActive", v as IsActive, { shouldValidate: true })}
+//               >
+//                 <SelectTrigger className="w-full">
+//                   {selectedStatus ? (
+//                     <span className="flex items-center gap-2 text-sm">
+//                       <span className={`h-2 w-2 rounded-full inline-block ${STATUS_META[selectedStatus]?.dot}`} />
+//                       {STATUS_META[selectedStatus]?.label}
+//                     </span>
+//                   ) : (
+//                     <span className="text-sm text-slate-400">Select status</span>
+//                   )}
+//                 </SelectTrigger>
+//                 <SelectContent>
+//                   {Object.values(IsActive).map((s) => (
+//                     <SelectItem key={s} value={s}>
+//                       <span className="flex items-center gap-2">
+//                         <span className={`h-2 w-2 rounded-full inline-block ${STATUS_META[s].dot}`} />
+//                         {STATUS_META[s].label}
+//                       </span>
+//                     </SelectItem>
+//                   ))}
+//                 </SelectContent>
+//               </Select>
+//               {errors.isActive && <p className="text-xs text-red-400">{errors.isActive.message}</p>}
+//             </div>
+//           </div>
+
+//           <Separator />
+
+//           {/* Compensation */}
+//           <div>
+//             <p className="text-xs font-bold tracking-widest uppercase text-slate-400 mb-3">
+//               Compensation{" "}
+//               <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+//             </p>
+//             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+//               <div className="space-y-1.5">
+//                 <Label htmlFor="ual-salary" className="text-xs font-semibold tracking-widest uppercase">
+//                   Monthly Salary (BDT)
+//                 </Label>
+//                 <Input id="ual-salary" type="number" min={0} placeholder="e.g. 20000" {...register("salary")} />
+//                 {errors.salary && <p className="text-xs text-red-400">{errors.salary.message}</p>}
+//               </div>
+
+//               <div className="space-y-1.5">
+//                 <Label htmlFor="ual-per-customer" className="text-xs font-semibold tracking-widest uppercase">
+//                   Salary Per Customer (BDT)
+//                 </Label>
+//                 <Input id="ual-per-customer" type="number" min={0} placeholder="e.g. 300" {...register("salaryPerCustomer")} />
+//                 {errors.salaryPerCustomer && <p className="text-xs text-red-400">{errors.salaryPerCustomer.message}</p>}
+//               </div>
+
+//             </div>
+//           </div>
+
+//           <Separator />
+
+//           {/* Address */}
+//           <div>
+//             <p className="text-xs font-bold tracking-widest uppercase text-slate-400 mb-3">
+//               Address{" "}
+//               <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+//             </p>
+//             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+//               <div className="space-y-1.5">
+//                 <Label htmlFor="ual-division" className="text-xs font-semibold tracking-widest uppercase">Division</Label>
+//                 <Input id="ual-division" placeholder="e.g. Dhaka" {...register("division")} />
+//               </div>
+//               <div className="space-y-1.5">
+//                 <Label htmlFor="ual-district" className="text-xs font-semibold tracking-widest uppercase">District</Label>
+//                 <Input id="ual-district" placeholder="e.g. Dhaka" {...register("district")} />
+//               </div>
+//               <div className="space-y-1.5">
+//                 <Label htmlFor="ual-thana" className="text-xs font-semibold tracking-widest uppercase">Thana</Label>
+//                 <Input id="ual-thana" placeholder="e.g. Mirpur" {...register("thana")} />
+//               </div>
+//               <div className="space-y-1.5">
+//                 <Label htmlFor="ual-union" className="text-xs font-semibold tracking-widest uppercase">Union / Ward</Label>
+//                 <Input id="ual-union" placeholder="e.g. Ward-10" {...register("union")} />
+//               </div>
+//             </div>
+//           </div>
+
+//           <Separator />
+
+//           {/* Profile Picture */}
+//           <div className="space-y-1.5">
+//             <Label className="text-xs font-semibold tracking-widest uppercase">
+//               Profile Picture{" "}
+//               <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+//             </Label>
+//             {imagePreview ? (
+//               <div className="relative flex items-center gap-3 rounded-md border border-slate-200 dark:border-slate-700 p-2">
+//                 <img
+//                   src={imagePreview}
+//                   alt="Preview"
+//                   className="h-14 w-14 rounded-full object-cover shrink-0 border-2 border-slate-200 dark:border-slate-700"
+//                 />
+//                 <div className="flex-1 min-w-0">
+//                   {imageFile ? (
+//                     <>
+//                       <p className="text-xs text-slate-500 truncate">{imageFile.name}</p>
+//                       <p className="text-xs text-slate-400">{(imageFile.size / 1024).toFixed(1)} KB</p>
+//                     </>
+//                   ) : (
+//                     <p className="text-xs text-slate-400">Current profile photo</p>
+//                   )}
+//                 </div>
+//                 <Button variant="destructive" type="button" size="sm" onClick={clearImage} className="shrink-0">
+//                   <X className="h-4 w-4" />
+//                 </Button>
+//               </div>
+//             ) : (
+//               <label
+//                 htmlFor="update-al-image"
+//                 className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 px-4 py-6 cursor-pointer transition-colors"
+//               >
+//                 <Upload className="h-6 w-6 text-slate-400" />
+//                 <div className="text-center">
+//                   <p className="text-sm text-slate-500">Click to upload a new photo</p>
+//                   <p className="text-xs text-slate-400">PNG, JPG, WEBP — max 2MB</p>
+//                 </div>
+//                 <input
+//                   id="update-al-image"
+//                   type="file"
+//                   accept="image/png,image/jpeg,image/webp"
+//                   className="hidden"
+//                   onChange={handleFileChange}
+//                 />
+//               </label>
+//             )}
+//           </div>
+
+//           {/* Submit */}
+//           <Button
+//             type="submit"
+//             disabled={isLoading}
+//             className="w-full mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60"
+//           >
+//             {isLoading ? (
+//               <span className="flex items-center gap-2">
+//                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+//                 Updating...
+//               </span>
+//             ) : (
+//               <span className="flex items-center gap-2">
+//                 <Crown className="h-4 w-4" />
+//                 Update Agent Leader
+//               </span>
+//             )}
+//           </Button>
+//         </form>
+//       </DialogContent>
+//     </Dialog>
+//   );
+// }
+
+
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -5,7 +382,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Crown, Upload, X } from "lucide-react";
+import { Crown, Upload, X, Eye, EyeOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,28 +406,54 @@ import { IsActive, IUser } from "@/types/user.types";
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
-const schema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters").max(100),
-  phone: z.string().min(11, "Enter a valid phone number").max(15),
-  email: z
-    .string()
-    .email("Enter a valid email address")
-    .optional()
-    .or(z.literal("")),
-  isActive: z.nativeEnum(IsActive),
-  salary: z.preprocess(
-    (val) => (val !== "" && val !== undefined ? Number(val) : undefined),
-    z.number().min(0).optional(),
-  ),
-  salaryPerCustomer: z.preprocess(
-    (val) => (val !== "" && val !== undefined ? Number(val) : undefined),
-    z.number().min(0).optional(),
-  ),
-  division: z.string().optional(),
-  district: z.string().optional(),
-  thana: z.string().optional(),
-  union: z.string().optional(),
-});
+const schema = z
+  .object({
+    name: z.string().min(2, "Name must be at least 2 characters").max(100),
+    phone: z.string().min(11, "Enter a valid phone number").max(15),
+    email: z
+      .string()
+      .email("Enter a valid email address")
+      .optional()
+      .or(z.literal("")),
+    isActive: z.nativeEnum(IsActive),
+    salary: z.preprocess(
+      (val) => (val !== "" && val !== undefined ? Number(val) : undefined),
+      z.number().min(0).optional(),
+    ),
+    salaryPerCustomer: z.preprocess(
+      (val) => (val !== "" && val !== undefined ? Number(val) : undefined),
+      z.number().min(0).optional(),
+    ),
+    division: z.string().optional(),
+    district: z.string().optional(),
+    thana: z.string().optional(),
+    union: z.string().optional(),
+    // ── Password change (optional) ──
+    newPassword: z
+      .string()
+      .min(6, "Password must be at least 6 characters")
+      .optional()
+      .or(z.literal("")),
+    confirmNewPassword: z.string().optional().or(z.literal("")),
+  })
+  .refine(
+    (d) => {
+      if (d.newPassword && d.newPassword.length > 0) {
+        return d.newPassword === d.confirmNewPassword;
+      }
+      return true;
+    },
+    { message: "Passwords do not match", path: ["confirmNewPassword"] },
+  )
+  .refine(
+    (d) => {
+      if (d.confirmNewPassword && d.confirmNewPassword.length > 0) {
+        return d.newPassword && d.newPassword.length > 0;
+      }
+      return true;
+    },
+    { message: "Please enter a new password first", path: ["newPassword"] },
+  );
 
 type FormValues = z.infer<typeof schema>;
 
@@ -72,6 +475,8 @@ const STATUS_META: Record<IsActive, { label: string; dot: string }> = {
 export function UpdateAgentLeaderModal({ open, onOpenChange, item, onSuccess }: Props) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [updateUser, { isLoading }] = useUpdateUserMutation();
 
@@ -101,9 +506,13 @@ export function UpdateAgentLeaderModal({ open, onOpenChange, item, onSuccess }: 
         district: item.address?.district ?? "",
         thana: item.address?.thana ?? "",
         union: item.address?.union ?? "",
+        newPassword: "",
+        confirmNewPassword: "",
       });
       setImagePreview(item.picture ?? null);
       setImageFile(null);
+      setShowNewPassword(false);
+      setShowConfirmPassword(false);
     }
   }, [open, item, reset]);
 
@@ -116,13 +525,12 @@ export function UpdateAgentLeaderModal({ open, onOpenChange, item, onSuccess }: 
   };
 
   const clearImage = () => { setImageFile(null); setImagePreview(null); };
-
   const handleClose = () => { clearImage(); onOpenChange(false); };
 
   const onSubmit = async (data: FormValues) => {
     try {
       const formData = new FormData();
-      const payload = {
+      const payload: Record<string, any> = {
         name: data.name,
         phone: data.phone,
         ...(data.email && { email: data.email }),
@@ -136,6 +544,9 @@ export function UpdateAgentLeaderModal({ open, onOpenChange, item, onSuccess }: 
           union: data.union || "",
         },
       };
+      if (data.newPassword && data.newPassword.trim().length > 0) {
+        payload.password = data.newPassword;
+      }
       formData.append("data", JSON.stringify(payload));
       if (imageFile) formData.append("picture", imageFile);
 
@@ -347,6 +758,73 @@ export function UpdateAgentLeaderModal({ open, onOpenChange, item, onSuccess }: 
                 />
               </label>
             )}
+          </div>
+
+          <Separator />
+
+          {/* ── Change Password ── */}
+          <div>
+            <p className="text-xs font-bold tracking-widest uppercase text-slate-400 mb-1">
+              Change Password
+            </p>
+            <p className="text-xs text-slate-400 mb-3">
+              Leave blank to keep the current password
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+              <div className="space-y-1.5">
+                <Label htmlFor="ual-new-password" className="text-xs font-semibold tracking-widest uppercase">
+                  New Password
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="ual-new-password"
+                    type={showNewPassword ? "text" : "password"}
+                    placeholder="At least 6 characters"
+                    className="pr-10"
+                    {...register("newPassword")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword((p) => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {errors.newPassword && (
+                  <p className="text-xs text-red-400">{errors.newPassword.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="ual-confirm-password" className="text-xs font-semibold tracking-widest uppercase">
+                  Confirm New Password
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="ual-confirm-password"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Re-enter new password"
+                    className="pr-10"
+                    {...register("confirmNewPassword")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((p) => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {errors.confirmNewPassword && (
+                  <p className="text-xs text-red-400">{errors.confirmNewPassword.message}</p>
+                )}
+              </div>
+
+            </div>
           </div>
 
           {/* Submit */}

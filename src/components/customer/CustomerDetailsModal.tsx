@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { IsActive, IUser } from "@/types/user.types";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Helpers ────
 
 function Field({
   icon: Icon,
