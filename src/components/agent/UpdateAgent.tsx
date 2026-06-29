@@ -5,7 +5,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { UserCog, Upload, X } from "lucide-react";
+import { UserCog, Upload, X, Eye, EyeOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -32,29 +32,63 @@ import { IsActive, IUser } from "@/types/user.types";
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
-const updateAgentSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters").max(100),
-  phone: z.string().min(11, "Enter a valid phone number").max(15),
-  email: z
-    .string()
-    .email("Enter a valid email address")
-    .optional()
-    .or(z.literal("")),
-  agentLeader: z.string().min(1, "Please select an Agent Leader"),
-  isActive: z.nativeEnum(IsActive),
-  salary: z.preprocess(
-    (val) => (val !== "" && val !== undefined ? Number(val) : undefined),
-    z.number().min(0).optional(),
-  ),
-  salaryPerCustomer: z.preprocess(
-    (val) => (val !== "" && val !== undefined ? Number(val) : undefined),
-    z.number().min(0).optional(),
-  ),
-  division: z.string().optional(),
-  district: z.string().optional(),
-  thana: z.string().optional(),
-  union: z.string().optional(),
-});
+const updateAgentSchema = z
+  .object({
+    name: z.string().min(2, "Name must be at least 2 characters").max(100),
+    phone: z.string().min(11, "Enter a valid phone number").max(15),
+    email: z
+      .string()
+      .email("Enter a valid email address")
+      .optional()
+      .or(z.literal("")),
+    agentLeader: z.string().min(1, "Please select an Agent Leader"),
+    isActive: z.nativeEnum(IsActive),
+    salary: z.preprocess(
+      (val) => (val !== "" && val !== undefined ? Number(val) : undefined),
+      z.number().min(0).optional(),
+    ),
+    salaryPerCustomer: z.preprocess(
+      (val) => (val !== "" && val !== undefined ? Number(val) : undefined),
+      z.number().min(0).optional(),
+    ),
+    division: z.string().optional(),
+    district: z.string().optional(),
+    thana: z.string().optional(),
+    union: z.string().optional(),
+    // ── Password change (optional) ──
+    newPassword: z
+      .string()
+      .min(6, "Password must be at least 6 characters")
+      .optional()
+      .or(z.literal("")),
+    confirmNewPassword: z.string().optional().or(z.literal("")),
+  })
+  .refine(
+    (d) => {
+      // If newPassword filled, confirmNewPassword must match
+      if (d.newPassword && d.newPassword.length > 0) {
+        return d.newPassword === d.confirmNewPassword;
+      }
+      return true;
+    },
+    {
+      message: "Passwords do not match",
+      path: ["confirmNewPassword"],
+    },
+  )
+  .refine(
+    (d) => {
+      // If confirmNewPassword filled but newPassword empty
+      if (d.confirmNewPassword && d.confirmNewPassword.length > 0) {
+        return d.newPassword && d.newPassword.length > 0;
+      }
+      return true;
+    },
+    {
+      message: "Please enter a new password first",
+      path: ["newPassword"],
+    },
+  );
 
 type UpdateAgentFormValues = z.infer<typeof updateAgentSchema>;
 
@@ -75,6 +109,8 @@ export function UpdateAgentModal({
 }: UpdateAgentModalProps) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [updateUser, { isLoading }] = useUpdateUserMutation();
   const { data: leadersData } = useGetAllAgentLeadersQuery({ limit: 100 });
@@ -115,9 +151,13 @@ export function UpdateAgentModal({
         district: item.address?.district ?? "",
         thana: item.address?.thana ?? "",
         union: item.address?.union ?? "",
+        newPassword: "",
+        confirmNewPassword: "",
       });
       setImagePreview(item.picture ?? null);
       setImageFile(null);
+      setShowNewPassword(false);
+      setShowConfirmPassword(false);
     }
   }, [open, item, reset]);
 
@@ -145,7 +185,7 @@ export function UpdateAgentModal({
   const onSubmit = async (data: UpdateAgentFormValues) => {
     try {
       const formData = new FormData();
-      const payload = {
+      const payload: Record<string, any> = {
         name: data.name,
         phone: data.phone,
         ...(data.email && { email: data.email }),
@@ -162,6 +202,12 @@ export function UpdateAgentModal({
           union: data.union || "",
         },
       };
+
+      // Only include password if provided
+      if (data.newPassword && data.newPassword.trim().length > 0) {
+        payload.password = data.newPassword;
+      }
+
       formData.append("data", JSON.stringify(payload));
       if (imageFile) formData.append("picture", imageFile);
 
@@ -485,6 +531,81 @@ export function UpdateAgentModal({
                 />
               </label>
             )}
+          </div>
+
+          <Separator />
+
+          {/* ── Change Password ── */}
+          <div>
+            <p className="text-xs font-bold tracking-widest uppercase text-slate-400 mb-1">
+              Change Password
+            </p>
+            <p className="text-xs text-slate-400 mb-3">
+              Leave blank to keep the current password
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+              <div className="space-y-1.5">
+                <Label htmlFor="ua-new-password" className="text-xs font-semibold tracking-widest uppercase">
+                  New Password
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="ua-new-password"
+                    type={showNewPassword ? "text" : "password"}
+                    placeholder="At least 6 characters"
+                    className="pr-10"
+                    {...register("newPassword")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword((p) => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showNewPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+                {errors.newPassword && (
+                  <p className="text-xs text-red-400">{errors.newPassword.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="ua-confirm-password" className="text-xs font-semibold tracking-widest uppercase">
+                  Confirm New Password
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="ua-confirm-password"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Re-enter new password"
+                    className="pr-10"
+                    {...register("confirmNewPassword")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((p) => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+                {errors.confirmNewPassword && (
+                  <p className="text-xs text-red-400">{errors.confirmNewPassword.message}</p>
+                )}
+              </div>
+
+            </div>
           </div>
 
           {/* ── Submit ── */}

@@ -300,6 +300,8 @@ export default function PartnerManagement() {
     ...(endDate   && { endDate }),
   });
 
+  console.log("Partners response ", data)
+
   const [softDeletePartner, { isLoading: isDeleting }] = useSoftDeletePartnerMutation();
 
   // ── derived ──

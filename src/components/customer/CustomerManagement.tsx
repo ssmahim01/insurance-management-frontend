@@ -1171,7 +1171,7 @@ export default function CustomerManagement() {
           onValueChange={(v) => {
             if (v === "__leader__") return;
             setFilterMode("by_leader");
-            setSelectedLeaderId(v);
+            setSelectedLeaderId(v as any);
             setSelectedAgentId("");
           }}
         >
@@ -1199,7 +1199,7 @@ export default function CustomerManagement() {
           onValueChange={(v) => {
             if (v === "__agent__") return;
             setFilterMode("by_agent");
-            setSelectedAgentId(v);
+            setSelectedAgentId(v as any);
             setSelectedLeaderId("");
           }}
         >
@@ -1236,7 +1236,7 @@ export default function CustomerManagement() {
 
         {/* Status filter */}
         <Select 
-        value={statusFilter} onValueChange={(v) => setStatusFilter(v as IsActive | "all")}>
+        value={statusFilter as any} onValueChange={(v) => setStatusFilter(v as IsActive | "all")}>
           <SelectTrigger className="w-40 h-9 text-sm">
             <span>{statusFilter === "all" ? "All Status" : STATUS_LABELS[statusFilter as IsActive]}</span>
           </SelectTrigger>

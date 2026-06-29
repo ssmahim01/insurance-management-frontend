@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { PageHeader } from '@/components/features/dashboard/components/PageHeader';
 import { PackageStats } from '@/components/features/dashboard/packages/PackageStats';
 import { PackageTable } from '@/components/features/dashboard/packages/PackageTable';
+import PackageManagement from '@/components/package/PackageManagement';
 
 export const metadata: Metadata = {
   title: 'Insurance Packages | Shurokkha',
@@ -73,7 +74,7 @@ const mockPackages = [
 export default function PackagesPage() {
   return (
     <div>
-      <PageHeader
+      {/* <PageHeader
         title="Insurance Packages"
         description="Manage and view all your insurance packages"
         breadcrumbs={[
@@ -90,7 +91,8 @@ export default function PackagesPage() {
 
       <div className="space-y-6">
         <PackageTable packages={mockPackages} />
-      </div>
+      </div> */}
+      <PackageManagement />
     </div>
   );
 }

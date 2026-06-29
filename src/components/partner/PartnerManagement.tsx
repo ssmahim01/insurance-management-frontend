@@ -222,6 +222,9 @@ export default function PartnerManagement() {
     ...(endDate   && { endDate }),
   });
 
+console.log("Partner response ", data)
+
+
   const [softDeletePartner, { isLoading: isDeleting }] = useSoftDeletePartnerMutation();
 
   // ── derived ──
@@ -287,8 +290,7 @@ export default function PartnerManagement() {
     </TableHead>
   );
 
-  // ─────────────────────────────────────────────────────────────────────────────
-
+console.log("I am now in partner management page ")
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -471,7 +473,7 @@ export default function PartnerManagement() {
                             className="w-10 h-10 rounded-lg object-contain border border-slate-200 dark:border-slate-700 bg-white p-1 shrink-0"
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                          <div className="w-10 h-10 rounded-lg bg-linear-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
                             {partner.name?.charAt(0)?.toUpperCase() ?? "P"}
                           </div>
                         )}
