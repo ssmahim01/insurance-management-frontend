@@ -93,10 +93,10 @@ export function AppSidebar({ user, onLogout }: AppSidebarProps) {
           <Image
             src={"/assets/shurokkha.png"}
             alt="Shurokkha Logo"
-            width={500}
-            height={500}
+            width={200}
+            height={200}
             quality={90}
-            className="w-full h-12 rounded-md"
+            className=" h-12 w-12 rounded-md object-center ml-2"
             priority
           />
         </Link>

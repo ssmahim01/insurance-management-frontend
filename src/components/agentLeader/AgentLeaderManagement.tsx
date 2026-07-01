@@ -429,7 +429,7 @@ export default function AgentLeaderManagement() {
         </div>
 
         <Select
-          value={statusFilter}
+          value={statusFilter as any}
           onValueChange={(v) => setStatusFilter(v as IsActive | "all")}
         >
           <SelectTrigger className="w-40 h-9 text-sm">
