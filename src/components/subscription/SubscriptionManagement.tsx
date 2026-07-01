@@ -11,12 +11,13 @@ import {
   ChevronDown,
   ChevronsUpDown,
   X,
-  Users,
-  UserCheck,
-  UserX,
-  ShieldAlert,
+  ShieldCheck,
+  Clock,
+  Ban,
+  Wallet,
   UserCog,
   Crown,
+  XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -47,58 +48,75 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
 import {
-  useGetAllCustomersQuery,
-  useGetAgentCustomersQuery,
-  useGetAgentLeaderCustomersQuery,
-  useDeleteUserMutation,
+  useGetAllSubscriptionsQuery,
+  useGetAgentsAllSubscriptionsQuery,
+  useGetAgentLeaderSubscriptionsByAdminQuery,
+  useSoftDeleteSubscriptionMutation,
+} from "@/redux/features/subscription/subscription.api";
+import {
   useGetAllAgentsQuery,
   useGetAllAgentLeadersQuery,
 } from "@/redux/features/user/user.api";
 
 import { PageHeader } from "../shared/PageHeader";
 import { Pagination } from "../pagination/Pagination";
-import { CreateCustomerModal } from "./CreateCustomer";
-import { CustomerDetailsModal } from "./CustomerDetailsModal";
-import { UpdateCustomerModal } from "./UpdateCustomer";
-import { IsActive, IUser } from "@/types/user.types";
+import {
+  ISubscription,
+  SubscriptionStatus,
+  PaymentStatus,
+} from "@/types/subscription.types";
+import { IUser } from "@/types/user.types";
+import { UpdateSubscriptionModal } from "./UpdateSubscriptionModal";
+import { SubscriptionDetailsModal } from "./SubscriptionDetailsModal";
+import { CreateSubscriptionModal } from "./CreateSubscriptionModal";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type SortField = "name" | "phone" | "isActive" | "createdAt" | "gender";
+type SortField = "price" | "startDate" | "endDate" | "status";
 type SortDir = "asc" | "desc" | null;
 type FilterMode = "all" | "by_agent" | "by_leader";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const STATUS_LABELS: Record<IsActive, string> = {
-  [IsActive.ACTIVE]:   "Active",
-  [IsActive.INACTIVE]: "Inactive",
-  [IsActive.BLOCKED]:  "Blocked",
+const STATUS_LABELS: Record<SubscriptionStatus, string> = {
+  [SubscriptionStatus.PENDING]: "Pending",
+  [SubscriptionStatus.ACTIVE]: "Active",
+  [SubscriptionStatus.EXPIRED]: "Expired",
+  [SubscriptionStatus.CANCELLED]: "Cancelled",
+  [SubscriptionStatus.FAILED]: "Failed",
 };
 
-const STATUS_STYLES: Record<IsActive, string> = {
-  [IsActive.ACTIVE]:
+const STATUS_STYLES: Record<SubscriptionStatus, string> = {
+  [SubscriptionStatus.PENDING]:
+    "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400",
+  [SubscriptionStatus.ACTIVE]:
     "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400",
-  [IsActive.INACTIVE]:
+  [SubscriptionStatus.EXPIRED]:
     "border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
-  [IsActive.BLOCKED]:
+  [SubscriptionStatus.CANCELLED]:
+    "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400",
+  [SubscriptionStatus.FAILED]:
     "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400",
 };
 
-const STATUS_DOT: Record<IsActive, string> = {
-  [IsActive.ACTIVE]:   "bg-emerald-500",
-  [IsActive.INACTIVE]: "bg-slate-400",
-  [IsActive.BLOCKED]:  "bg-red-500",
+const STATUS_DOT: Record<SubscriptionStatus, string> = {
+  [SubscriptionStatus.PENDING]: "bg-amber-500",
+  [SubscriptionStatus.ACTIVE]: "bg-emerald-500",
+  [SubscriptionStatus.EXPIRED]: "bg-slate-400",
+  [SubscriptionStatus.CANCELLED]: "bg-red-500",
+  [SubscriptionStatus.FAILED]: "bg-red-500",
 };
 
-const GENDER_LABELS: Record<string, string> = {
-  MALE:   "Male",
-  FEMALE: "Female",
-  OTHER:  "Other",
+const PAYMENT_STYLES: Record<string, string> = {
+  PAID: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400",
+  UNPAID: "border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
+  FAILED: "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400",
+  REFUNDED: "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
 };
 
-const formatDate = (iso?: string) => {
+const formatDate = (iso?: string | null) => {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("en-GB", {
     day: "2-digit",
@@ -107,9 +125,17 @@ const formatDate = (iso?: string) => {
   });
 };
 
+const formatCurrency = (n?: number) => `৳${(n ?? 0).toLocaleString("en-BD")}`;
+
+const getNestedName = (v: any): string => {
+  if (!v) return "—";
+  if (typeof v === "string") return v;
+  return v.name ?? "—";
+};
+
 // ─── Skeleton Row ─────────────────────────────────────────────────────────────
 
-function CustomerRowSkeleton() {
+function SubscriptionRowSkeleton() {
   return (
     <TableRow>
       <TableCell>
@@ -152,13 +178,13 @@ function StatCardSkeleton() {
   );
 }
 
-type StatColor = "blue" | "emerald" | "slate" | "red";
+type StatColor = "blue" | "emerald" | "amber" | "red";
 
 const STAT_COLOR_MAP: Record<StatColor, { bg: string; icon: string; text: string }> = {
-  blue:    { bg: "bg-blue-50 dark:bg-blue-900/20",       icon: "text-blue-600 dark:text-blue-400",     text: "text-blue-600 dark:text-blue-400" },
+  blue: { bg: "bg-blue-50 dark:bg-blue-900/20", icon: "text-blue-600 dark:text-blue-400", text: "text-blue-600 dark:text-blue-400" },
   emerald: { bg: "bg-emerald-50 dark:bg-emerald-900/20", icon: "text-emerald-600 dark:text-emerald-400", text: "text-emerald-600 dark:text-emerald-400" },
-  slate:   { bg: "bg-slate-100 dark:bg-slate-800",       icon: "text-slate-500 dark:text-slate-400",   text: "text-slate-500 dark:text-slate-400" },
-  red:     { bg: "bg-red-50 dark:bg-red-900/20",         icon: "text-red-500 dark:text-red-400",       text: "text-red-500 dark:text-red-400" },
+  amber: { bg: "bg-amber-50 dark:bg-amber-900/20", icon: "text-amber-600 dark:text-amber-400", text: "text-amber-600 dark:text-amber-400" },
+  red: { bg: "bg-red-50 dark:bg-red-900/20", icon: "text-red-500 dark:text-red-400", text: "text-red-500 dark:text-red-400" },
 };
 
 function StatCard({
@@ -192,103 +218,107 @@ function SortIcon({ field, sortField, sortDir }: { field: SortField; sortField: 
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function CustomerManagement() {
+export default function SubscriptionManagement() {
   // ── filters & pagination ──
-  const [searchTerm, setSearchTerm]       = useState("");
-  const [filterMode, setFilterMode]       = useState<FilterMode>("all");
-  const [selectedAgentId, setSelectedAgentId]   = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterMode, setFilterMode] = useState<FilterMode>("all");
+  const [selectedAgentId, setSelectedAgentId] = useState("");
   const [selectedLeaderId, setSelectedLeaderId] = useState("");
-  const [statusFilter, setStatusFilter]   = useState<IsActive | "all">("all");
-  const [genderFilter, setGenderFilter]   = useState<"MALE" | "FEMALE" | "OTHER" | "all">("all");
-  const [startDate, setStartDate]         = useState("");
-  const [endDate, setEndDate]             = useState("");
-  const [page, setPage]                   = useState(1);
+  const [statusFilter, setStatusFilter] = useState<SubscriptionStatus | "all">("all");
+  const [paymentFilter, setPaymentFilter] = useState<PaymentStatus | "all">("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [page, setPage] = useState(1);
   const limit = 10;
 
   // ── sort ──
   const [sortField, setSortField] = useState<SortField | null>(null);
-  const [sortDir, setSortDir]     = useState<SortDir>(null);
+  const [sortDir, setSortDir] = useState<SortDir>(null);
 
   // ── modals ──
-  const [editingCustomer, setEditingCustomer]   = useState<IUser | null>(null);
-  const [isUpdateOpen, setIsUpdateOpen]         = useState(false);
-  const [viewingCustomer, setViewingCustomer]   = useState<IUser | null>(null);
-  const [isDetailsOpen, setIsDetailsOpen]       = useState(false);
-  const [deletingCustomer, setDeletingCustomer] = useState<IUser | null>(null);
-  const [isDeleteOpen, setIsDeleteOpen]         = useState(false);
+  const [editingSub, setEditingSub] = useState<ISubscription | null>(null);
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
+  const [viewingSub, setViewingSub] = useState<ISubscription | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [deletingSub, setDeletingSub] = useState<ISubscription | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   // ── reset page on filter change ──
-  useEffect(() => { setPage(1); }, [searchTerm, filterMode, selectedAgentId, selectedLeaderId, statusFilter, genderFilter]);
+  useEffect(() => { setPage(1); }, [searchTerm, filterMode, selectedAgentId, selectedLeaderId, statusFilter, paymentFilter]);
 
   // ── shared query params ──
   const baseParams = {
     searchTerm: searchTerm || undefined,
-    isActive:   statusFilter !== "all" ? (statusFilter as IsActive) : undefined,
-    gender:     genderFilter !== "all" ? genderFilter : undefined,
+    status: statusFilter !== "all" ? statusFilter : undefined,
+    paymentStatus: paymentFilter !== "all" ? paymentFilter : undefined,
     page,
     limit,
     ...(startDate && { startDate }),
-    ...(endDate   && { endDate }),
+    ...(endDate && { endDate }),
   };
 
   // ── 3 different API calls depending on filter mode ──
-  const allCustomersResult = useGetAllCustomersQuery(baseParams, {
+  const allResult = useGetAllSubscriptionsQuery(baseParams, {
     skip: filterMode !== "all",
   });
 
-  const agentCustomersResult = useGetAgentCustomersQuery(
-    { agentId: selectedAgentId, params: baseParams },
+  const agentResult = useGetAgentsAllSubscriptionsQuery(
+    { id: selectedAgentId, params: baseParams },
     { skip: filterMode !== "by_agent" || !selectedAgentId },
   );
 
-  const leaderCustomersResult = useGetAgentLeaderCustomersQuery(
-    { agentLeaderId: selectedLeaderId, params: baseParams },
+  const leaderResult = useGetAgentLeaderSubscriptionsByAdminQuery(
+    { id: selectedLeaderId, params: baseParams },
     { skip: filterMode !== "by_leader" || !selectedLeaderId },
   );
 
   // ── pick active result ──
   const activeResult =
-    filterMode === "by_agent"  ? agentCustomersResult  :
-    filterMode === "by_leader" ? leaderCustomersResult :
-    allCustomersResult;
+    filterMode === "by_agent" ? agentResult :
+      filterMode === "by_leader" ? leaderResult :
+        allResult;
 
   const { data, isLoading, refetch } = activeResult;
-  const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
+  const [softDeleteSubscription, { isLoading: isDeleting }] = useSoftDeleteSubscriptionMutation();
 
   // ── dropdown data ──
-  const { data: agentsData }  = useGetAllAgentsQuery({ limit: 200 });
+  const { data: agentsData } = useGetAllAgentsQuery({ limit: 200 });
   const { data: leadersData } = useGetAllAgentLeadersQuery({ limit: 100 });
 
   // ── derived data ──
-  const customers: IUser[] = data?.data ?? [];
-  const stats              = data?.stats;
-  const meta               = data?.meta;
-  const totalPage          = meta?.totalPage ?? 1;
+  const subscriptions: ISubscription[] = data?.data?.data ?? [];
+  const stats = data?.data?.stats;
+  const meta = data?.data?.meta;
+  const totalPage = meta?.totalPage ?? 1;
 
   const hasActiveFilters =
     filterMode !== "all" ||
     statusFilter !== "all" ||
-    genderFilter !== "all";
+    paymentFilter !== "all";
   const hasDateFilter = !!(startDate || endDate);
 
-  // ── client-side sort only (no more client-side filter) ──
-  const sortedCustomers = useMemo(() => {
-    if (!sortField || !sortDir) return customers;
-    return [...customers].sort((a, b) => {
-      let aVal = "", bVal = "";
-      if (sortField === "name")      { aVal = a.name ?? "";      bVal = b.name ?? ""; }
-      if (sortField === "phone")     { aVal = a.phone ?? "";     bVal = b.phone ?? ""; }
-      if (sortField === "isActive")  { aVal = a.isActive ?? "";  bVal = b.isActive ?? ""; }
-      if (sortField === "createdAt") { aVal = a.createdAt ?? ""; bVal = b.createdAt ?? ""; }
-      if (sortField === "gender")    { aVal = a.gender ?? "";    bVal = b.gender ?? ""; }
-      return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+  // ── client-side sort only ──
+  const sortedSubscriptions = useMemo(() => {
+    if (!sortField || !sortDir) return subscriptions;
+    return [...subscriptions].sort((a, b) => {
+      let aVal: string | number = "", bVal: string | number = "";
+      if (sortField === "price") { aVal = a.price ?? 0; bVal = b.price ?? 0; }
+      if (sortField === "startDate") { aVal = a.startDate ?? ""; bVal = b.startDate ?? ""; }
+      if (sortField === "endDate") { aVal = a.endDate ?? ""; bVal = b.endDate ?? ""; }
+      if (sortField === "status") { aVal = a.status ?? ""; bVal = b.status ?? ""; }
+      if (typeof aVal === "number" && typeof bVal === "number") {
+        return sortDir === "asc" ? aVal - bVal : bVal - aVal;
+      }
+      return sortDir === "asc"
+        ? String(aVal).localeCompare(String(bVal))
+        : String(bVal).localeCompare(String(aVal));
     });
-  }, [customers, sortField, sortDir]);
+  }, [subscriptions, sortField, sortDir]);
 
   // ── handlers ──
   const handleSort = (field: SortField) => {
     if (sortField !== field) { setSortField(field); setSortDir("asc"); return; }
-    if (sortDir === "asc")   { setSortDir("desc"); return; }
+    if (sortDir === "asc") { setSortDir("desc"); return; }
     setSortField(null); setSortDir(null);
   };
 
@@ -297,24 +327,24 @@ export default function CustomerManagement() {
     setSelectedAgentId("");
     setSelectedLeaderId("");
     setStatusFilter("all");
-    setGenderFilter("all");
+    setPaymentFilter("all");
   };
   const clearDateFilter = () => { setStartDate(""); setEndDate(""); };
 
-  const openEditDialog    = (c: IUser) => { setEditingCustomer(c); setIsUpdateOpen(true); };
-  const openDetailsDialog = (c: IUser) => { setViewingCustomer(c); setIsDetailsOpen(true); };
-  const openDeleteDialog  = (c: IUser) => { setDeletingCustomer(c); setIsDeleteOpen(true); };
+  const openEditDialog = (s: ISubscription) => { setEditingSub(s); setIsUpdateOpen(true); };
+  const openDetailsDialog = (s: ISubscription) => { setViewingSub(s); setIsDetailsOpen(true); };
+  const openDeleteDialog = (s: ISubscription) => { setDeletingSub(s); setIsDeleteOpen(true); };
 
   const handleDelete = async () => {
-    if (!deletingCustomer?._id) return;
+    if (!deletingSub?._id) return;
     try {
-      await deleteUser(String(deletingCustomer._id)).unwrap();
-      toast.success("Customer deleted successfully");
+      await softDeleteSubscription(String(deletingSub._id)).unwrap();
+      toast.success("Subscription moved to trash");
       setIsDeleteOpen(false);
-      setDeletingCustomer(null);
+      setDeletingSub(null);
       refetch();
     } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to delete customer");
+      toast.error(err?.data?.message || "Failed to delete subscription");
     }
   };
 
@@ -328,41 +358,24 @@ export default function CustomerManagement() {
     </TableHead>
   );
 
-  const getAgentName = (c: IUser): string => {
-    const a = c.createdBy;
-    if (!a) return "—";
-    if (typeof a === "string") return a;
-    return a.name ?? "—";
-  };
-
-  // ── agent/leader select label ──
-  const agentFilterLabel = () => {
-    if (filterMode === "by_agent" && selectedAgentId) {
-      return (agentsData?.data ?? []).find((a: IUser) => String(a._id) === selectedAgentId)?.name || "Agent";
-    }
-    if (filterMode === "by_leader" && selectedLeaderId) {
-      return (leadersData?.data ?? []).find((l: IUser) => String(l._id) === selectedLeaderId)?.name || "Leader";
-    }
-    return "All";
-  };
-
   // ─────────────────────────────────────────────────────────────────────────────
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Customer Management"
-        description="Manage all customers and monitor their activity"
+        title="Subscription Management"
+        description="Manage all customer subscriptions and monitor revenue"
         breadcrumbs={[
           { label: "Dashboard", href: "/dashboard" },
-          { label: "Customer Management" },
+          { label: "Subscription Management" },
         ]}
-        action={<CreateCustomerModal onSuccess={refetch} />}
+
+        action={<CreateSubscriptionModal onSuccess={refetch} />}
       />
 
       {/* ── Stat Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="sm:col-span-2 lg:col-span-4 flex flex-wrap items-center gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+        <div className="sm:col-span-2 lg:col-span-6 flex flex-wrap items-center gap-3">
           <p className="text-sm text-slate-500 dark:text-slate-400 shrink-0">Filter stats by date:</p>
           <div className="flex items-center gap-2 flex-wrap">
             <Input type="date" className="h-9 w-40 text-sm" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
@@ -377,13 +390,15 @@ export default function CustomerManagement() {
         </div>
 
         {isLoading ? (
-          <><StatCardSkeleton /><StatCardSkeleton /><StatCardSkeleton /><StatCardSkeleton /></>
+          <><StatCardSkeleton /><StatCardSkeleton /><StatCardSkeleton /><StatCardSkeleton /><StatCardSkeleton /><StatCardSkeleton /></>
         ) : (
           <>
-            <StatCard label="Total Customers"    value={stats?.total    ?? 0} sub="registered in the system"   icon={Users}      color="blue" />
-            <StatCard label="Active Customers"   value={stats?.active   ?? 0} sub={`${stats?.total ? Math.round(((stats?.active ?? 0) / stats.total) * 100) : 0}% of total`} icon={UserCheck} color="emerald" />
-            <StatCard label="Inactive Customers" value={stats?.inactive ?? 0} sub="not currently active"       icon={UserX}      color="slate" />
-            <StatCard label="Blocked Customers"  value={stats?.blocked  ?? 0} sub="access restricted"          icon={ShieldAlert} color="red" />
+            <StatCard label="Total Subscriptions" value={stats?.total ?? 0} sub="all-time records" icon={Wallet} color="blue" />
+            <StatCard label="Active" value={stats?.active ?? 0} sub={`${stats?.total ? Math.round(((stats?.active ?? 0) / stats.total) * 100) : 0}% of total`} icon={ShieldCheck} color="emerald" />
+            <StatCard label="Pending" value={stats?.pending ?? 0} sub="awaiting payment" icon={Clock} color="amber" />
+            <StatCard label="Expired / Cancelled" value={(stats?.expired ?? 0) + (stats?.cancelled ?? 0)} sub="no longer active" icon={Ban} color="red" />
+            <StatCard label="Failed" value={stats?.failed ?? 0} sub="payment failed" icon={XCircle} color="red" />
+            <StatCard label="Total Revenue" value={formatCurrency(stats?.totalRevenue)} sub="from paid subscriptions" icon={Wallet} color="emerald" />
           </>
         )}
       </div>
@@ -394,7 +409,7 @@ export default function CustomerManagement() {
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
-            placeholder="Search by name or phone..."
+            placeholder="Search by customer or agent name..."
             className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -457,30 +472,32 @@ export default function CustomerManagement() {
           </SelectContent>
         </Select>
 
-        {/* Gender filter */}
-        <Select value={genderFilter} onValueChange={(v) => setGenderFilter(v as typeof genderFilter)}>
-          <SelectTrigger className="w-36 h-9 text-sm">
-            <span>{genderFilter === "all" ? "All Genders" : GENDER_LABELS[genderFilter]}</span>
+        {/* Payment status filter */}
+        <Select value={paymentFilter as any} onValueChange={(v) => setPaymentFilter(v as PaymentStatus | "all")}>
+          <SelectTrigger className="w-40 h-9 text-sm">
+            <span>{paymentFilter === "all" ? "All Payments" : paymentFilter}</span>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Genders</SelectItem>
-            <SelectItem value="MALE">Male</SelectItem>
-            <SelectItem value="FEMALE">Female</SelectItem>
-            <SelectItem value="OTHER">Other</SelectItem>
+            <SelectItem value="all">All Payments</SelectItem>
+            <SelectItem value={PaymentStatus.PAID}>Paid</SelectItem>
+            <SelectItem value={PaymentStatus.UNPAID}>Unpaid</SelectItem>
+            <SelectItem value={PaymentStatus.FAILED}>Failed</SelectItem>
+            <SelectItem value={PaymentStatus.REFUNDED}>Refunded</SelectItem>
           </SelectContent>
         </Select>
 
         {/* Status filter */}
-        <Select 
-        value={statusFilter as any} onValueChange={(v) => setStatusFilter(v as IsActive | "all")}>
+        <Select value={statusFilter as any} onValueChange={(v) => setStatusFilter(v as SubscriptionStatus | "all")}>
           <SelectTrigger className="w-40 h-9 text-sm">
-            <span>{statusFilter === "all" ? "All Status" : STATUS_LABELS[statusFilter as IsActive]}</span>
+            <span>{statusFilter === "all" ? "All Status" : STATUS_LABELS[statusFilter as SubscriptionStatus]}</span>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value={IsActive.ACTIVE}>Active</SelectItem>
-            <SelectItem value={IsActive.INACTIVE}>Inactive</SelectItem>
-            <SelectItem value={IsActive.BLOCKED}>Blocked</SelectItem>
+            <SelectItem value={SubscriptionStatus.PENDING}>Pending</SelectItem>
+            <SelectItem value={SubscriptionStatus.ACTIVE}>Active</SelectItem>
+            <SelectItem value={SubscriptionStatus.EXPIRED}>Expired</SelectItem>
+            <SelectItem value={SubscriptionStatus.CANCELLED}>Cancelled</SelectItem>
+            <SelectItem value={SubscriptionStatus.FAILED}>Failed</SelectItem>
           </SelectContent>
         </Select>
 
@@ -497,26 +514,27 @@ export default function CustomerManagement() {
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50 dark:bg-slate-800/50">
-                <SortableTh field="name"      label="Customer" />
-                <SortableTh field="phone"     label="Phone" />
-                <SortableTh field="gender"    label="Gender" />
-                <TableHead className="whitespace-nowrap">NID</TableHead>
+                <TableHead className="whitespace-nowrap">Customer</TableHead>
+                <TableHead className="whitespace-nowrap">Package</TableHead>
+                <TableHead className="whitespace-nowrap">Plan</TableHead>
+                <SortableTh field="price" label="Price" />
+                <TableHead className="whitespace-nowrap">Payment</TableHead>
+                <SortableTh field="status" label="Status" />
+                <SortableTh field="startDate" label="Start" />
+                <SortableTh field="endDate" label="End" />
                 <TableHead className="whitespace-nowrap">Agent</TableHead>
-                <SortableTh field="createdAt" label="Joined" />
-                <TableHead className="whitespace-nowrap">Last Login</TableHead>
-                <SortableTh field="isActive"  label="Status" />
                 <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
               </TableRow>
             </TableHeader>
 
             <TableBody>
               {isLoading ? (
-                Array.from({ length: 6 }).map((_, i) => <CustomerRowSkeleton key={i} />)
-              ) : sortedCustomers.length === 0 ? (
+                Array.from({ length: 6 }).map((_, i) => <SubscriptionRowSkeleton key={i} />)
+              ) : sortedSubscriptions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9}>
+                  <TableCell colSpan={10}>
                     <div className="flex flex-col items-center justify-center py-16 text-slate-400">
-                      <Users className="w-12 h-12 mb-4 opacity-30" />
+                      <Wallet className="w-12 h-12 mb-4 opacity-30" />
                       {searchTerm || hasActiveFilters ? (
                         <>
                           <p className="text-base font-medium">No results found</p>
@@ -524,66 +542,68 @@ export default function CustomerManagement() {
                         </>
                       ) : (
                         <>
-                          <p className="text-base font-medium">No customers added yet</p>
-                          <p className="text-sm mt-1">Click the Add Customer button to get started</p>
+                          <p className="text-base font-medium">No subscriptions yet</p>
+                          <p className="text-sm mt-1">Subscriptions created via package purchase will show here</p>
                         </>
                       )}
                     </div>
                   </TableCell>
                 </TableRow>
               ) : (
-                sortedCustomers.map((customer) => {
-                  const status = customer.isActive ?? IsActive.INACTIVE;
+                sortedSubscriptions.map((sub) => {
+                  const status = sub.status ?? SubscriptionStatus.PENDING;
+                  const customerName = getNestedName(sub.customer);
+                  const customerPhone = typeof sub.customer === "object" ? sub.customer?.phone : undefined;
+                  const packageName = getNestedName(sub.package);
                   return (
-                    <TableRow key={String(customer._id)} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                      {/* Customer name */}
+                    <TableRow key={String(sub._id)} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                      {/* Customer */}
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          {customer.picture ? (
-                            <img src={customer.picture} alt={customer.name} className="w-9 h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 shrink-0" />
-                          ) : (
-                            <div className="w-9 h-9 rounded-full bg-linear-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                              {customer.name?.charAt(0)?.toUpperCase() ?? "C"}
-                            </div>
-                          )}
+                          <div className="w-9 h-9 rounded-full bg-linear-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                            {customerName?.charAt(0)?.toUpperCase() ?? "C"}
+                          </div>
                           <div className="min-w-0">
-                            <p className="font-medium text-slate-900 dark:text-white truncate max-w-36">{customer.name ?? "—"}</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate max-w-36">{customer.email ?? customer.phone ?? "—"}</p>
+                            <p className="font-medium text-slate-900 dark:text-white truncate max-w-32">{customerName}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate max-w-32">{customerPhone ?? "—"}</p>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">{customer.phone ?? "—"}</TableCell>
+                      <TableCell className="text-slate-600 dark:text-slate-400 text-sm max-w-40 truncate">{packageName}</TableCell>
                       <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
-                        {customer.gender ? GENDER_LABELS[customer.gender] : <span className="text-slate-300 dark:text-slate-600 italic text-xs">—</span>}
+                        <Badge variant="outline" className="font-normal">{sub.planType}</Badge>
                       </TableCell>
-                      <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
-                        {customer.nid ?? <span className="text-slate-300 dark:text-slate-600 italic text-xs">—</span>}
+                      <TableCell className="text-slate-700 dark:text-slate-300 font-medium text-sm whitespace-nowrap">{formatCurrency(sub.price)}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={PAYMENT_STYLES[sub.paymentStatus] ?? PAYMENT_STYLES.UNPAID}>
+                          {sub.paymentStatus}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={STATUS_STYLES[status] ?? STATUS_STYLES[SubscriptionStatus.PENDING]}>
+                          <span className={`h-1.5 w-1.5 rounded-full mr-1.5 inline-block ${STATUS_DOT[status] ?? STATUS_DOT[SubscriptionStatus.PENDING]}`} />
+                          {STATUS_LABELS[status] ?? "Unknown"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">{formatDate(sub.startDate)}</TableCell>
+                      <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
+                        {sub.isLifetime ? <span className="italic text-xs text-slate-400">Lifetime</span> : formatDate(sub.endDate)}
                       </TableCell>
                       <TableCell>
                         <span className="inline-flex items-center gap-1.5 text-sm text-slate-700 dark:text-slate-300">
                           <UserCog className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          {getAgentName(customer)}
+                          {getNestedName(sub.createdBy)}
                         </span>
-                      </TableCell>
-                      <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">{formatDate(customer.createdAt)}</TableCell>
-                      <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
-                        {customer.lastLoginAt ? formatDate(customer.lastLoginAt) : <span className="text-slate-300 dark:text-slate-600 italic text-xs">Never</span>}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={STATUS_STYLES[status as IsActive] ?? STATUS_STYLES[IsActive.INACTIVE]}>
-                          <span className={`h-1.5 w-1.5 rounded-full mr-1.5 inline-block ${STATUS_DOT[status as IsActive] ?? STATUS_DOT[IsActive.INACTIVE]}`} />
-                          {STATUS_LABELS[status as IsActive] ?? "Unknown"}
-                        </Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1.5 justify-end">
-                          <Button variant="outline" size="icon" className="h-8 w-8" title="View details" onClick={() => openDetailsDialog(customer)}>
+                          <Button variant="outline" size="icon" className="h-8 w-8" title="View details" onClick={() => openDetailsDialog(sub)}>
                             <Eye className="w-3.5 h-3.5" />
                           </Button>
-                          <Button variant="outline" size="icon" className="h-8 w-8" title="Edit customer" onClick={() => openEditDialog(customer)}>
+                          <Button variant="outline" size="icon" className="h-8 w-8" title="Edit subscription" onClick={() => openEditDialog(sub)}>
                             <Edit2 className="w-3.5 h-3.5" />
                           </Button>
-                          <Button variant="destructive" size="icon" className="h-8 w-8" title="Delete customer" onClick={() => openDeleteDialog(customer)}>
+                          <Button variant="destructive" size="icon" className="h-8 w-8" title="Delete subscription" onClick={() => openDeleteDialog(sub)}>
                             <Trash2 className="w-3.5 h-3.5" />
                           </Button>
                         </div>
@@ -598,12 +618,12 @@ export default function CustomerManagement() {
           <Pagination page={page} totalPage={totalPage} onPageChange={setPage} />
         </div>
 
-        {!isLoading && sortedCustomers.length > 0 && (
+        {!isLoading && sortedSubscriptions.length > 0 && (
           <div className="px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Showing{" "}
-              <span className="font-semibold text-slate-700 dark:text-slate-300">{sortedCustomers.length}</span>{" "}
-              customer{sortedCustomers.length !== 1 ? "s" : ""}
+              <span className="font-semibold text-slate-700 dark:text-slate-300">{sortedSubscriptions.length}</span>{" "}
+              subscription{sortedSubscriptions.length !== 1 ? "s" : ""}
               {hasActiveFilters && " (filtered)"}
             </p>
             {totalPage > 1 && (
@@ -614,19 +634,20 @@ export default function CustomerManagement() {
       </div>
 
       {/* ── Modals ── */}
-      {editingCustomer && (
-        <UpdateCustomerModal open={isUpdateOpen} onOpenChange={setIsUpdateOpen} item={editingCustomer} onSuccess={refetch} />
+      {editingSub && (
+        <UpdateSubscriptionModal open={isUpdateOpen} onOpenChange={setIsUpdateOpen} item={editingSub} onSuccess={refetch} />
       )}
-      {viewingCustomer && (
-        <CustomerDetailsModal open={isDetailsOpen} onOpenChange={setIsDetailsOpen} item={viewingCustomer} />
+      {viewingSub && (
+        <SubscriptionDetailsModal open={isDetailsOpen} onOpenChange={setIsDetailsOpen} item={viewingSub} />
       )}
 
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Customer</AlertDialogTitle>
+            <AlertDialogTitle>Delete Subscription</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete <strong>{deletingCustomer?.name}</strong>? This action cannot be undone.
+              Are you sure you want to move this subscription for{" "}
+              <strong>{getNestedName(deletingSub?.customer)}</strong> to trash?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex gap-2">

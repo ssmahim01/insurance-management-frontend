@@ -41,7 +41,7 @@ export default function Login() {
       const response = await loginUser(data);
       if (response.success) {
         toast.success("Login successful!");
-        router.push("/dashboard");
+        router.push("/admin/dashboard");
       }
 
       // console.log(' Login data:', data);

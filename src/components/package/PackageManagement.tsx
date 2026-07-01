@@ -42,11 +42,11 @@ type SortDir = "asc" | "desc" | null;
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const PLAN_LABELS: Record<PlanType, string> = {
-  [PlanType.MONTHLY]:     "Monthly",
-  [PlanType.QUARTERLY]:   "Quarterly",
+  [PlanType.MONTHLY]: "Monthly",
+  [PlanType.QUARTERLY]: "Quarterly",
   [PlanType.HALF_YEARLY]: "Half-Yearly",
-  [PlanType.YEARLY]:      "Yearly",
-  [PlanType.LIFETIME]:    "Lifetime",
+  [PlanType.YEARLY]: "Yearly",
+  [PlanType.LIFETIME]: "Lifetime",
 };
 
 const formatCurrency = (amount?: number) => {
@@ -106,11 +106,11 @@ function StatCardSkeleton() {
 type StatColor = "blue" | "emerald" | "slate" | "violet" | "amber";
 
 const STAT_COLOR_MAP: Record<StatColor, { bg: string; icon: string; text: string }> = {
-  blue:    { bg: "bg-blue-50 dark:bg-blue-900/20",     icon: "text-blue-600 dark:text-blue-400",     text: "text-blue-600 dark:text-blue-400" },
+  blue: { bg: "bg-blue-50 dark:bg-blue-900/20", icon: "text-blue-600 dark:text-blue-400", text: "text-blue-600 dark:text-blue-400" },
   emerald: { bg: "bg-emerald-50 dark:bg-emerald-900/20", icon: "text-emerald-600 dark:text-emerald-400", text: "text-emerald-600 dark:text-emerald-400" },
-  slate:   { bg: "bg-slate-100 dark:bg-slate-800",     icon: "text-slate-500 dark:text-slate-400",   text: "text-slate-500 dark:text-slate-400" },
-  violet:  { bg: "bg-violet-50 dark:bg-violet-900/20", icon: "text-violet-600 dark:text-violet-400", text: "text-violet-600 dark:text-violet-400" },
-  amber:   { bg: "bg-amber-50 dark:bg-amber-900/20",   icon: "text-amber-600 dark:text-amber-400",   text: "text-amber-600 dark:text-amber-400" },
+  slate: { bg: "bg-slate-100 dark:bg-slate-800", icon: "text-slate-500 dark:text-slate-400", text: "text-slate-500 dark:text-slate-400" },
+  violet: { bg: "bg-violet-50 dark:bg-violet-900/20", icon: "text-violet-600 dark:text-violet-400", text: "text-violet-600 dark:text-violet-400" },
+  amber: { bg: "bg-amber-50 dark:bg-amber-900/20", icon: "text-amber-600 dark:text-amber-400", text: "text-amber-600 dark:text-amber-400" },
 };
 
 function StatCard({ label, value, sub, icon: Icon, color }: {
@@ -139,53 +139,58 @@ function SortIcon({ field, sortField, sortDir }: { field: SortField; sortField: 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function PackageManagement() {
-  const [searchTerm, setSearchTerm]       = useState("");
-  const [statusFilter, setStatusFilter]   = useState<"true" | "false" | "all">("all");
-  const [startDate, setStartDate]         = useState("");
-  const [endDate, setEndDate]             = useState("");
-  const [page, setPage]                   = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"true" | "false" | "all">("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [page, setPage] = useState(1);
   const limit = 10;
 
   const [sortField, setSortField] = useState<SortField | null>(null);
-  const [sortDir, setSortDir]     = useState<SortDir>(null);
+  const [sortDir, setSortDir] = useState<SortDir>(null);
 
-  const [editingPkg, setEditingPkg]     = useState<IInsurancePackage | null>(null);
+  const [editingPkg, setEditingPkg] = useState<IInsurancePackage | null>(null);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
-  const [viewingPkg, setViewingPkg]     = useState<IInsurancePackage | null>(null);
+  const [viewingPkg, setViewingPkg] = useState<IInsurancePackage | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [deletingPkg, setDeletingPkg]   = useState<IInsurancePackage | null>(null);
+  const [deletingPkg, setDeletingPkg] = useState<IInsurancePackage | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   useEffect(() => { setPage(1); }, [searchTerm, statusFilter]);
 
   const { data, isLoading, refetch } = useGetAllPackagesQuery({
     searchTerm: searchTerm || undefined,
-    isActive:   statusFilter !== "all" ? statusFilter : undefined,
+    isActive: statusFilter !== "all" ? statusFilter : undefined,
     page,
     limit,
     ...(startDate && { startDate }),
-    ...(endDate   && { endDate }),
+    ...(endDate && { endDate }),
   });
 
   const [softDeletePackage, { isLoading: isDeleting }] = useSoftDeletePackageMutation();
 
-  const packages: IInsurancePackage[] = data?.data?.data ?? data?.data ?? [];
-  const stats    = data?.data?.stats ?? data?.stats;
-  const meta     = data?.data?.meta  ?? data?.meta;
+  // const packages: IInsurancePackage[] = data?.data?.data ?? data?.data ?? [];
+  // const stats    = data?.data?.stats ?? data?.stats;
+  // const meta     = data?.data?.meta  ?? data?.meta;
+  // const totalPage = meta?.totalPage ?? 1;
+
+  const packages: IInsurancePackage[] = data?.data?.data ?? [];
+  const stats = data?.data?.stats;
+  const meta = data?.data?.meta;
   const totalPage = meta?.totalPage ?? 1;
 
   const hasActiveFilters = statusFilter !== "all";
-  const hasDateFilter    = !!(startDate || endDate);
+  const hasDateFilter = !!(startDate || endDate);
 
   const sortedPackages = useMemo(() => {
     if (!sortField || !sortDir) return packages;
     return [...packages].sort((a, b) => {
       let aVal: string | number = "";
       let bVal: string | number = "";
-      if (sortField === "name")           { aVal = a.name ?? "";           bVal = b.name ?? ""; }
-      if (sortField === "coverageAmount") { aVal = a.coverageAmount ?? 0;  bVal = b.coverageAmount ?? 0; }
-      if (sortField === "isActive")       { aVal = String(a.isActive);     bVal = String(b.isActive); }
-      if (sortField === "createdAt")      { aVal = String(a.createdAt ?? ""); bVal = String(b.createdAt ?? ""); }
+      if (sortField === "name") { aVal = a.name ?? ""; bVal = b.name ?? ""; }
+      if (sortField === "coverageAmount") { aVal = a.coverageAmount ?? 0; bVal = b.coverageAmount ?? 0; }
+      if (sortField === "isActive") { aVal = String(a.isActive); bVal = String(b.isActive); }
+      if (sortField === "createdAt") { aVal = String(a.createdAt ?? ""); bVal = String(b.createdAt ?? ""); }
       if (typeof aVal === "number") return sortDir === "asc" ? aVal - (bVal as number) : (bVal as number) - aVal;
       return sortDir === "asc" ? String(aVal).localeCompare(String(bVal)) : String(bVal).localeCompare(String(aVal));
     });
@@ -193,11 +198,11 @@ export default function PackageManagement() {
 
   const handleSort = (field: SortField) => {
     if (sortField !== field) { setSortField(field); setSortDir("asc"); return; }
-    if (sortDir === "asc")   { setSortDir("desc"); return; }
+    if (sortDir === "asc") { setSortDir("desc"); return; }
     setSortField(null); setSortDir(null);
   };
 
-  const clearFilters    = () => setStatusFilter("all");
+  const clearFilters = () => setStatusFilter("all");
   const clearDateFilter = () => { setStartDate(""); setEndDate(""); };
 
   const handleDelete = async () => {
@@ -253,11 +258,11 @@ export default function PackageManagement() {
           <><StatCardSkeleton /><StatCardSkeleton /><StatCardSkeleton /><StatCardSkeleton /><StatCardSkeleton /></>
         ) : (
           <>
-            <StatCard label="Total Packages"      value={stats?.total              ?? 0} sub="in the system"         icon={Package}      color="blue" />
-            <StatCard label="Active Packages"     value={stats?.active             ?? 0} sub={`${stats?.total ? Math.round(((stats?.active ?? 0) / stats.total) * 100) : 0}% of total`} icon={PackageCheck} color="emerald" />
-            <StatCard label="Inactive Packages"   value={stats?.inactive           ?? 0} sub="not currently active"  icon={PackageX}     color="slate" />
-            <StatCard label="Total Subscriptions" value={stats?.totalSubscriptions ?? 0} sub="across all packages"   icon={Users}        color="violet" />
-            <StatCard label="Total Revenue"       value={formatCurrency(stats?.totalRevenue)} sub="from paid subscriptions" icon={DollarSign} color="amber" />
+            <StatCard label="Total Packages" value={stats?.total ?? 0} sub="in the system" icon={Package} color="blue" />
+            <StatCard label="Active Packages" value={stats?.active ?? 0} sub={`${stats?.total ? Math.round(((stats?.active ?? 0) / stats.total) * 100) : 0}% of total`} icon={PackageCheck} color="emerald" />
+            <StatCard label="Inactive Packages" value={stats?.inactive ?? 0} sub="not currently active" icon={PackageX} color="slate" />
+            <StatCard label="Total Subscriptions" value={stats?.totalSubscriptions ?? 0} sub="across all packages" icon={Users} color="violet" />
+            <StatCard label="Total Revenue" value={formatCurrency(stats?.totalRevenue)} sub="from paid subscriptions" icon={DollarSign} color="amber" />
           </>
         )}
       </div>
@@ -293,14 +298,14 @@ export default function PackageManagement() {
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50 dark:bg-slate-800/50">
-                <SortableTh field="name"           label="Package Name" />
+                <SortableTh field="name" label="Package Name" />
                 <SortableTh field="coverageAmount" label="Coverage" />
                 <TableHead className="whitespace-nowrap">Plans</TableHead>
                 <TableHead className="whitespace-nowrap">Starting Price</TableHead>
                 <TableHead className="whitespace-nowrap">Subscriptions</TableHead>
                 <TableHead className="whitespace-nowrap">Revenue</TableHead>
-                <SortableTh field="createdAt"      label="Created" />
-                <SortableTh field="isActive"       label="Status" />
+                <SortableTh field="createdAt" label="Created" />
+                <SortableTh field="isActive" label="Status" />
                 <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -324,7 +329,7 @@ export default function PackageManagement() {
               ) : (
                 sortedPackages.map((pkg) => {
                   const lowestPrice = getLowestPlanPrice(pkg);
-                  const analytics   = (pkg as any).analytics;
+                  const analytics = (pkg as any).analytics;
                   return (
                     <TableRow key={String(pkg._id)} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                       {/* Name */}
