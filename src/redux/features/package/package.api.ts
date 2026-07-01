@@ -1,123 +1,8 @@
-// import { IInsurancePackage } from "@/types/package.types";
-// import { baseApi } from "../baseApi";
-// import {
-//   IResponse,
-//   GetQueryParams,
-// } from "@/types";
-
-// interface PackageResponse {
-//   success: boolean;
-//   data: IInsurancePackage[];
-//   meta: {
-//     total: number;
-//     totalPage: number;
-//   };
-// }
-
-// export const packageApi = baseApi.injectEndpoints({
-//   endpoints: (builder) => ({
-//     createPackage: builder.mutation<
-//       IResponse<IInsurancePackage>,
-//       Partial<IInsurancePackage>
-//     >({
-//       query: (data) => ({
-//         url: "/package/create-package",
-//         method: "POST",
-//         data,
-//       }),
-//       invalidatesTags: ["PACKAGES"],
-//     }),
-
-//     updatePackage: builder.mutation<
-//       IResponse<IInsurancePackage>,
-//       {
-//         id: string;
-//         data: Partial<IInsurancePackage>;
-//       }
-//     >({
-//       query: ({ id, data }) => ({
-//         url: `/package/${id}`,
-//         method: "PATCH",
-//         data,
-//       }),
-//       invalidatesTags: ["PACKAGES"],
-//     }),
-
-//     getAllPackages: builder.query<
-//       PackageResponse,
-//       GetQueryParams
-//     >({
-//       query: (params) => ({
-//         url: "/package/all-packages",
-//         method: "GET",
-//         params,
-//       }),
-//       providesTags: ["PACKAGES"],
-//     }),
-
-//     getSinglePackage: builder.query<
-//       IResponse<IInsurancePackage>,
-//       string
-//     >({
-//       query: (id) => ({
-//         url: `/package/${id}`,
-//         method: "GET",
-//       }),
-//       providesTags: ["PACKAGE"],
-//     }),
-
-//     getAllTrashPackages: builder.query<
-//       PackageResponse,
-//       GetQueryParams
-//     >({
-//       query: (params) => ({
-//         url: "/package/all-trash-packages",
-//         method: "GET",
-//         params,
-//       }),
-//       providesTags: ["PACKAGES"],
-//     }),
-
-//     softDeletePackage: builder.mutation<
-//       IResponse<IInsurancePackage>,
-//       string
-//     >({
-//       query: (id) => ({
-//         url: `/package/soft-delete/${id}`,
-//         method: "PATCH",
-//       }),
-//       invalidatesTags: ["PACKAGES"],
-//     }),
-
-//     deletePackage: builder.mutation<
-//       IResponse<null>,
-//       string
-//     >({
-//       query: (id) => ({
-//         url: `/package/${id}`,
-//         method: "DELETE",
-//       }),
-//       invalidatesTags: ["PACKAGES"],
-//     }),
-//   }),
-// });
-
-// export const {
-//   useCreatePackageMutation,
-//   useUpdatePackageMutation,
-//   useGetAllPackagesQuery,
-//   useGetSinglePackageQuery,
-//   useGetAllTrashPackagesQuery,
-//   useSoftDeletePackageMutation,
-//   useDeletePackageMutation,
-// } = packageApi;
-
 
 import {
   GetPackagesParams,
   IPackageListResponse,
   ISinglePackageResponse,
-  IInsurancePackage,
 } from "@/types/package.types";
 import { baseApi } from "../baseApi";
 
@@ -126,11 +11,11 @@ export const packageApi = baseApi.injectEndpoints({
 
     // ── CREATE ──────────────────────────────────────────────────────────────
 
-    createPackage: builder.mutation<ISinglePackageResponse, Partial<IInsurancePackage>>({
-      query: (data) => ({
+    createPackage: builder.mutation<ISinglePackageResponse, FormData>({
+      query: (formData) => ({
         url: "/package/create-package",
         method: "POST",
-        data,
+        data: formData,
       }),
       invalidatesTags: ["PACKAGES"],
     }),
@@ -167,9 +52,9 @@ export const packageApi = baseApi.injectEndpoints({
       providesTags: ["PACKAGES"],
     }),
 
-    // ── UPDATE ───────────────────────────────────────────────────────────────
+    // ── UPDATE ─────
 
-    updatePackage: builder.mutation<ISinglePackageResponse, { id: string; data: Partial<IInsurancePackage> }>({
+    updatePackage: builder.mutation<ISinglePackageResponse, { id: string; data: FormData }>({
       query: ({ id, data }) => ({
         url: `/package/${id}`,
         method: "PATCH",
@@ -178,7 +63,7 @@ export const packageApi = baseApi.injectEndpoints({
       invalidatesTags: ["PACKAGES"],
     }),
 
-    // ── SOFT DELETE (move to trash) ───────────────────────────────────────────
+    // ── SOFT DELETE (move to trash) ─────
 
     softDeletePackage: builder.mutation<ISinglePackageResponse, string>({
       query: (id) => ({
