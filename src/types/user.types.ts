@@ -74,7 +74,7 @@ export interface IUser {
   salaryPerCustomer?: string;
 
   // SYSTEM FLAGS
-  isActive?: IsActive;
+  isActive?: IsActive.ACTIVE | null;
   isVerified?: boolean;
   isDeleted?: boolean;
   lastLoginAt?: string; // ISO string from API
