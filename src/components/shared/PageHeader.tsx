@@ -1,20 +1,23 @@
-'use client'
+"use client";
 
-import { ChevronRight, Home } from 'lucide-react'
-import Link from 'next/link'
-import { cn } from '@/lib/utils'
-
-interface Breadcrumb {
-  label: string
-  href?: string
-}
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import React from "react";
 
 interface PageHeaderProps {
-  title: string
-  description?: string
-  breadcrumbs?: Breadcrumb[]
-  action?: React.ReactNode
-  className?: string
+  title: string;
+  description?: string;
+  breadcrumbs?: Array<{ label: string; href?: string }>;
+  action?: {
+    label: string;
+    href: string;
+  };
+  actionButton?: {
+    label: string;
+    icon?: React.ComponentType<{ className?: string }>;
+    onClick: () => void;
+  };
 }
 
 export function PageHeader({
@@ -22,49 +25,61 @@ export function PageHeader({
   description,
   breadcrumbs,
   action,
-  className,
+  actionButton,
 }: PageHeaderProps) {
   return (
-    <div className={cn('space-y-4 mb-6', className)}>
+    <div className="space-y-6 mb-8">
+      {/* Breadcrumbs */}
       {breadcrumbs && breadcrumbs.length > 0 && (
-        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-          <Link
-            href="#"
-            className="flex items-center gap-1 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
-          >
-            <Home className="w-4 h-4" />
-          </Link>
+        <div className="flex items-center gap-2 text-sm">
           {breadcrumbs.map((crumb, idx) => (
             <div key={idx} className="flex items-center gap-2">
-              <ChevronRight className="w-4 h-4" />
               {crumb.href ? (
                 <Link
                   href={crumb.href}
-                  className="hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {crumb.label}
                 </Link>
               ) : (
-                <span className="text-gray-900 dark:text-gray-200 font-medium">
+                <span className="text-foreground font-medium">
                   {crumb.label}
                 </span>
+              )}
+              {idx < breadcrumbs.length - 1 && (
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
               )}
             </div>
           ))}
         </div>
       )}
 
-      <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-            {title}
-          </h1>
+      {/* Title and Action */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
           {description && (
-            <p className="text-gray-600 dark:text-gray-400">{description}</p>
+            <p className="text-muted-foreground mt-2">{description}</p>
           )}
         </div>
-        {action && <div>{action}</div>}
+        {action && (
+          <Link
+            href={action.href}
+            className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 gap-2 hover:scale-105 transition-transform duration-200"
+          >
+            {action.label}
+          </Link>
+        )}
+        {actionButton && (
+          <Button
+            onClick={actionButton.onClick}
+            className="gap-2 hover:scale-105 transition-transform duration-200"
+          >
+            {actionButton.icon && <actionButton.icon className="w-4 h-4" />}
+            {actionButton.label}
+          </Button>
+        )}
       </div>
     </div>
-  )
+  );
 }

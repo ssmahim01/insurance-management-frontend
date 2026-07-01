@@ -10,6 +10,7 @@ export enum Role {
 
 export enum IsActive {
   ACTIVE = "ACTIVE",
+  ALL = "ALL",
   INACTIVE = "INACTIVE",
   BLOCKED = "BLOCKED"
 }
