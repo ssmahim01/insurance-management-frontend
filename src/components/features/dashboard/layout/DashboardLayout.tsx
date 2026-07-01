@@ -100,6 +100,12 @@ export const dashboardNavigation: NavGroup[] = [
         href: "/admin/dashboard/packages",
         icon: Package,
       },
+      {
+        id: "subscription",
+        label: "Insurance Subscriptions",
+        href: "/admin/dashboard/subscription",
+        icon: Package,
+      },
     ],
   },
   {
