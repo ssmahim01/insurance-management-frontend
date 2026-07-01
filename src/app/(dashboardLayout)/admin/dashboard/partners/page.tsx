@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // import type { Metadata } from 'next';
 // import { PageHeader } from '@/components/features/dashboard/components/PageHeader';
 // import { PartnerStats } from '@/components/features/dashboard/partners/PartnerStats';
@@ -70,7 +71,6 @@
 //   );
 // }
 
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -135,11 +135,12 @@ import { CreatePartnerModal } from "@/components/partner/CreatePartner";
 import { Pagination } from "@/components/pagination/Pagination";
 import { PartnerDetailsModal } from "@/components/partner/PartnerDetailsModal";
 import { UpdatePartnerModal } from "@/components/partner/UpdatePartner";
+import Image from "next/image";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type SortField = "name" | "phone" | "isActive" | "createdAt";
-type SortDir   = "asc" | "desc" | null;
+type SortDir = "asc" | "desc" | null;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -199,19 +200,22 @@ function StatCardSkeleton() {
 
 type StatColor = "violet" | "emerald" | "slate";
 
-const STAT_COLOR_MAP: Record<StatColor, { bg: string; icon: string; text: string }> = {
+const STAT_COLOR_MAP: Record<
+  StatColor,
+  { bg: string; icon: string; text: string }
+> = {
   violet: {
-    bg:   "bg-violet-50 dark:bg-violet-900/20",
+    bg: "bg-violet-50 dark:bg-violet-900/20",
     icon: "text-violet-600 dark:text-violet-400",
     text: "text-violet-600 dark:text-violet-400",
   },
   emerald: {
-    bg:   "bg-emerald-50 dark:bg-emerald-900/20",
+    bg: "bg-emerald-50 dark:bg-emerald-900/20",
     icon: "text-emerald-600 dark:text-emerald-400",
     text: "text-emerald-600 dark:text-emerald-400",
   },
   slate: {
-    bg:   "bg-slate-100 dark:bg-slate-800",
+    bg: "bg-slate-100 dark:bg-slate-800",
     icon: "text-slate-500 dark:text-slate-400",
     text: "text-slate-500 dark:text-slate-400",
   },
@@ -239,7 +243,9 @@ function StatCard({
           <Icon className={`w-5 h-5 ${c.icon}`} />
         </div>
       </div>
-      <p className="text-2xl font-semibold text-slate-900 dark:text-white">{value}</p>
+      <p className="text-2xl font-semibold text-slate-900 dark:text-white">
+        {value}
+      </p>
       {sub && <p className={`text-xs mt-1 ${c.text}`}>{sub}</p>}
     </div>
   );
@@ -269,49 +275,56 @@ function SortIcon({
 
 export default function PartnerManagement() {
   // ── filters ──
-  const [searchTerm, setSearchTerm]     = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "true" | "false">("all");
-  const [startDate, setStartDate]       = useState("");
-  const [endDate, setEndDate]           = useState("");
-  const [page, setPage]                 = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "true" | "false">(
+    "all",
+  );
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [page, setPage] = useState(1);
   const limit = 10;
 
   // ── sort ──
   const [sortField, setSortField] = useState<SortField | null>(null);
-  const [sortDir, setSortDir]     = useState<SortDir>(null);
+  const [sortDir, setSortDir] = useState<SortDir>(null);
 
   // ── modals ──
-  const [viewingPartner, setViewingPartner]   = useState<IPartner | null>(null);
-  const [isDetailsOpen, setIsDetailsOpen]     = useState(false);
-  const [editingPartner, setEditingPartner]   = useState<IPartner | null>(null);
-  const [isUpdateOpen, setIsUpdateOpen]       = useState(false);
+  const [viewingPartner, setViewingPartner] = useState<IPartner | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [editingPartner, setEditingPartner] = useState<IPartner | null>(null);
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [deletingPartner, setDeletingPartner] = useState<IPartner | null>(null);
-  const [isDeleteOpen, setIsDeleteOpen]       = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  useEffect(() => { setPage(1); }, [searchTerm, statusFilter]);
+  useEffect(() => {
+    setTimeout(() => {
+      setPage(1);
+    }, 100);
+  }, [searchTerm, statusFilter]);
 
   // ── API ──
   const { data, isLoading, refetch } = useGetAllPartnersQuery({
     searchTerm: searchTerm || undefined,
-    isActive:   statusFilter !== "all" ? statusFilter : undefined,
+    isActive: statusFilter !== "all" ? statusFilter : undefined,
     page,
     limit,
     ...(startDate && { startDate }),
-    ...(endDate   && { endDate }),
+    ...(endDate && { endDate }),
   });
 
-  console.log("Partners response ", data)
+  console.log("Partners response ", data);
 
-  const [softDeletePartner, { isLoading: isDeleting }] = useSoftDeletePartnerMutation();
+  const [softDeletePartner, { isLoading: isDeleting }] =
+    useSoftDeletePartnerMutation();
 
   // ── derived ──
   const partners: IPartner[] = data?.data ?? [];
-  const stats                = data?.stats;
-  const meta                 = data?.meta;
-  const totalPage            = meta?.totalPage ?? 1;
+  const stats = data?.stats;
+  const meta = data?.meta;
+  const totalPage = meta?.totalPage ?? 1;
 
   const hasActiveFilters = statusFilter !== "all";
-  const hasDateFilter    = !!(startDate || endDate);
+  const hasDateFilter = !!(startDate || endDate);
 
   // ── client sort ──
   const sortedPartners = React.useMemo(() => {
@@ -319,27 +332,63 @@ export default function PartnerManagement() {
     return [...partners].sort((a, b) => {
       let aVal = "";
       let bVal = "";
-      if (sortField === "name")      { aVal = a.name ?? ""; bVal = b.name ?? ""; }
-      if (sortField === "phone")     { aVal = a.phone ?? ""; bVal = b.phone ?? ""; }
-      if (sortField === "isActive")  { aVal = String(a.isActive); bVal = String(b.isActive); }
-      if (sortField === "createdAt") { aVal = a.createdAt ?? ""; bVal = b.createdAt ?? ""; }
-      return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      if (sortField === "name") {
+        aVal = a.name ?? "";
+        bVal = b.name ?? "";
+      }
+      if (sortField === "phone") {
+        aVal = a.phone ?? "";
+        bVal = b.phone ?? "";
+      }
+      if (sortField === "isActive") {
+        aVal = String(a.isActive);
+        bVal = String(b.isActive);
+      }
+      if (sortField === "createdAt") {
+        aVal = a.createdAt ?? "";
+        bVal = b.createdAt ?? "";
+      }
+      return sortDir === "asc"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
     });
   }, [partners, sortField, sortDir]);
 
   // ── handlers ──
   const handleSort = (field: SortField) => {
-    if (sortField !== field) { setSortField(field); setSortDir("asc"); return; }
-    if (sortDir === "asc")   { setSortDir("desc"); return; }
-    setSortField(null); setSortDir(null);
+    if (sortField !== field) {
+      setSortField(field);
+      setSortDir("asc");
+      return;
+    }
+    if (sortDir === "asc") {
+      setSortDir("desc");
+      return;
+    }
+    setSortField(null);
+    setSortDir(null);
   };
 
-  const clearFilters    = () => { setStatusFilter("all"); };
-  const clearDateFilter = () => { setStartDate(""); setEndDate(""); };
+  const clearFilters = () => {
+    setStatusFilter("all");
+  };
+  const clearDateFilter = () => {
+    setStartDate("");
+    setEndDate("");
+  };
 
-  const openDetailsDialog = (p: IPartner) => { setViewingPartner(p); setIsDetailsOpen(true); };
-  const openEditDialog    = (p: IPartner) => { setEditingPartner(p); setIsUpdateOpen(true); };
-  const openDeleteDialog  = (p: IPartner) => { setDeletingPartner(p); setIsDeleteOpen(true); };
+  const openDetailsDialog = (p: IPartner) => {
+    setViewingPartner(p);
+    setIsDetailsOpen(true);
+  };
+  const openEditDialog = (p: IPartner) => {
+    setEditingPartner(p);
+    setIsUpdateOpen(true);
+  };
+  const openDeleteDialog = (p: IPartner) => {
+    setDeletingPartner(p);
+    setIsDeleteOpen(true);
+  };
 
   const handleDelete = async () => {
     if (!deletingPartner?._id) return;
@@ -355,7 +404,13 @@ export default function PartnerManagement() {
   };
 
   // ── sortable header ──
-  const SortableTh = ({ field, label }: { field: SortField; label: string }) => (
+  const SortableTh = ({
+    field,
+    label,
+  }: {
+    field: SortField;
+    label: string;
+  }) => (
     <TableHead
       className="cursor-pointer select-none whitespace-nowrap"
       onClick={() => handleSort(field)}
@@ -379,7 +434,7 @@ export default function PartnerManagement() {
           { label: "Dashboard", href: "/dashboard" },
           { label: "Partner Management" },
         ]}
-        action={<CreatePartnerModal onSuccess={refetch} />}
+        // action={<CreatePartnerModal onSuccess={refetch} />}
       />
 
       {/* ── Stat Cards ── */}
@@ -471,8 +526,8 @@ export default function PartnerManagement() {
               {statusFilter === "all"
                 ? "All Status"
                 : statusFilter === "true"
-                ? "Active"
-                : "Inactive"}
+                  ? "Active"
+                  : "Inactive"}
             </span>
           </SelectTrigger>
           <SelectContent>
@@ -501,13 +556,15 @@ export default function PartnerManagement() {
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50 dark:bg-slate-800/50">
-                <SortableTh field="name"      label="Partner" />
-                <SortableTh field="phone"     label="Phone" />
+                <SortableTh field="name" label="Partner" />
+                <SortableTh field="phone" label="Phone" />
                 <TableHead className="whitespace-nowrap">Email</TableHead>
                 <TableHead className="whitespace-nowrap">Website</TableHead>
                 <SortableTh field="createdAt" label="Added" />
-                <SortableTh field="isActive"  label="Status" />
-                <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
+                <SortableTh field="isActive" label="Status" />
+                <TableHead className="text-right whitespace-nowrap">
+                  Actions
+                </TableHead>
               </TableRow>
             </TableHeader>
 
@@ -523,13 +580,21 @@ export default function PartnerManagement() {
                       <Handshake className="w-12 h-12 mb-4 opacity-30" />
                       {searchTerm || hasActiveFilters ? (
                         <>
-                          <p className="text-base font-medium">No results found</p>
-                          <p className="text-sm mt-1">Try adjusting your search or filters</p>
+                          <p className="text-base font-medium">
+                            No results found
+                          </p>
+                          <p className="text-sm mt-1">
+                            Try adjusting your search or filters
+                          </p>
                         </>
                       ) : (
                         <>
-                          <p className="text-base font-medium">No partners added yet</p>
-                          <p className="text-sm mt-1">Click the Add Partner button to get started</p>
+                          <p className="text-base font-medium">
+                            No partners added yet
+                          </p>
+                          <p className="text-sm mt-1">
+                            Click the Add Partner button to get started
+                          </p>
                         </>
                       )}
                     </div>
@@ -545,13 +610,17 @@ export default function PartnerManagement() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         {partner.logo ? (
-                          <img
+                          <Image
+                          width={400}
+                          height={400}
+                          priority
+                          quality={90}
                             src={partner.logo}
                             alt={partner.name}
                             className="w-10 h-10 rounded-lg object-contain border border-slate-200 dark:border-slate-700 bg-white p-1 shrink-0"
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                          <div className="w-10 h-10 rounded-lg bg-linear-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
                             {partner.name?.charAt(0)?.toUpperCase() ?? "P"}
                           </div>
                         )}

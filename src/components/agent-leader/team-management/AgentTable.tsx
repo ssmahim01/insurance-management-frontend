@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { IUser } from "@/types/user.types";
+import { IsActive, IUser } from "@/types/user.types";
 import { AgentStatusBadge } from "./AgentStatusBadge";
 import { AgentActions } from "./AgentActions";
 
@@ -178,12 +178,12 @@ export function AgentTable({
                 </span>
               </TableCell>
               <TableCell>
-                <AgentStatusBadge status={agent.isActive} />
+                <AgentStatusBadge status={agent?.isActive ?? IsActive.ALL} />
               </TableCell>
               <TableCell className="text-right">
                 <AgentActions
                   agentId={agent._id as string}
-                  agentStatus={agent.isActive}
+                  agentStatus={agent?.isActive ?? IsActive.ALL}
                   onViewDetails={() => onViewDetails(agent._id as string)}
                   // onViewCustomers={() => onViewCustomers(agent._id as string)}
                   // onEdit={() => {
@@ -192,7 +192,7 @@ export function AgentTable({
                   onToggleBlock={() =>
                     onToggleBlock(
                       agent._id as string,
-                      agent.isActive === "BLOCKED",
+                      agent?.isActive ?? IsActive.BLOCKED,
                     )
                   }
                   onDelete={() => onDelete(agent._id as string)}
