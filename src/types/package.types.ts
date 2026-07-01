@@ -55,6 +55,7 @@ export interface IInsurancePackage {
   _id?:           string;
   name:           string;
   slug:           string;
+  featuredImage?: string;
   description:    string;
   coverageAmount: number;
   plans:          IPlan[];

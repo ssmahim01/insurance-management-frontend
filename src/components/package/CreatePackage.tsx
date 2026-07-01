@@ -16,7 +16,6 @@
 // import { Label } from "@/components/ui/label";
 // import { Separator } from "@/components/ui/separator";
 // import { Textarea } from "@/components/ui/textarea";
-// import { Switch } from "@/components/ui/switch";
 // import {
 //   Select, SelectContent, SelectItem, SelectTrigger,
 // } from "@/components/ui/select";
@@ -24,6 +23,7 @@
 // import { useCreatePackageMutation } from "@/redux/features/package/package.api";
 // import { useGetAllPartnersQuery } from "@/redux/features/partner/partner.api";
 // import { PlanType } from "@/types/package.types";
+// import { IPartner } from "@/types/partner.types";
 
 // // ─── Schema ───────────────────────────────────────────────────────────────────
 
@@ -84,7 +84,10 @@
 //     { skip: !open },
 //   );
 //   // Response shape: { data: [...], meta: {...}, stats: {...} }
-//   const partners: { _id: string; name: string; logo?: string }[]  = partnersData?.data ?? [];
+//   // _id is optional on IPartner, so filter out any entries missing it
+//   const partners = ((partnersData?.data ?? []) as IPartner[]).filter(
+//     (p): p is IPartner & { _id: string } => typeof p._id === "string",
+//   );
 
 //   const {
 //     register, handleSubmit, setValue, watch, control,
@@ -124,6 +127,7 @@
 //         isActive:         data.isActive,
 //         isDeleted:        data.isDeleted,
 //       };
+//       // Note: slug is intentionally NOT sent — backend generates it automatically.
 //       await createPackage(payload).unwrap();
 //       toast.success("Package created successfully!");
 //       handleClose();
@@ -177,15 +181,20 @@
 //                   {errors.coverageAmount && <p className="text-xs text-red-400">{errors.coverageAmount.message}</p>}
 //                 </div>
 
-//                 <div className="space-y-1.5 flex items-center gap-3 pt-5">
-//                   <Switch
-//                     id="p-active"
-//                     checked={watchedIsActive}
-//                     onCheckedChange={(v) => setValue("isActive", v)}
-//                   />
-//                   <Label htmlFor="p-active" className="text-sm font-medium">
-//                     {watchedIsActive ? "Active" : "Inactive"}
-//                   </Label>
+//                 <div className="space-y-1.5">
+//                   <Label htmlFor="p-active" className="text-xs font-semibold tracking-widest uppercase">Status</Label>
+//                   <Select
+//                     value={watchedIsActive ? "active" : "inactive"}
+//                     onValueChange={(v) => setValue("isActive", v === "active")}
+//                   >
+//                     <SelectTrigger id="p-active" className="h-9 text-sm">
+//                       <span>{watchedIsActive ? "Active" : "Inactive"}</span>
+//                     </SelectTrigger>
+//                     <SelectContent>
+//                       <SelectItem value="active">Active</SelectItem>
+//                       <SelectItem value="inactive">Inactive</SelectItem>
+//                     </SelectContent>
+//                   </Select>
 //                 </div>
 //               </div>
 //             </div>
@@ -395,15 +404,20 @@
 //                             <p className="text-xs text-red-400">{errors.partnerDiscounts[idx]?.discountPercent?.message}</p>
 //                           )}
 //                         </div>
-//                         <div className="space-y-1.5 flex items-center gap-3 pt-5">
-//                           <Switch
-//                             id={`pd-active-${idx}`}
-//                             checked={isPartnerActive}
-//                             onCheckedChange={(v) => setValue(`partnerDiscounts.${idx}.isActive`, v)}
-//                           />
-//                           <Label htmlFor={`pd-active-${idx}`} className="text-sm font-medium">
-//                             {isPartnerActive ? "Active" : "Inactive"}
-//                           </Label>
+//                         <div className="space-y-1.5">
+//                           <Label htmlFor={`pd-active-${idx}`} className="text-xs font-semibold tracking-widest uppercase">Status</Label>
+//                           <Select
+//                             value={isPartnerActive ? "active" : "inactive"}
+//                             onValueChange={(v) => setValue(`partnerDiscounts.${idx}.isActive`, v === "active")}
+//                           >
+//                             <SelectTrigger id={`pd-active-${idx}`} className="h-9 text-sm">
+//                               <span>{isPartnerActive ? "Active" : "Inactive"}</span>
+//                             </SelectTrigger>
+//                             <SelectContent>
+//                               <SelectItem value="active">Active</SelectItem>
+//                               <SelectItem value="inactive">Inactive</SelectItem>
+//                             </SelectContent>
+//                           </Select>
 //                         </div>
 //                       </div>
 //                     </div>
@@ -434,14 +448,16 @@
 // }
 
 
+
+
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { toast } from "sonner";
-import { Plus, Package, Trash2, PlusCircle } from "lucide-react";
+import { Plus, Package, Trash2, PlusCircle, ImagePlus, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -451,7 +467,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import {
   Select, SelectContent, SelectItem, SelectTrigger,
 } from "@/components/ui/select";
@@ -514,13 +529,16 @@ export function CreatePackageModal({ onSuccess }: CreatePackageModalProps) {
   const [open, setOpen] = useState(false);
   const [createPackage, { isLoading }] = useCreatePackageMutation();
 
+  // Feature image state
+  const [imageFile, setImageFile]       = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef                    = useRef<HTMLInputElement>(null);
+
   // Fetch all active partners — only when modal is open
   const { data: partnersData, isLoading: isPartnersLoading } = useGetAllPartnersQuery(
     { isActive: "true", limit: 100 },
     { skip: !open },
   );
-  // Response shape: { data: [...], meta: {...}, stats: {...} }
-  // _id is optional on IPartner, so filter out any entries missing it
   const partners = ((partnersData?.data ?? []) as IPartner[]).filter(
     (p): p is IPartner & { _id: string } => typeof p._id === "string",
   );
@@ -548,30 +566,86 @@ export function CreatePackageModal({ onSuccess }: CreatePackageModalProps) {
 
   const watchedIsActive = watch("isActive");
 
-  const handleClose = () => { reset(); setOpen(false); };
-
-  const onSubmit = async (data: CreatePackageFormValues) => {
-    try {
-      const payload = {
-        name:             data.name,
-        description:      data.description,
-        coverageAmount:   data.coverageAmount,
-        plans:            data.plans,
-        benefits:         data.benefits.map((b) => b.value),
-        exclusions:       data.exclusions.map((e) => e.value),
-        partnerDiscounts: data.partnerDiscounts,
-        isActive:         data.isActive,
-        isDeleted:        data.isDeleted,
-      };
-      await createPackage(payload).unwrap();
-      toast.success("Package created successfully!");
-      handleClose();
-      onSuccess?.();
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to create package");
-    }
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleClose = () => {
+    reset();
+    handleRemoveImage();
+    setOpen(false);
+  };
+
+  // const onSubmit = async (data: CreatePackageFormValues) => {
+  //   try {
+  //     const formData = new FormData();
+
+  //     if (imageFile) formData.append("featureImage", imageFile);
+
+  //     const jsonPayload = {
+  //       name:             data.name,
+  //       description:      data.description,
+  //       coverageAmount:   data.coverageAmount,
+  //       plans:            data.plans,
+  //       benefits:         data.benefits.map((b) => b.value),
+  //       exclusions:       data.exclusions.map((e) => e.value),
+  //       partnerDiscounts: data.partnerDiscounts,
+  //       isActive:         data.isActive,
+  //       isDeleted:        data.isDeleted,
+  //     };
+
+  //     // Append all non-file fields as JSON string (backend parses req.body via multer)
+  //     Object.entries(jsonPayload).forEach(([key, value]) => {
+  //       formData.append(key, typeof value === "object" ? JSON.stringify(value) : String(value));
+  //     });
+
+  //     await createPackage(formData).unwrap();
+  //     toast.success("Package created successfully!");
+  //     handleClose();
+  //     onSuccess?.();
+  //   } catch (err: any) {
+  //     toast.error(err?.data?.message || "Failed to create package");
+  //   }
+  // };
+
+
+  const onSubmit = async (data: CreatePackageFormValues) => {
+  try {
+    const formData = new FormData();
+
+    if (imageFile) formData.append("featureImage", imageFile);
+
+    const payload = {
+      name:             data.name,
+      description:      data.description,
+      coverageAmount:   data.coverageAmount,
+      plans:            data.plans,
+      benefits:         data.benefits.map((b) => b.value),
+      exclusions:       data.exclusions.map((e) => e.value),
+      partnerDiscounts: data.partnerDiscounts,
+      isActive:         data.isActive,
+      isDeleted:        data.isDeleted,
+    };
+
+    formData.append("data", JSON.stringify(payload));
+
+    await createPackage(formData).unwrap();
+    toast.success("Package created successfully!");
+    handleClose();
+    onSuccess?.();
+  } catch (err: any) {
+    toast.error(err?.data?.message || "Failed to create package");
+  }
+};
   return (
     <>
       <Button onClick={() => setOpen(true)}>
@@ -616,15 +690,56 @@ export function CreatePackageModal({ onSuccess }: CreatePackageModalProps) {
                   {errors.coverageAmount && <p className="text-xs text-red-400">{errors.coverageAmount.message}</p>}
                 </div>
 
-                <div className="space-y-1.5 flex items-center gap-3 pt-5">
-                  <Switch
-                    id="p-active"
-                    checked={watchedIsActive}
-                    onCheckedChange={(v) => setValue("isActive", v)}
-                  />
-                  <Label htmlFor="p-active" className="text-sm font-medium">
-                    {watchedIsActive ? "Active" : "Inactive"}
+                <div className="space-y-1.5">
+                  <Label htmlFor="p-active" className="text-xs font-semibold tracking-widest uppercase">Status</Label>
+                  <Select
+                    value={watchedIsActive ? "active" : "inactive"}
+                    onValueChange={(v) => setValue("isActive", v === "active")}
+                  >
+                    <SelectTrigger id="p-active" className="h-9 text-sm">
+                      <span>{watchedIsActive ? "Active" : "Inactive"}</span>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Feature Image */}
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label className="text-xs font-semibold tracking-widest uppercase">
+                    Feature Image <span className="text-[#96999A] normal-case font-normal">(optional)</span>
                   </Label>
+                  {imagePreview ? (
+                    <div className="relative w-full h-40 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/30">
+                      <img src={imagePreview} alt="Feature preview" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white transition-colors"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full h-32 rounded-lg border-2 border-dashed border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/20 hover:bg-slate-100/60 dark:hover:bg-slate-800/40 transition-colors flex flex-col items-center justify-center gap-2 text-slate-400"
+                    >
+                      <ImagePlus className="w-6 h-6" />
+                      <span className="text-xs font-medium">Click to upload image</span>
+                      <span className="text-[10px]">PNG, JPG, WEBP up to 5MB</span>
+                    </button>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageChange}
+                  />
                 </div>
               </div>
             </div>
@@ -834,15 +949,20 @@ export function CreatePackageModal({ onSuccess }: CreatePackageModalProps) {
                             <p className="text-xs text-red-400">{errors.partnerDiscounts[idx]?.discountPercent?.message}</p>
                           )}
                         </div>
-                        <div className="space-y-1.5 flex items-center gap-3 pt-5">
-                          <Switch
-                            id={`pd-active-${idx}`}
-                            checked={isPartnerActive}
-                            onCheckedChange={(v) => setValue(`partnerDiscounts.${idx}.isActive`, v)}
-                          />
-                          <Label htmlFor={`pd-active-${idx}`} className="text-sm font-medium">
-                            {isPartnerActive ? "Active" : "Inactive"}
-                          </Label>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-semibold tracking-widest uppercase">Status</Label>
+                          <Select
+                            value={isPartnerActive ? "active" : "inactive"}
+                            onValueChange={(v) => setValue(`partnerDiscounts.${idx}.isActive`, v === "active")}
+                          >
+                            <SelectTrigger className="h-9 text-sm">
+                              <span>{isPartnerActive ? "Active" : "Inactive"}</span>
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="active">Active</SelectItem>
+                              <SelectItem value="inactive">Inactive</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
                     </div>
