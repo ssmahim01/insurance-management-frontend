@@ -56,7 +56,7 @@ export const dashboardNavigation: NavGroup[] = [
       {
         id: "dashboard",
         label: "Dashboard",
-        href: "/dashboard",
+        href: "/admin/dashboard",
         icon: LayoutDashboard,
       }
     ],
@@ -66,38 +66,38 @@ export const dashboardNavigation: NavGroup[] = [
     items: [
                   {
         id: "agentLeader",
-        label: "Agent Leader",
-        href: "/dashboard/agent-leader",
+        label: "Agent Leaders",
+        href: "/admin/dashboard/agent-leader",
         icon: Handshake,
       },
       {
         id: "agents",
         label: "Agents",
-        href: "/dashboard/agents",
+        href: "/admin/dashboard/agents",
         icon: Handshake,
       },
          {
         id: "customers",
         label: "Customers",
-        href: "/dashboard/customers",
+        href: "/admin/dashboard/customers",
         icon: Handshake,
       },
       {
         id: "partners",
         label: "Partners",
-        href: "/dashboard/partners",
+        href: "/admin/dashboard/partners",
         icon: Handshake,
       },
       {
         id: "branches",
         label: "Branches",
-        href: "/dashboard/branches",
+        href: "/admin/dashboard/branches",
         icon: Building2,
       },
       {
         id: "packages",
         label: "Insurance Packages",
-        href: "/dashboard/packages",
+        href: "/admin/dashboard/packages",
         icon: Package,
       },
     ],
@@ -108,7 +108,7 @@ export const dashboardNavigation: NavGroup[] = [
       {
         id: "settings",
         label: "Settings",
-        href: "/dashboard/settings",
+        href: "/admin/dashboard/settings",
         icon: Settings,
       },
       {
