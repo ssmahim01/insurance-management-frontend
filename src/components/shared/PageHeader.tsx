@@ -5,20 +5,36 @@ import { ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import React from "react";
 
+// interface PageHeaderProps {
+//   title: string;
+//   description?: string;
+//   breadcrumbs?: Array<{ label: string; href?: string }>;
+//   action?: {
+//     label: string;
+//     href: string;
+//   };
+//   actionButton?: {
+//     label: string;
+//     icon?: React.ComponentType<{ className?: string }>;
+//     onClick: () => void;
+//   };
+// }
+
 interface PageHeaderProps {
   title: string;
   description?: string;
   breadcrumbs?: Array<{ label: string; href?: string }>;
-  action?: {
-    label: string;
-    href: string;
-  };
+
+  action?: React.ReactNode;
+
   actionButton?: {
     label: string;
     icon?: React.ComponentType<{ className?: string }>;
     onClick: () => void;
   };
 }
+
+
 
 export function PageHeader({
   title,
@@ -30,7 +46,7 @@ export function PageHeader({
   return (
     <div className="space-y-6 mb-8">
       {/* Breadcrumbs */}
-      {breadcrumbs && breadcrumbs.length > 0 && (
+      {/* {breadcrumbs && breadcrumbs.length > 0 && (
         <div className="flex items-center gap-2 text-sm">
           {breadcrumbs.map((crumb, idx) => (
             <div key={idx} className="flex items-center gap-2">
@@ -52,10 +68,10 @@ export function PageHeader({
             </div>
           ))}
         </div>
-      )}
+      )} */}
 
       {/* Title and Action */}
-      <div className="flex items-start justify-between gap-4">
+      {/* <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
           {description && (
@@ -79,6 +95,26 @@ export function PageHeader({
             {actionButton.label}
           </Button>
         )}
+      </div> */}
+
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+          {description && (
+            <p className="text-muted-foreground mt-2">{description}</p>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          {action}
+
+          {actionButton && (
+            <Button onClick={actionButton.onClick}>
+              {actionButton.icon && <actionButton.icon className="w-4 h-4" />}
+              {actionButton.label}
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

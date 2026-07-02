@@ -76,12 +76,6 @@ export const dashboardNavigation: NavGroup[] = [
         href: "/admin/dashboard/agents",
         icon: Handshake,
       },
-         {
-        id: "customers",
-        label: "Customers",
-        href: "/admin/dashboard/customers",
-        icon: Handshake,
-      },
       {
         id: "partners",
         label: "Partners",
@@ -96,14 +90,14 @@ export const dashboardNavigation: NavGroup[] = [
       },
       {
         id: "packages",
-        label: "Insurance Packages",
+        label: "Packages",
         href: "/admin/dashboard/packages",
         icon: Package,
       },
       {
-        id: "subscription",
-        label: "Insurance Subscriptions",
-        href: "/admin/dashboard/subscription",
+        id: "customers",
+        label: "Customers",
+        href: "/admin/dashboard/customers",
         icon: Package,
       },
     ],

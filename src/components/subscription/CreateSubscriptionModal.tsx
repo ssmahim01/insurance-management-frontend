@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Loader2, Plus, Search, UserCheck, UserPlus, X, Check } from "lucide-react";
+import { Loader2, Plus, Search, UserCheck, UserPlus, X, Check, User, Users } from "lucide-react";
 
 import {
     Dialog,
@@ -31,6 +31,8 @@ import { useGetAllCustomersQuery } from "@/redux/features/user/user.api";
 import { useGetAllPackagesQuery } from "@/redux/features/package/package.api";
 import { IUser } from "@/types/user.types";
 import { PlanType } from "@/types/subscription.types";
+
+import { divisions, getDistrictsByDivision, getUpazilasByDistrict } from "@/lib/bd-address";
 
 // ── local shape assumption for package plans (adjust if IPackage differs) ──
 interface IPackagePlan {
@@ -80,6 +82,13 @@ const schema = z
         nomineeRelationship: z.string().optional(),
         nomineePhone: z.string().optional(),
 
+        // who the subscription actually covers
+        subscribeFor: z.enum(["SELF", "OTHER"]),
+        beneficiaryName: z.string().optional(),
+        beneficiaryPhone: z.string().optional(),
+        beneficiaryDateOfBirth: z.string().optional(),
+        beneficiaryRelationship: z.string().optional(),
+
         // common
         package: z.string().min(1, "Please select a package"),
         planType: z.nativeEnum(PlanType, { error: "Please select a plan" }),
@@ -99,6 +108,18 @@ const schema = z
             if (!data.district?.trim()) ctx.addIssue({ code: "custom", path: ["district"], message: "District is required" });
             if (!data.thana?.trim()) ctx.addIssue({ code: "custom", path: ["thana"], message: "Thana is required" });
         }
+
+        if (data.subscribeFor === "OTHER") {
+            if (!data.beneficiaryName?.trim()) {
+                ctx.addIssue({ code: "custom", path: ["beneficiaryName"], message: "Beneficiary name is required" });
+            }
+            if (!data.beneficiaryPhone?.trim() || data.beneficiaryPhone.length !== 11) {
+                ctx.addIssue({ code: "custom", path: ["beneficiaryPhone"], message: "Valid 11-digit phone required" });
+            }
+            if (!data.beneficiaryRelationship?.trim()) {
+                ctx.addIssue({ code: "custom", path: ["beneficiaryRelationship"], message: "Relationship is required" });
+            }
+        }
     });
 
 type FormValues = z.infer<typeof schema>;
@@ -109,6 +130,8 @@ const defaultValues: FormValues = {
     name: "", phone: "", email: "", nid: "", dateOfBirth: "", gender: undefined,
     division: "", district: "", thana: "", union: "",
     nomineeName: "", nomineeAge: "", nomineeRelationship: "", nomineePhone: "",
+    subscribeFor: "SELF",
+    beneficiaryName: "", beneficiaryPhone: "", beneficiaryDateOfBirth: "", beneficiaryRelationship: "",
     package: "",
     planType: undefined as any,
     price: 0,
@@ -124,6 +147,15 @@ export function CreateSubscriptionModal({ onSuccess }: { onSuccess?: () => void 
     const [selectedCustomer, setSelectedCustomer] = useState<IUser | null>(null);
     const [showResults, setShowResults] = useState(false);
 
+    // ── division / district / thana cascading selection (ids drive the Selects,
+    // the actual name strings are what get saved into the form / payload) ──
+    const [divisionId, setDivisionId] = useState("");
+    const [districtId, setDistrictId] = useState("");
+    const [thanaId, setThanaId] = useState("");
+
+    const availableDistricts = useMemo(() => getDistrictsByDivision(divisionId), [divisionId]);
+    const availableUpazilas = useMemo(() => getUpazilasByDistrict(districtId), [districtId]);
+
     useEffect(() => {
         const t = setTimeout(() => setDebouncedSearch(customerSearch), 350);
         return () => clearTimeout(t);
@@ -135,8 +167,6 @@ export function CreateSubscriptionModal({ onSuccess }: { onSuccess?: () => void 
     );
     const customerResults: IUser[] = customersData?.data ?? [];
 
-    //   const { data: packagesData } = useGetAllPackagesQuery({ limit: 100 } as any);
-    //   const packages: IPackageWithPlans[] = (packagesData?.data as any) ?? [];
     const { data: packagesData } = useGetAllPackagesQuery({ limit: 100 } as any);
 
     // handles both possible shapes: { data: [] } or { data: { data: [] } }
@@ -190,6 +220,9 @@ export function CreateSubscriptionModal({ onSuccess }: { onSuccess?: () => void 
         setSelectedCustomer(null);
         setCustomerSearch("");
         setDebouncedSearch("");
+        setDivisionId("");
+        setDistrictId("");
+        setThanaId("");
     };
 
     const handleModeSwitch = (m: "existing" | "new") => {
@@ -214,6 +247,36 @@ export function CreateSubscriptionModal({ onSuccess }: { onSuccess?: () => void 
         form.setValue("customerId", "");
     };
 
+    // ── cascading address handlers ──
+    // NOTE: shadcn's Select onValueChange can fire with `null` (e.g. on clear),
+    // so these accept `string | null` and normalize to "".
+    const handleDivisionChange = (id: string | null) => {
+        const value = id ?? "";
+        const division = divisions.find((d) => d.id === value);
+        setDivisionId(value);
+        setDistrictId("");
+        setThanaId("");
+        form.setValue("division", division?.name ?? "", { shouldValidate: true });
+        form.setValue("district", "", { shouldValidate: true });
+        form.setValue("thana", "", { shouldValidate: true });
+    };
+
+    const handleDistrictChange = (id: string | null) => {
+        const value = id ?? "";
+        const district = availableDistricts.find((d) => d.id === value);
+        setDistrictId(value);
+        setThanaId("");
+        form.setValue("district", district?.name ?? "", { shouldValidate: true });
+        form.setValue("thana", "", { shouldValidate: true });
+    };
+
+    const handleThanaChange = (id: string | null) => {
+        const value = id ?? "";
+        const upazila = availableUpazilas.find((u) => u.id === value);
+        setThanaId(value);
+        form.setValue("thana", upazila?.name ?? "", { shouldValidate: true });
+    };
+
     const onError = (errors: typeof form.formState.errors) => {
         const firstError = Object.values(errors)[0];
         toast.error((firstError as any)?.message || "Please check the form fields");
@@ -230,6 +293,15 @@ export function CreateSubscriptionModal({ onSuccess }: { onSuccess?: () => void 
             planType: values.planType,
             durationInMonths: selectedPlan.durationInMonths,
             price: values.price,
+            subscribeFor: values.subscribeFor,
+            ...(values.subscribeFor === "OTHER" && {
+                beneficiary: {
+                    name: values.beneficiaryName!.trim(),
+                    phone: values.beneficiaryPhone!.trim(),
+                    relationship: values.beneficiaryRelationship!.trim(),
+                    ...(values.beneficiaryDateOfBirth && { dateOfBirth: values.beneficiaryDateOfBirth }),
+                },
+            }),
         };
 
         const payload =
@@ -264,11 +336,10 @@ export function CreateSubscriptionModal({ onSuccess }: { onSuccess?: () => void 
 
         try {
             const res = await createSubscription(payload as any).unwrap();
+
+            console.log("subscription response ", res)
             toast.success("Subscription created successfully");
             const paymentUrl = res?.data?.data?.paymentUrl;
-            //   if (paymentUrl) {
-            //     window.open(paymentUrl, "_blank");
-            //   }
             console.log(paymentUrl)
             setOpen(false);
             resetAll();
@@ -415,19 +486,52 @@ export function CreateSubscriptionModal({ onSuccess }: { onSuccess?: () => void 
                             <Separator />
                             <p className="text-[10px] font-bold tracking-widest uppercase text-slate-400">Address</p>
                             <div className="grid grid-cols-2 gap-3">
+                                {/* Division */}
                                 <div className="space-y-1.5">
-                                    <Input placeholder="Division *" {...form.register("division")} />
+                                    <Select value={divisionId} onValueChange={handleDivisionChange}>
+                                        <SelectTrigger className="h-12 w-full text-base px-4">
+                                            <span>{divisionId ? divisions.find((d) => d.id === divisionId)?.name : "Division *"}</span>
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {divisions.map((d) => (
+                                                <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                     {form.formState.errors.division && <p className="text-xs text-red-500">{form.formState.errors.division.message}</p>}
                                 </div>
+
+                                {/* District — depends on Division */}
                                 <div className="space-y-1.5">
-                                    <Input placeholder="District *" {...form.register("district")} />
+                                    <Select value={districtId} onValueChange={handleDistrictChange} disabled={!divisionId}>
+                                        <SelectTrigger className="h-12 w-full text-base px-4">
+                                            <span>{districtId ? availableDistricts.find((d) => d.id === districtId)?.name : "District *"}</span>
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {availableDistricts.map((d) => (
+                                                <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                     {form.formState.errors.district && <p className="text-xs text-red-500">{form.formState.errors.district.message}</p>}
                                 </div>
+
+                                {/* Thana / Upazila — depends on District */}
                                 <div className="space-y-1.5">
-                                    <Input placeholder="Thana *" {...form.register("thana")} />
+                                    <Select value={thanaId} onValueChange={handleThanaChange} disabled={!districtId}>
+                                        <SelectTrigger className="h-12 w-full text-base px-4">
+                                            <span>{thanaId ? availableUpazilas.find((u) => u.id === thanaId)?.name : "Thana *"}</span>
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {availableUpazilas.map((u) => (
+                                                <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                     {form.formState.errors.thana && <p className="text-xs text-red-500">{form.formState.errors.thana.message}</p>}
                                 </div>
-                                <Input placeholder="Union" {...form.register("union")} />
+
+                                <Input placeholder="Union" className="h-12 w-full text-base px-4" {...form.register("union")} />
                             </div>
 
                             <Separator />
@@ -443,61 +547,98 @@ export function CreateSubscriptionModal({ onSuccess }: { onSuccess?: () => void 
 
                     <Separator />
 
+                    {/* ── Subscribing For (Self / Someone Else) ── */}
+                    <div className="space-y-3">
+                        <p className="text-[10px] font-bold tracking-widest uppercase text-slate-400">Subscribing For</p>
+                        <div className="grid grid-cols-2 gap-2">
+                            <button
+                                type="button"
+                                onClick={() => form.setValue("subscribeFor", "SELF", { shouldValidate: true })}
+                                className={`flex items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-colors ${form.watch("subscribeFor") === "SELF"
+                                        ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400"
+                                        : "border-slate-200 text-slate-500 dark:border-slate-700"
+                                    }`}
+                            >
+                                <User className="w-4 h-4" /> For Myself
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => form.setValue("subscribeFor", "OTHER", { shouldValidate: true })}
+                                className={`flex items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-colors ${form.watch("subscribeFor") === "OTHER"
+                                        ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400"
+                                        : "border-slate-200 text-slate-500 dark:border-slate-700"
+                                    }`}
+                            >
+                                <Users className="w-4 h-4" /> For Someone Else
+                            </button>
+                        </div>
+
+                        {form.watch("subscribeFor") === "OTHER" && (
+                            <div className="space-y-1.5">
+                                <p className="text-[10px] font-bold tracking-widest uppercase text-slate-400 pt-1">Beneficiary Info</p>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="space-y-1.5 col-span-2">
+                                        <Input placeholder="Beneficiary Name *" {...form.register("beneficiaryName")} />
+                                        {form.formState.errors.beneficiaryName && <p className="text-xs text-red-500">{form.formState.errors.beneficiaryName.message}</p>}
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Input placeholder="Beneficiary Phone *" {...form.register("beneficiaryPhone")} />
+                                        {form.formState.errors.beneficiaryPhone && <p className="text-xs text-red-500">{form.formState.errors.beneficiaryPhone.message}</p>}
+                                    </div>
+                                    <Input type="date" placeholder="Date of Birth" {...form.register("beneficiaryDateOfBirth")} />
+                                    <div className="space-y-1.5 col-span-2">
+                                        <Input placeholder="Relationship (e.g. Spouse, Son, Father) *" {...form.register("beneficiaryRelationship")} />
+                                        {form.formState.errors.beneficiaryRelationship && <p className="text-xs text-red-500">{form.formState.errors.beneficiaryRelationship.message}</p>}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <Separator />
+
                     {/* ── Package & Plan ── */}
                     <div className="space-y-4">
                         <p className="text-[10px] font-bold tracking-widest uppercase text-slate-400">Subscription</p>
 
-                        {/* <div className="space-y-1.5">
-              <Select
-                value={form.watch("package")}
-                onValueChange={(v) => form.setValue("package", v as any, { shouldValidate: true })}
-              >
-                <SelectTrigger><SelectValue placeholder="Select Package" /></SelectTrigger>
-                <SelectContent>
-                  {packages.map((pkg) => (
-                    <SelectItem key={pkg._id} value={pkg._id}>{pkg.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {form.formState.errors.package && <p className="text-xs text-red-500">{form.formState.errors.package.message}</p>}
-            </div> */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                                <Select
+                                    value={form.watch("package")}
+                                    onValueChange={(v) => form.setValue("package", v as any, { shouldValidate: true })}
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <span>{selectedPackage ? selectedPackage.name : "Select Package"}</span>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {packages.map((pkg) => (
+                                            <SelectItem key={pkg._id} value={pkg._id}>{pkg.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {form.formState.errors.package && <p className="text-xs text-red-500">{form.formState.errors.package.message}</p>}
+                            </div>
 
-                        <div className="space-y-1.5">
-                            <Select
-                                value={form.watch("package")}
-                                onValueChange={(v) => form.setValue("package", v as any, { shouldValidate: true })}
-                            >
-                                <SelectTrigger>
-                                    <span>{selectedPackage ? selectedPackage.name : "Select Package"}</span>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {packages.map((pkg) => (
-                                        <SelectItem key={pkg._id} value={pkg._id}>{pkg.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {form.formState.errors.package && <p className="text-xs text-red-500">{form.formState.errors.package.message}</p>}
-                        </div>
-
-                        <div className="space-y-1.5">
-                            <Select
-                                value={form.watch("planType") ?? ""}
-                                onValueChange={(v) => form.setValue("planType", v as PlanType, { shouldValidate: true })}
-                                disabled={!selectedPackageId}
-                            >
-                                <SelectTrigger><SelectValue placeholder="Select Plan" /></SelectTrigger>
-                                <SelectContent>
-                                    {availablePlans.map((plan) => {
-                                        const price = plan.discountPrice || plan.regularPrice;
-                                        return (
-                                            <SelectItem key={plan.type} value={plan.type}>
-                                                {PLAN_LABELS[plan.type]} — {formatCurrency(price)}
-                                            </SelectItem>
-                                        );
-                                    })}
-                                </SelectContent>
-                            </Select>
-                            {form.formState.errors.planType && <p className="text-xs text-red-500">{form.formState.errors.planType.message}</p>}
+                            <div className="space-y-1.5">
+                                <Select
+                                    value={form.watch("planType") ?? ""}
+                                    onValueChange={(v) => form.setValue("planType", v as PlanType, { shouldValidate: true })}
+                                    disabled={!selectedPackageId}
+                                >
+                                    <SelectTrigger className="w-full"><SelectValue placeholder="Select Plan" /></SelectTrigger>
+                                    <SelectContent>
+                                        {availablePlans.map((plan) => {
+                                            const price = plan.discountPrice || plan.regularPrice;
+                                            return (
+                                                <SelectItem key={plan.type} value={plan.type}>
+                                                    {PLAN_LABELS[plan.type]} — {formatCurrency(price)}
+                                                </SelectItem>
+                                            );
+                                        })}
+                                    </SelectContent>
+                                </Select>
+                                {form.formState.errors.planType && <p className="text-xs text-red-500">{form.formState.errors.planType.message}</p>}
+                            </div>
                         </div>
 
                         {selectedPlan && (

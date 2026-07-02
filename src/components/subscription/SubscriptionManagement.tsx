@@ -18,6 +18,8 @@ import {
   UserCog,
   Crown,
   XCircle,
+  User,
+  Users,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -58,6 +60,7 @@ import {
 import {
   useGetAllAgentsQuery,
   useGetAllAgentLeadersQuery,
+  useGetAllUsersQuery,
 } from "@/redux/features/user/user.api";
 
 import { PageHeader } from "../shared/PageHeader";
@@ -66,6 +69,7 @@ import {
   ISubscription,
   SubscriptionStatus,
   PaymentStatus,
+  SubscribeFor
 } from "@/types/subscription.types";
 import { IUser } from "@/types/user.types";
 import { UpdateSubscriptionModal } from "./UpdateSubscriptionModal";
@@ -283,6 +287,7 @@ export default function SubscriptionManagement() {
 
   // ── dropdown data ──
   const { data: agentsData } = useGetAllAgentsQuery({ limit: 200 });
+  const { data: usersData } = useGetAllUsersQuery({ limit: 200 });
   const { data: leadersData } = useGetAllAgentLeadersQuery({ limit: 100 });
 
   // ── derived data ──
@@ -358,8 +363,6 @@ export default function SubscriptionManagement() {
     </TableHead>
   );
 
-  // ─────────────────────────────────────────────────────────────────────────────
-
   return (
     <div className="space-y-6">
       <PageHeader
@@ -420,12 +423,17 @@ export default function SubscriptionManagement() {
         <Select
           value={filterMode === "by_leader" ? selectedLeaderId || "__leader__" : "__leader__"}
           onValueChange={(v) => {
-            if (v === "__leader__") return;
+            if (v === "__leader__") {
+              setFilterMode("all");    
+              setSelectedLeaderId("");
+              return;
+            }
             setFilterMode("by_leader");
             setSelectedLeaderId(v as any);
             setSelectedAgentId("");
           }}
         >
+
           <SelectTrigger className="w-52 h-9 text-sm">
             <span className="flex items-center gap-2">
               <Crown className="w-4 h-4 text-slate-400 shrink-0" />
@@ -445,28 +453,34 @@ export default function SubscriptionManagement() {
         </Select>
 
         {/* Agent filter */}
+   
         <Select
-          value={filterMode === "by_agent" ? selectedAgentId || "__agent__" : "__agent__"}
+          value={filterMode === "by_agent" ? selectedAgentId || "__creator__" : "__creator__"}
           onValueChange={(v) => {
-            if (v === "__agent__") return;
+            if (v === "__creator__") {
+              setFilterMode("all");   
+              setSelectedAgentId("");
+              return;
+            }
             setFilterMode("by_agent");
             setSelectedAgentId(v as any);
             setSelectedLeaderId("");
           }}
         >
+
           <SelectTrigger className="w-48 h-9 text-sm">
             <span className="flex items-center gap-2">
               <UserCog className="w-4 h-4 text-slate-400 shrink-0" />
               {filterMode === "by_agent" && selectedAgentId
-                ? (agentsData?.data ?? []).find((a: IUser) => String(a._id) === selectedAgentId)?.name || "Agent"
-                : "All Agents"}
+                ? (usersData?.data ?? []).find((a: IUser) => String(a._id) === selectedAgentId)?.name || "Agent"
+                : "All Creators"}
             </span>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="__agent__">All Agents</SelectItem>
-            {(agentsData?.data ?? []).map((agent: IUser) => (
-              <SelectItem key={String(agent._id)} value={String(agent._id)}>
-                {agent.name}
+            <SelectItem value="__creator__">All Creators</SelectItem>
+            {(usersData?.data ?? []).map((user: IUser) => (
+              <SelectItem key={String(user._id)} value={String(user._id)}>
+                {user.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -515,6 +529,7 @@ export default function SubscriptionManagement() {
             <TableHeader>
               <TableRow className="bg-slate-50 dark:bg-slate-800/50">
                 <TableHead className="whitespace-nowrap">Customer</TableHead>
+                <TableHead className="whitespace-nowrap">Subscribed For</TableHead>
                 <TableHead className="whitespace-nowrap">Package</TableHead>
                 <TableHead className="whitespace-nowrap">Plan</TableHead>
                 <SortableTh field="price" label="Price" />
@@ -522,7 +537,7 @@ export default function SubscriptionManagement() {
                 <SortableTh field="status" label="Status" />
                 <SortableTh field="startDate" label="Start" />
                 <SortableTh field="endDate" label="End" />
-                <TableHead className="whitespace-nowrap">Agent</TableHead>
+                <TableHead className="whitespace-nowrap">Created By</TableHead>
                 <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -563,16 +578,39 @@ export default function SubscriptionManagement() {
                           <div className="w-9 h-9 rounded-full bg-linear-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
                             {customerName?.charAt(0)?.toUpperCase() ?? "C"}
                           </div>
+
                           <div className="min-w-0">
                             <p className="font-medium text-slate-900 dark:text-white truncate max-w-32">{customerName}</p>
                             <p className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate max-w-32">{customerPhone ?? "—"}</p>
                           </div>
                         </div>
                       </TableCell>
+                      <TableCell>
+                        {sub.subscribeFor === SubscribeFor.OTHER && sub.beneficiary ? (
+                          <div className="flex flex-col gap-0.5 max-w-32">
+                            <span className="inline-flex items-center gap-1 text-xs font-medium text-violet-700 dark:text-violet-400">
+                              <Users className="w-3 h-3 shrink-0" />
+                              <span className="truncate">{sub.beneficiary.name}</span>
+                            </span>
+                            <span className="text-[11px] text-slate-400 truncate">
+                              {sub.beneficiary.relationship} · {sub.beneficiary.phone}
+                            </span>
+                          </div>
+                        ) : (
+                          <Badge
+                            variant="outline"
+                            className="font-normal border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+                          >
+                            <User className="w-3 h-3 mr-1" />
+                            Self
+                          </Badge>
+                        )}
+                      </TableCell>
                       <TableCell className="text-slate-600 dark:text-slate-400 text-sm max-w-40 truncate">{packageName}</TableCell>
                       <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
                         <Badge variant="outline" className="font-normal">{sub.planType}</Badge>
                       </TableCell>
+
                       <TableCell className="text-slate-700 dark:text-slate-300 font-medium text-sm whitespace-nowrap">{formatCurrency(sub.price)}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className={PAYMENT_STYLES[sub.paymentStatus] ?? PAYMENT_STYLES.UNPAID}>
