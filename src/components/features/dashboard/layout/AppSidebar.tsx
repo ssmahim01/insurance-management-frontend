@@ -27,14 +27,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { dashboardNavigation, NavItem } from "./DashboardLayout";
 import Image from "next/image";
 import { ChevronDown, LogOut, Settings, User } from "lucide-react";
+import { IUser } from "@/types/user.types";
 
 export interface AppSidebarProps {
-  user?: {
-    name: string;
-    email: string;
-    picture?: string;
-    role?: string;
-  };
+  user?: IUser | null;
   onLogout?: () => void;
 }
 
@@ -161,7 +157,7 @@ export function AppSidebar({ user, onLogout }: AppSidebarProps) {
                             {user.name}
                           </p>
                           <p className="truncate text-[11px] text-gray-400 dark:text-gray-500">
-                            {user.email}
+                            {user.phone}
                           </p>
                         </div>
                         <ChevronDown className="h-4 w-4 shrink-0 text-gray-400 ml-auto" />
@@ -181,11 +177,14 @@ export function AppSidebar({ user, onLogout }: AppSidebarProps) {
                       {user.name}
                     </p>
                     <p className="text-xs text-gray-400 dark:text-gray-500">
-                      {user.email}
+                      {user.phone}
                     </p>
                     {user.role && (
-                      <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-1">
-                        {user.role}
+                      <p className="mt-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                        {user.role
+                          .replace(/[_-]/g, " ")
+                          .toLowerCase()
+                          .replace(/\b\w/g, (char) => char.toUpperCase())}
                       </p>
                     )}
                   </div>

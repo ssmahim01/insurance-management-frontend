@@ -3,7 +3,7 @@
 import { ReactNode } from 'react';
 
 interface AuthCardProps {
-  title: string;
+  title?: string;
   subtitle?: string;
   children: ReactNode;
   footer?: ReactNode;

@@ -19,7 +19,7 @@ export function AuthLayout({
     <div className="min-h-screen flex">
       {/* Left Panel - Hidden on mobile, gradient background */}
       {showLeftPanel && (
-        <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-primary via-primary/90 to-primary/80 flex-col justify-between p-8 relative overflow-hidden">
+        <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-primary via-primary/90 to-primary/80 flex-col justify-between dark:from-slate-950 dark:via-slate-900 dark:to-gray-950 p-8 relative overflow-hidden">
           {/* Decorative circles */}
           <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full -mr-48 -mt-48" />
           <div className="absolute bottom-0 left-0 w-72 h-72 bg-emerald-500/5 rounded-full -ml-36 -mb-36" />

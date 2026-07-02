@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { MoreHorizontal, Eye, Users, Edit, Lock, LockOpen, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Eye, Trash2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,23 +14,23 @@ import { IsActive } from '@/types/user.types';
 
 interface AgentActionsProps {
   agentId?: string;
-  agentStatus: IsActive | undefined;
+  agentStatus?: IsActive | undefined;
   onViewDetails: () => void;
   onViewCustomers?: () => void;
   onEdit?: () => void;
-  onToggleBlock: () => void;
+  onToggleBlock?: () => void;
   onDelete: () => void;
 }
 
 export function AgentActions({
-  agentStatus,
+  // agentStatus,
   onViewDetails,
   // onViewCustomers,
   // onEdit,
-  onToggleBlock,
+  // onToggleBlock,
   onDelete,
 }: AgentActionsProps) {
-  const isBlocked = agentStatus === IsActive.BLOCKED;
+  // const isBlocked = agentStatus === IsActive.BLOCKED;
 
   return (
     <DropdownMenu>
@@ -57,7 +57,7 @@ export function AgentActions({
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem onClick={onToggleBlock} className="gap-2 cursor-pointer">
+        {/* <DropdownMenuItem onClick={onToggleBlock} className="gap-2 cursor-pointer">
           {isBlocked ? (
             <>
               <LockOpen className="w-4 h-4" />
@@ -69,7 +69,7 @@ export function AgentActions({
               Block Agent
             </>
           )}
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
 
         <DropdownMenuSeparator />
 

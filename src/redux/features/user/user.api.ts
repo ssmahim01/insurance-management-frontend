@@ -1,10 +1,13 @@
-
-import { GetUsersParams, IAllUsersResponse, ISingleUserResponse, IUserListResponse } from "@/types/user.types";
+import {
+  GetUsersParams,
+  IAllUsersResponse,
+  ISingleUserResponse,
+  IUserListResponse,
+} from "@/types/user.types";
 import { baseApi } from "../baseApi";
 
 export const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-
     // ── CREATE ──────────────────────────────────────────────────────────────
 
     // Super Admin / Agent / Agent Leader — create any user
@@ -51,7 +54,10 @@ export const userApi = baseApi.injectEndpoints({
     }),
 
     // Super Admin — get all soft-deleted staff users
-    getAllTrashUsers: builder.query<IUserListResponse, GetUsersParams | undefined>({
+    getAllTrashUsers: builder.query<
+      IUserListResponse,
+      GetUsersParams | undefined
+    >({
       query: (params) => ({
         url: "/user/all-trash-users",
         method: "GET",
@@ -63,7 +69,10 @@ export const userApi = baseApi.injectEndpoints({
     // ── ROLE-SPECIFIC LISTS (Admin / Super Admin) ────────────────────────────
 
     // Super Admin / Admin — get all agent leaders
-    getAllAgentLeaders: builder.query<IUserListResponse, GetUsersParams | undefined>({
+    getAllAgentLeaders: builder.query<
+      IUserListResponse,
+      GetUsersParams | undefined
+    >({
       query: (params) => ({
         url: "/user/all-agent-leaders",
         method: "GET",
@@ -83,7 +92,10 @@ export const userApi = baseApi.injectEndpoints({
     }),
 
     // Super Admin / Admin — get all customers
-    getAllCustomers: builder.query<IUserListResponse, GetUsersParams | undefined>({
+    getAllCustomers: builder.query<
+      IUserListResponse,
+      GetUsersParams | undefined
+    >({
       query: (params) => ({
         url: "/user/all-customers",
         method: "GET",
@@ -104,8 +116,23 @@ export const userApi = baseApi.injectEndpoints({
       providesTags: ["USERS"],
     }),
 
+    getMyTrashAgents: builder.query<
+      IUserListResponse,
+      GetUsersParams | undefined
+    >({
+      query: (params) => ({
+        url: "/user/my-trash-agents",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["USERS"],
+    }),
+
     // Agent Leader — get customers created by own agents
-    getMyLeaderCustomers: builder.query<IUserListResponse, GetUsersParams | undefined>({
+    getMyLeaderCustomers: builder.query<
+      IUserListResponse,
+      GetUsersParams | undefined
+    >({
       query: (params) => ({
         url: "/user/my-leader-customers",
         method: "GET",
@@ -130,7 +157,10 @@ export const userApi = baseApi.injectEndpoints({
     // ── AGENT — own resources ────────────────────────────────────────────────
 
     // Agent — get own customers
-    getMyCustomers: builder.query<IUserListResponse, GetUsersParams | undefined>({
+    getMyCustomers: builder.query<
+      IUserListResponse,
+      GetUsersParams | undefined
+    >({
       query: (params) => ({
         url: "/user/my-customers",
         method: "GET",
@@ -179,7 +209,10 @@ export const userApi = baseApi.injectEndpoints({
     }),
 
     // Any role — update user by id (Super Admin can update anything; others limited)
-    updateUser: builder.mutation<ISingleUserResponse, { id: string; data: FormData }>({
+    updateUser: builder.mutation<
+      ISingleUserResponse,
+      { id: string; data: FormData }
+    >({
       query: ({ id, data }) => ({
         url: `/user/${id}`,
         method: "PATCH",
@@ -192,6 +225,22 @@ export const userApi = baseApi.injectEndpoints({
     deleteUser: builder.mutation<ISingleUserResponse, string>({
       query: (id) => ({
         url: `/user/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["USERS"],
+    }),
+
+    restoreUser: builder.mutation<ISingleUserResponse, string>({
+      query: (id) => ({
+        url: `/user/restore/${id}`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["USERS"],
+    }),
+
+    permanentDeleteUser: builder.mutation<ISingleUserResponse, string>({
+      query: (id) => ({
+        url: `/user/permanent-delete/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["USERS"],
@@ -214,6 +263,7 @@ export const {
   useGetAllCustomersQuery,
   // Agent Leader — own resources
   useGetMyAgentsQuery,
+  useGetMyTrashAgentsQuery,
   useGetMyLeaderCustomersQuery,
   useGetAgentCustomersByLeaderQuery,
   // Agent — own resources
@@ -223,6 +273,8 @@ export const {
   useGetAgentCustomersQuery,
   // Single / Update / Delete
   useGetSingleUserQuery,
+  useRestoreUserMutation,
+  usePermanentDeleteUserMutation,
   useUpdateUserMutation,
   useDeleteUserMutation,
 } = userApi;
