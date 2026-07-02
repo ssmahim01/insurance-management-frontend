@@ -14,8 +14,7 @@ const benefits = [
   {
     icon: Shield,
     title: "Secure Insurance Management",
-    description:
-      "Advanced protection for policies, claims, and customer data.",
+    description: "Advanced protection for policies, claims, and customer data.",
   },
   {
     icon: TrendingUp,
@@ -60,61 +59,56 @@ export default function Login() {
   return (
     <AuthLayout
       showLeftPanel={true}
-     leftPanelContent={
-  <div className="flex h-full flex-col justify-between">
-    {/* Top Section */}
-    <div>
+      leftPanelContent={
+        <div className="flex h-full flex-col justify-between">
+          {/* Top Section */}
+          <div>
+            <div className="space-y-4">
+              <h1 className="text-4xl font-bold leading-tight text-white">
+                Protecting Lives.
+                <br />
+                Securing Futures.
+              </h1>
 
-      <div className="space-y-4">
-        <h1 className="text-4xl font-bold leading-tight text-white">
-          Protecting Lives.
-          <br />
-          Securing Futures.
-        </h1>
-
-        <p className="max-w-md text-base text-white/80">
-          Shurokkha provides a complete digital insurance ecosystem
-          for policy management, claims processing, customer support,
-          and business growth.
-        </p>
-      </div>
-
-      {/* Feature Cards */}
-      <div className="mt-4 space-y-4">
-        {benefits.map((benefit, index) => {
-          const Icon = benefit.icon;
-
-          return (
-            <div
-              key={index}
-              className="group flex items-start gap-4 rounded-2xl border border-white/10 bg-emerald-500/10 p-4 backdrop-blur-sm transition-all hover:bg-emerald-700/15"
-            >
-              <div className="rounded-xl bg-emerald-500/60 p-3">
-                <Icon className="h-5 w-5 text-white" />
-              </div>
-
-              <div>
-                <h4 className="font-semibold text-white">
-                  {benefit.title}
-                </h4>
-
-                <p className="text-sm text-white/70">
-                  {benefit.description}
-                </p>
-              </div>
+              <p className="max-w-md text-base text-white/80">
+                Shurokkha provides a complete digital insurance ecosystem for
+                policy management, claims processing, customer support, and
+                business growth.
+              </p>
             </div>
-          );
-        })}
-      </div>
-    </div>
-  </div>
-}
+
+            {/* Feature Cards */}
+            <div className="mt-4 space-y-4">
+              {benefits.map((benefit, index) => {
+                const Icon = benefit.icon;
+
+                return (
+                  <div
+                    key={index}
+                    className="group flex items-start gap-4 rounded-2xl border border-white/10 bg-emerald-500/10 p-4 backdrop-blur-sm transition-all hover:bg-emerald-700/15"
+                  >
+                    <div className="rounded-xl bg-emerald-500/60 p-3">
+                      <Icon className="h-5 w-5 text-white" />
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-white">
+                        {benefit.title}
+                      </h4>
+
+                      <p className="text-sm text-white/70">
+                        {benefit.description}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      }
     >
-      <AuthCard
-        title="Welcome back"
-        subtitle="Sign in to your account to continue"
-       
-      >
+      <AuthCard>
         <LoginForm onSubmit={handleLogin} isLoading={isLoading} />
       </AuthCard>
     </AuthLayout>

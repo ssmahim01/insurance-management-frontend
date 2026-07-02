@@ -24,15 +24,9 @@ export const metadata: Metadata = {
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const mockUser = {
-    name: 'Admin User',
-    email: 'admin@shurokkha.com',
-    role: 'Administrator',
-  };
 
   return (
     <DashboardLayoutWrapper
-      user={mockUser}
       defaultOpen={true}
     >
       <ReduxProvider>

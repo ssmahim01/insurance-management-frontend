@@ -21,9 +21,7 @@ import {
   Package,
   Building2,
   Handshake,
-  BarChart3,
   Settings,
-
   User,
   Sun,
   Moon,
@@ -32,10 +30,11 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/lib/providers/ThemeProvider";
-import { AppSidebar, AppSidebarProps } from "./AppSidebar";
+import { AppSidebar } from "./AppSidebar";
 import { useUser } from "@/context/UserContext";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useGetMeQuery } from "@/redux/features/user/user.api";
 
 export interface NavItem {
   id: string;
@@ -58,13 +57,13 @@ export const dashboardNavigation: NavGroup[] = [
         label: "Dashboard",
         href: "/admin/dashboard",
         icon: LayoutDashboard,
-      }
+      },
     ],
   },
   {
     label: "Management",
     items: [
-                  {
+      {
         id: "agentLeader",
         label: "Agent Leaders",
         href: "/admin/dashboard/agent-leader",
@@ -121,10 +120,6 @@ export const dashboardNavigation: NavGroup[] = [
   },
 ];
 
-
-
-
-
 interface DashboardHeaderProps {
   pageTitle?: string;
 }
@@ -179,7 +174,6 @@ export function DashboardHeader({ pageTitle }: DashboardHeaderProps) {
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
-  user?: AppSidebarProps["user"];
   onLogout?: () => void;
   pageTitle?: string;
   defaultOpen?: boolean;
@@ -187,25 +181,24 @@ interface DashboardLayoutProps {
 
 export function DashboardLayoutWrapper({
   children,
-  user,
   pageTitle,
   defaultOpen = true,
 }: DashboardLayoutProps) {
-  const router = useRouter()
-  
-  const {logout} = useUser();
+  const router = useRouter();
+  const { data: user } = useGetMeQuery(undefined);
 
-    const handleLogout = async () => {
+  const { logout } = useUser();
+
+  const handleLogout = async () => {
     await logout();
-    toast.success("Logout successful")
-    router.push("/login")
-
-  }
+    toast.success("Logout successful");
+    router.push("/login");
+  };
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
       <TooltipProvider>
-        <AppSidebar user={user} onLogout={handleLogout} />
+        <AppSidebar user={user?.data} onLogout={handleLogout} />
         <SidebarInset className="flex flex-col min-h-screen">
           <DashboardHeader pageTitle={pageTitle} />
 

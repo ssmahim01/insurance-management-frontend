@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React from "react";
@@ -17,7 +16,7 @@ import { IAgentFilters } from "@/types/agent-leader";
 
 interface AgentFiltersProps {
   filters: IAgentFilters;
-  onFiltersChange: (filters: any) => void;
+  onFiltersChange: (filters: IAgentFilters) => void;
   onReset: () => void;
 }
 

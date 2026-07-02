@@ -25,6 +25,20 @@ export interface IAgentFilters {
   endDate?: string;
 }
 
+export interface ITrashFilters {
+  searchTerm: string;
+  sortBy: "newest" | "oldest" | "name-asc" | "name-desc";
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface ITrashStats {
+  totalTrash: number;
+  deletedToday: number;
+  deletedThisMonth: number;
+  mostRecent: IUser | null;
+}
+
 export interface IAgentTableRow {
   agent: IAgent;
   onViewDetails: (agentId: string) => void;

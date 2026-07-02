@@ -81,7 +81,7 @@ export function PageHeader({
         {action && (
           <Link
             href={action.href}
-            className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 gap-2 hover:scale-105 transition-transform duration-200"
+            className="inline-flex hover:cursor-pointer items-center justify-center rounded-md bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 gap-2 hover:scale-105 transition-transform duration-200"
           >
             {action.label}
           </Link>
@@ -89,7 +89,7 @@ export function PageHeader({
         {actionButton && (
           <Button
             onClick={actionButton.onClick}
-            className="gap-2 hover:scale-105 transition-transform duration-200"
+            className="gap-2 hover:cursor-pointer hover:scale-105 transition-transform duration-200"
           >
             {actionButton.icon && <actionButton.icon className="w-4 h-4" />}
             {actionButton.label}

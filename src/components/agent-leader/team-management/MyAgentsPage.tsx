@@ -1,9 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import React, { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useGetMyAgentsQuery } from "@/redux/features/user/user.api";
+import {
+  useDeleteUserMutation,
+  useGetMyAgentsQuery,
+} from "@/redux/features/user/user.api";
 import { toast } from "sonner";
 import { IAgentFilters } from "@/types/agent-leader";
 
@@ -14,7 +18,8 @@ import { AgentTable } from "./AgentTable";
 import { AgentEmptyState } from "./AgentEmptyState";
 import { AgentPagination } from "./AgentPagination";
 import { DeleteAgentDialog } from "./DeleteAgentDialog";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function MyAgentsPage() {
   const router = useRouter();
@@ -54,12 +59,14 @@ export function MyAgentsPage() {
   };
 
   const { data, isLoading, error } = useGetMyAgentsQuery(queryParams);
+  const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
 
-  const hasFilters =
+  const hasFilters = Boolean(
     filters.searchTerm ||
     (filters.status && filters.status !== "all") ||
     filters.startDate ||
-    filters.endDate;
+    filters.endDate,
+  );
 
   const handleFiltersChange = useCallback((newFilters: IAgentFilters) => {
     setFilters(newFilters);
@@ -82,9 +89,12 @@ export function MyAgentsPage() {
     [router],
   );
 
-  const handleViewDetails = useCallback((agentId: string) => {
-    toast.info(`View details for agent: ${agentId}`);
-  }, []);
+  const handleViewDetails = useCallback(
+    (agentId: string) => {
+      router.push(`/agent-leader/my-agents/${agentId}`);
+    },
+    [router],
+  );
 
   const handleEdit = useCallback((agentId: string) => {
     toast.info(`Edit agent: ${agentId}`);
@@ -107,11 +117,17 @@ export function MyAgentsPage() {
 
   const handleDeleteConfirm = async () => {
     try {
-      // TODO: Implement delete mutation
-      toast.success("Agent deleted successfully");
-      setDeleteDialog({ isOpen: false, agentId: "", agentName: "" });
-    } catch (err) {
-      toast.error("Failed to delete agent");
+      await deleteUser(deleteDialog.agentId).unwrap();
+
+      toast.success("Agent moved to trash successfully.");
+
+      setDeleteDialog({
+        isOpen: false,
+        agentId: "",
+        agentName: "",
+      });
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to move agent to trash.");
     }
   };
 
@@ -122,7 +138,7 @@ export function MyAgentsPage() {
         title="My Agents"
         description="Manage your assigned insurance agents, monitor their activity, customer growth and performance."
         breadcrumbs={[
-          { label: "Dashboard", href: "/dashboard" },
+          { label: "Dashboard", href: "/agent-leader" },
           { label: "Team Management" },
         ]}
         actionButton={{
@@ -132,17 +148,26 @@ export function MyAgentsPage() {
         }}
       />
 
+      <div className="mb-6 flex flex-wrap items-center justify-end gap-3">
+        <Button
+          variant="outline"
+          onClick={() => router.push("/agent-leader/my-agents/trash")}
+          className="group hover:cursor-pointer border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all duration-300"
+        >
+          <Trash2 className="mr-2 h-4 w-4 group-hover:rotate-6 transition-transform duration-300" />
+          Trash
+        </Button>
+      </div>
+
       {/* Stats Cards */}
 
       <AgentStatsCards stats={data?.stats} isLoading={isLoading} />
 
-      <div>
-        <AgentFilters
-          filters={filters}
-          onFiltersChange={handleFiltersChange}
-          onReset={handleResetFilters}
-        ></AgentFilters>
-      </div>
+      <AgentFilters
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        onReset={handleResetFilters}
+      ></AgentFilters>
       {/* Table or Empty State */}
       {data?.data && data.data.length > 0 ? (
         <>
@@ -190,7 +215,7 @@ export function MyAgentsPage() {
         onCancel={() =>
           setDeleteDialog({ isOpen: false, agentId: "", agentName: "" })
         }
-        isLoading={false}
+        isLoading={isDeleting}
       />
     </div>
   );

@@ -192,7 +192,7 @@ export function AgentTable({
                   onToggleBlock={() =>
                     onToggleBlock(
                       agent._id as string,
-                      agent?.isActive ?? IsActive.BLOCKED,
+                      agent.isActive ?? IsActive.BLOCKED,
                     )
                   }
                   onDelete={() => onDelete(agent._id as string)}
