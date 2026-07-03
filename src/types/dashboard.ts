@@ -1,3 +1,4 @@
+import { ElementType } from "react";
 export interface SidebarItem {
   id: string;
   label: string;
@@ -6,9 +7,17 @@ export interface SidebarItem {
   children?: SidebarItem[];
 }
 
+
+export interface NavItem {
+  id: string;
+  label: string;
+  href: string;
+  icon: ElementType;
+}
+
 export interface NavGroup {
   label: string;
-  items: SidebarItem[];
+  items: NavItem[];
 }
 
 export interface DashboardMetadata {

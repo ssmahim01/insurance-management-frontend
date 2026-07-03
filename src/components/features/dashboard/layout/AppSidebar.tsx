@@ -24,10 +24,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { dashboardNavigation, NavItem } from "./DashboardLayout";
+import { NavItem } from "./DashboardLayout";
 import Image from "next/image";
 import { ChevronDown, LogOut, Settings, User } from "lucide-react";
 import { IUser } from "@/types/user.types";
+import { getDashboardNavigation } from "./navigation";
 
 export interface AppSidebarProps {
   user?: IUser | null;
@@ -77,6 +78,7 @@ function NavItemRow({ item }: { item: NavItem }) {
 export function AppSidebar({ user, onLogout }: AppSidebarProps) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const navigation = getDashboardNavigation(user?.role);
 
   return (
     <Sidebar
@@ -100,7 +102,7 @@ export function AppSidebar({ user, onLogout }: AppSidebarProps) {
 
       {/* ── Navigation ── */}
       <SidebarContent className="py-3">
-        {dashboardNavigation.map((group) => (
+        {navigation.map((group) => (
           <SidebarGroup key={group.label} className="px-2 py-1">
             <SidebarGroupLabel
               className={cn(

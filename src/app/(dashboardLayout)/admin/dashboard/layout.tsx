@@ -26,12 +26,12 @@ export const metadata: Metadata = {
 export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
+    <ReduxProvider>
     <DashboardLayoutWrapper
       defaultOpen={true}
     >
-      <ReduxProvider>
         {children}
-      </ReduxProvider>
     </DashboardLayoutWrapper>
+      </ReduxProvider>
   );
 }
