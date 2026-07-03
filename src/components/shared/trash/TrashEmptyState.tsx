@@ -5,23 +5,31 @@ import { Button } from "@/components/ui/button";
 
 interface TrashEmptyStateProps {
   hasFilters: boolean;
+  title?: string;
+  description?: string;
   onClearFilters?: () => void;
   onGoBack: () => void;
 }
 
-export function TrashEmptyState({ hasFilters, onClearFilters, onGoBack }: TrashEmptyStateProps) {
+export function TrashEmptyState({
+  hasFilters,
+  onClearFilters,
+  title,
+  description,
+  onGoBack,
+}: TrashEmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/50 py-16 px-6 text-center">
       <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center mb-4">
         <Trash2 className="h-6 w-6 text-primary" />
       </div>
-      <h3 className="text-base font-semibold text-foreground mb-1">
-        No deleted agents found.
-      </h3>
+      <h3>{title ?? "No deleted items found."}</h3>
+
       <p className="text-sm text-muted-foreground mb-6 max-w-sm">
         {hasFilters
           ? "Try adjusting or clearing your filters to see more results."
-          : "Agents you delete will show up here until they're restored or permanently removed."}
+          : (description ??
+            "Deleted items will appear here until they are restored or permanently removed.")}
       </p>
       {hasFilters && onClearFilters ? (
         <Button

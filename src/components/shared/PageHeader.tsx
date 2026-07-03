@@ -109,7 +109,7 @@ export function PageHeader({
           {action}
 
           {actionButton && (
-            <Button onClick={actionButton.onClick}>
+            <Button onClick={actionButton.onClick} className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 hover:cursor-pointer hover:scale-105 transition-transform duration-200">
               {actionButton.icon && <actionButton.icon className="w-4 h-4" />}
               {actionButton.label}
             </Button>

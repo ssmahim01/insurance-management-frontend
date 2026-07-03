@@ -12,10 +12,12 @@ import { baseApi } from "../baseApi";
 
 export const subscriptionApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-
     // ── CREATE ──────────────────────────────────────────────────────────────
 
-    createSubscription: builder.mutation<ICreateSubscriptionResponse, ICreateSubscriptionPayload>({
+    createSubscription: builder.mutation<
+      ICreateSubscriptionResponse,
+      ICreateSubscriptionPayload
+    >({
       query: (payload) => ({
         url: "/subscription/create-subscription",
         method: "POST",
@@ -26,7 +28,10 @@ export const subscriptionApi = baseApi.injectEndpoints({
 
     // ── GET ALL (admin/super-admin) ────────────────────────────────────────
 
-    getAllSubscriptions: builder.query<ISubscriptionListResponse, GetSubscriptionsParams | undefined>({
+    getAllSubscriptions: builder.query<
+      ISubscriptionListResponse,
+      GetSubscriptionsParams | undefined
+    >({
       query: (params) => ({
         url: "/subscription/all-subscriptions",
         method: "GET",
@@ -37,7 +42,10 @@ export const subscriptionApi = baseApi.injectEndpoints({
 
     // ── GET ALL TRASH ─────────────────────────────────────────────────────────
 
-    getAllTrashSubscriptions: builder.query<ISubscriptionListResponse, GetSubscriptionsParams | undefined>({
+    getAllTrashSubscriptions: builder.query<
+      ISubscriptionListResponse,
+      GetSubscriptionsParams | undefined
+    >({
       query: (params) => ({
         url: "/subscription/all-trash-subscriptions",
         method: "GET",
@@ -62,7 +70,10 @@ export const subscriptionApi = baseApi.injectEndpoints({
 
     // ── AGENT LEADER'S OWN TEAM SUBSCRIPTIONS ─────────────────────────────────
 
-    getAgentLeaderSubscriptions: builder.query<ISubscriptionListResponse, GetSubscriptionsParams | undefined>({
+    getAgentLeaderSubscriptions: builder.query<
+      ISubscriptionListResponse,
+      GetSubscriptionsParams | undefined
+    >({
       query: (params) => ({
         url: "/subscription/leader-subscriptions/me",
         method: "GET",
@@ -87,7 +98,10 @@ export const subscriptionApi = baseApi.injectEndpoints({
 
     // ── MY SUBSCRIPTIONS (any authenticated role) ─────────────────────────────
 
-    getMySubscriptions: builder.query<ISubscriptionListResponse, GetSubscriptionsParams | undefined>({
+    getMySubscriptions: builder.query<
+      ISubscriptionListResponse,
+      GetSubscriptionsParams | undefined
+    >({
       query: (params) => ({
         url: "/subscription/my-subscriptions",
         method: "GET",
@@ -108,7 +122,10 @@ export const subscriptionApi = baseApi.injectEndpoints({
 
     // ── UPDATE ─────────────────────────────────────────────────────────────
 
-    updateSubscription: builder.mutation<ISingleSubscriptionResponse, { id: string; data: IUpdateSubscriptionPayload }>({
+    updateSubscription: builder.mutation<
+      ISingleSubscriptionResponse,
+      { id: string; data: IUpdateSubscriptionPayload }
+    >({
       query: ({ id, data }) => ({
         url: `/subscription/${id}`,
         method: "PATCH",
@@ -117,9 +134,20 @@ export const subscriptionApi = baseApi.injectEndpoints({
       invalidatesTags: ["SUBSCRIPTIONS"],
     }),
 
+    restoreSubscription: builder.mutation<ISingleSubscriptionResponse, string>({
+      query: (id) => ({
+        url: `/subscription/restore/${id}`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["SUBSCRIPTIONS"],
+    }),
+
     // ── SOFT DELETE (move to trash) ────────────────────────────────────────
 
-    softDeleteSubscription: builder.mutation<ISingleSubscriptionResponse, string>({
+    softDeleteSubscription: builder.mutation<
+      ISingleSubscriptionResponse,
+      string
+    >({
       query: (id) => ({
         url: `/subscription/soft-delete/${id}`,
         method: "PATCH",
@@ -127,6 +155,13 @@ export const subscriptionApi = baseApi.injectEndpoints({
       invalidatesTags: ["SUBSCRIPTIONS"],
     }),
 
+    permanentDeleteSubscription: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/subscription/permanent-delete/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["SUBSCRIPTIONS"],
+    }),
   }),
 });
 
@@ -141,4 +176,6 @@ export const {
   useGetSingleSubscriptionQuery,
   useUpdateSubscriptionMutation,
   useSoftDeleteSubscriptionMutation,
+  useRestoreSubscriptionMutation,
+  usePermanentDeleteSubscriptionMutation,
 } = subscriptionApi;

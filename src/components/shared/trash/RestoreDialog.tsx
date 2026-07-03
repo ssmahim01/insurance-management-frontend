@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface RestoreDialogProps {
+  entityName?: string;
   isOpen: boolean;
   itemName: string;
   onConfirm: () => void;
@@ -20,17 +21,25 @@ interface RestoreDialogProps {
   isLoading: boolean;
 }
 
-export function RestoreDialog({ isOpen, itemName, onConfirm, onCancel, isLoading }: RestoreDialogProps) {
+export function RestoreDialog({
+  isOpen,
+  itemName,
+  entityName,
+  onConfirm,
+  onCancel,
+  isLoading,
+}: RestoreDialogProps) {
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <RotateCcw className="h-5 w-5 text-primary" />
-            Restore Agent?
+            Restore {entityName}?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            This will restore <span className="font-medium text-foreground">{itemName}</span> and
+            This will restore{" "}
+            <span className="font-medium text-foreground">{itemName}</span> and
             make them available again.
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -42,7 +51,7 @@ export function RestoreDialog({ isOpen, itemName, onConfirm, onCancel, isLoading
               onConfirm();
             }}
             disabled={isLoading}
-            className="gap-2"
+            className="gap-2 bg-indigo-700 hover:bg-indigo-800 text-white hover:cursor-pointer hover:scale-105 transition-transform duration-200"
           >
             {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
             Restore

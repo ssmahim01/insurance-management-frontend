@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
@@ -6,20 +5,22 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import {
-  useGetMyTrashAgentsQuery,
-  useRestoreUserMutation,
-  usePermanentDeleteUserMutation,
-} from "@/redux/features/user/user.api";
+  useGetAllTrashSubscriptionsQuery,
+  useRestoreSubscriptionMutation,
+  usePermanentDeleteSubscriptionMutation,
+} from "@/redux/features/subscription/subscription.api";
 import { ITrashFilters } from "@/types/agent-leader";
+import { ISubscription } from "@/types/subscription.types";
+import { getNestedName } from "@/lib/utils/format-subscription";
 
 import { PageHeader } from "@/components/shared/PageHeader";
-import { TrashStatsCards } from "@/components/shared/trash/TrashStatsCards";
+import { SubscriptionStatsCards } from "@/components/agent-leader/customer-subscriptions/SubscriptionStatsCards";
 import { TrashFilters } from "@/components/shared/trash/TrashFilters";
-import { TrashTable } from "./TrashTable";
 import { TrashPagination } from "@/components/shared/trash/TrashPagination";
 import { TrashEmptyState } from "@/components/shared/trash/TrashEmptyState";
 import { RestoreDialog } from "@/components/shared/trash/RestoreDialog";
 import { PermanentDeleteDialog } from "@/components/shared/trash/PermanentDeleteDialog";
+import { SubscriptionTrashTable } from "./SubscriptionTrashTable";
 
 interface DialogState {
   isOpen: boolean;
@@ -29,7 +30,7 @@ interface DialogState {
 
 const EMPTY_DIALOG: DialogState = { isOpen: false, itemId: "", itemName: "" };
 
-export function TrashAgents() {
+export function SubscriptionTrashManagement() {
   const router = useRouter();
   const [page, setPage] = useState<number>(1);
   const [limit] = useState<number>(10);
@@ -48,9 +49,9 @@ export function TrashAgents() {
       searchTerm: filters.searchTerm || undefined,
       sort:
         filters.sortBy === "newest"
-          ? "-updatedAt"
+          ? "-createdAt"
           : filters.sortBy === "oldest"
-            ? "updatedAt"
+            ? "createdAt"
             : filters.sortBy === "name-asc"
               ? "name"
               : "-name",
@@ -60,10 +61,16 @@ export function TrashAgents() {
     [page, limit, filters],
   );
 
-  const { data, isLoading, error: errorData } = useGetMyTrashAgentsQuery(queryParams);
-  const [restoreUser, { isLoading: isRestoring }] = useRestoreUserMutation();
-  const [permanentDeleteUser, { isLoading: isDeleting }] =
-    usePermanentDeleteUserMutation();
+  const { data, isLoading, isError } =
+    useGetAllTrashSubscriptionsQuery(queryParams);
+  const [restoreSubscription, { isLoading: isRestoring }] =
+    useRestoreSubscriptionMutation();
+  const [permanentDeleteSubscription, { isLoading: isDeleting }] =
+    usePermanentDeleteSubscriptionMutation();
+
+  const subscriptions: ISubscription[] = data?.data?.data ?? [];
+  const stats = data?.data?.stats;
+  const meta = data?.data?.meta;
 
   const hasFilters = Boolean(
     filters.searchTerm || filters.startDate || filters.endDate,
@@ -89,51 +96,50 @@ export function TrashAgents() {
 
   const handleRestoreConfirm = useCallback(async () => {
     try {
-      await restoreUser(restoreDialog.itemId).unwrap();
-      toast.success("Agent restored successfully.");
+      await restoreSubscription(restoreDialog.itemId).unwrap();
+      toast.success("Subscription restored successfully.");
       setRestoreDialog(EMPTY_DIALOG);
     } catch (err) {
       const message =
         err && typeof err === "object" && "data" in err
           ? ((err as { data?: { message?: string } }).data?.message ??
-            "Failed to restore agent.")
-          : "Failed to restore agent.";
+            "Failed to restore subscription.")
+          : "Failed to restore subscription.";
       toast.error(message);
     }
-  }, [restoreUser, restoreDialog.itemId]);
+  }, [restoreSubscription, restoreDialog.itemId]);
 
   const handleDeleteConfirm = useCallback(async () => {
     try {
-      await permanentDeleteUser(deleteDialog.itemId).unwrap();
-      toast.success("Agent permanently deleted.");
+      await permanentDeleteSubscription(deleteDialog.itemId).unwrap();
+      toast.success("Subscription permanently deleted.");
       setDeleteDialog(EMPTY_DIALOG);
     } catch (err) {
       const message =
         err && typeof err === "object" && "data" in err
           ? ((err as { data?: { message?: string } }).data?.message ??
-            "Failed to delete agent.")
-          : "Failed to delete agent.";
+            "Failed to delete subscription.")
+          : "Failed to delete subscription.";
       toast.error(message);
     }
-  }, [permanentDeleteUser, deleteDialog.itemId]);
+  }, [permanentDeleteSubscription, deleteDialog.itemId]);
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
-        title="Trash"
-        description="Restore or permanently remove deleted agents."
+        title="Subscription Trash"
+        description="Restore or permanently remove deleted subscriptions."
         breadcrumbs={[
-          { label: "Dashboard", href: "/agent-leader" },
-          { label: "My Agents", href: "/agent-leader/my-agents" },
+          { label: "Dashboard", href: "/admin/dashboard" },
+          {
+            label: "Subscription Management",
+            href: "/admin/dashboard/subscriptions",
+          },
           { label: "Trash" },
         ]}
       />
 
-      <TrashStatsCards
-        items={data?.data}
-        totalCount={data?.meta.total}
-        isLoading={isLoading}
-      />
+      <SubscriptionStatsCards stats={stats} isLoading={isLoading} />
 
       <TrashFilters
         filters={filters}
@@ -141,49 +147,45 @@ export function TrashAgents() {
         onReset={handleResetFilters}
       />
 
-      {data?.data && data.data.length > 0 ? (
+      {isError ? (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive">
+          <p>Failed to load trash. Please try again.</p>
+        </div>
+      ) : !isLoading && subscriptions.length === 0 ? (
+        <TrashEmptyState
+          hasFilters={hasFilters}
+          title="No deleted subscriptions found"
+          onClearFilters={hasFilters ? handleResetFilters : undefined}
+          onGoBack={() => router.push("/admin/dashboard/subscriptions")}
+        />
+      ) : (
         <>
-          <TrashTable
-            items={data.data}
+          <SubscriptionTrashTable
+            items={subscriptions}
             isLoading={isLoading}
             onRestore={(id) => {
-              const item = data.data.find((a) => a._id === id);
-              if (item) handleRestoreClick(id, item.name);
+              const item = subscriptions.find((s) => s._id === id);
+              if (item) handleRestoreClick(id, getNestedName(item.customer));
             }}
             onPermanentDelete={(id) => {
-              const item = data.data.find((a) => a._id === id);
-              if (item) handleDeleteClick(id, item.name);
+              const item = subscriptions.find((s) => s._id === id);
+              if (item) handleDeleteClick(id, getNestedName(item.customer));
             }}
           />
           <TrashPagination
-            meta={data.meta}
+            meta={meta}
             currentPage={page}
             onPageChange={setPage}
             isLoading={isLoading}
           />
         </>
-      ) : (
-        !isLoading && (
-          <TrashEmptyState
-            hasFilters={hasFilters}
-            title="No deleted agents found"
-            onClearFilters={hasFilters ? handleResetFilters : undefined}
-            onGoBack={() => router.push("/agent-leader/my-agents")}
-          />
-        )
       )}
-
-      {/* {errorData && (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive">
-          <p>Failed to load trash. Please try again.</p>
-        </div>
-      )} */}
 
       <RestoreDialog
         isOpen={restoreDialog.isOpen}
         itemName={restoreDialog.itemName}
+        entityName="Subscription"
         onConfirm={handleRestoreConfirm}
-        entityName="Agent"
         onCancel={() => setRestoreDialog(EMPTY_DIALOG)}
         isLoading={isRestoring}
       />

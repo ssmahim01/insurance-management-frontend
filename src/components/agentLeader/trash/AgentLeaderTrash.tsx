@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
@@ -6,20 +5,21 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import {
-  useGetMyTrashAgentsQuery,
+  useGetAllTrashUsersQuery,
   useRestoreUserMutation,
   usePermanentDeleteUserMutation,
 } from "@/redux/features/user/user.api";
 import { ITrashFilters } from "@/types/agent-leader";
+import { IUser, Role } from "@/types/user.types";
 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { TrashStatsCards } from "@/components/shared/trash/TrashStatsCards";
 import { TrashFilters } from "@/components/shared/trash/TrashFilters";
-import { TrashTable } from "./TrashTable";
 import { TrashPagination } from "@/components/shared/trash/TrashPagination";
 import { TrashEmptyState } from "@/components/shared/trash/TrashEmptyState";
 import { RestoreDialog } from "@/components/shared/trash/RestoreDialog";
 import { PermanentDeleteDialog } from "@/components/shared/trash/PermanentDeleteDialog";
+import { AgentLeaderTrashTable } from "./AgentLeaderTrashTable";
 
 interface DialogState {
   isOpen: boolean;
@@ -29,7 +29,7 @@ interface DialogState {
 
 const EMPTY_DIALOG: DialogState = { isOpen: false, itemId: "", itemName: "" };
 
-export function TrashAgents() {
+export function AgentLeaderTrash() {
   const router = useRouter();
   const [page, setPage] = useState<number>(1);
   const [limit] = useState<number>(10);
@@ -45,6 +45,7 @@ export function TrashAgents() {
     () => ({
       page,
       limit,
+      role: Role.AGENT_LEADER,
       searchTerm: filters.searchTerm || undefined,
       sort:
         filters.sortBy === "newest"
@@ -60,10 +61,15 @@ export function TrashAgents() {
     [page, limit, filters],
   );
 
-  const { data, isLoading, error: errorData } = useGetMyTrashAgentsQuery(queryParams);
+  const { data, isLoading, isError } = useGetAllTrashUsersQuery(queryParams);
   const [restoreUser, { isLoading: isRestoring }] = useRestoreUserMutation();
   const [permanentDeleteUser, { isLoading: isDeleting }] =
     usePermanentDeleteUserMutation();
+
+  const leaders: IUser[] = useMemo(
+    () => (data?.data ?? []).filter((u) => u.role === Role.AGENT_LEADER),
+    [data?.data],
+  );
 
   const hasFilters = Boolean(
     filters.searchTerm || filters.startDate || filters.endDate,
@@ -90,14 +96,14 @@ export function TrashAgents() {
   const handleRestoreConfirm = useCallback(async () => {
     try {
       await restoreUser(restoreDialog.itemId).unwrap();
-      toast.success("Agent restored successfully.");
+      toast.success("Agent Leader restored successfully.");
       setRestoreDialog(EMPTY_DIALOG);
     } catch (err) {
       const message =
         err && typeof err === "object" && "data" in err
           ? ((err as { data?: { message?: string } }).data?.message ??
-            "Failed to restore agent.")
-          : "Failed to restore agent.";
+            "Failed to restore agent leader.")
+          : "Failed to restore agent leader.";
       toast.error(message);
     }
   }, [restoreUser, restoreDialog.itemId]);
@@ -105,14 +111,14 @@ export function TrashAgents() {
   const handleDeleteConfirm = useCallback(async () => {
     try {
       await permanentDeleteUser(deleteDialog.itemId).unwrap();
-      toast.success("Agent permanently deleted.");
+      toast.success("Agent Leader permanently deleted.");
       setDeleteDialog(EMPTY_DIALOG);
     } catch (err) {
       const message =
         err && typeof err === "object" && "data" in err
           ? ((err as { data?: { message?: string } }).data?.message ??
-            "Failed to delete agent.")
-          : "Failed to delete agent.";
+            "Failed to delete agent leader.")
+          : "Failed to delete agent leader.";
       toast.error(message);
     }
   }, [permanentDeleteUser, deleteDialog.itemId]);
@@ -120,17 +126,20 @@ export function TrashAgents() {
   return (
     <div>
       <PageHeader
-        title="Trash"
-        description="Restore or permanently remove deleted agents."
+        title="Agent Leader Trash"
+        description="Restore or permanently remove deleted agent leaders."
         breadcrumbs={[
-          { label: "Dashboard", href: "/agent-leader" },
-          { label: "My Agents", href: "/agent-leader/my-agents" },
+          { label: "Dashboard", href: "/admin/dashboard" },
+          {
+            label: "Agent Leader Management",
+            href: "/admin/dashboard/agent-leaders",
+          },
           { label: "Trash" },
         ]}
       />
 
       <TrashStatsCards
-        items={data?.data}
+        items={leaders}
         totalCount={data?.meta.total}
         isLoading={isLoading}
       />
@@ -141,22 +150,26 @@ export function TrashAgents() {
         onReset={handleResetFilters}
       />
 
-      {data?.data && data.data.length > 0 ? (
+      {isError ? (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive">
+          <p>Failed to load trash. Please try again.</p>
+        </div>
+      ) : leaders.length > 0 ? (
         <>
-          <TrashTable
-            items={data.data}
+          <AgentLeaderTrashTable
+            items={leaders}
             isLoading={isLoading}
             onRestore={(id) => {
-              const item = data.data.find((a) => a._id === id);
+              const item = leaders.find((a) => a._id === id);
               if (item) handleRestoreClick(id, item.name);
             }}
             onPermanentDelete={(id) => {
-              const item = data.data.find((a) => a._id === id);
+              const item = leaders.find((a) => a._id === id);
               if (item) handleDeleteClick(id, item.name);
             }}
           />
           <TrashPagination
-            meta={data.meta}
+            meta={data?.meta}
             currentPage={page}
             onPageChange={setPage}
             isLoading={isLoading}
@@ -166,24 +179,18 @@ export function TrashAgents() {
         !isLoading && (
           <TrashEmptyState
             hasFilters={hasFilters}
-            title="No deleted agents found"
+            title="No deleted agent leaders found"
             onClearFilters={hasFilters ? handleResetFilters : undefined}
-            onGoBack={() => router.push("/agent-leader/my-agents")}
+            onGoBack={() => router.push("/admin/dashboard/agent-leaders")}
           />
         )
       )}
 
-      {/* {errorData && (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive">
-          <p>Failed to load trash. Please try again.</p>
-        </div>
-      )} */}
-
       <RestoreDialog
         isOpen={restoreDialog.isOpen}
         itemName={restoreDialog.itemName}
+        entityName="Agent Leader"
         onConfirm={handleRestoreConfirm}
-        entityName="Agent"
         onCancel={() => setRestoreDialog(EMPTY_DIALOG)}
         isLoading={isRestoring}
       />

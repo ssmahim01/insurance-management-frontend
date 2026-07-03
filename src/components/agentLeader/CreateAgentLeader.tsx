@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -19,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useCreateUserMutation } from "@/redux/features/user/user.api";
+import Image from "next/image";
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
@@ -93,7 +95,10 @@ export function CreateAgentLeaderModal({ onSuccess }: Props) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) { toast.error("Image must be under 2MB"); return; }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image must be under 2MB");
+      return;
+    }
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
   };
@@ -146,12 +151,21 @@ export function CreateAgentLeaderModal({ onSuccess }: Props) {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
+      <Button
+        onClick={() => setOpen(true)}
+        className="bg-indigo-700 hover:bg-indigo-800 text-white gap-2 hover:cursor-pointer hover:scale-105 transition-transform duration-200 ease-in-out"
+      >
         <Plus className="h-4 w-4" />
         Add Agent Leader
       </Button>
 
-      <Dialog open={open} onOpenChange={(val) => { if (!val) handleClose(); else setOpen(true); }}>
+      <Dialog
+        open={open}
+        onOpenChange={(val) => {
+          if (!val) handleClose();
+          else setOpen(true);
+        }}
+      >
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto p-6">
           <DialogHeader className="flex flex-col items-center gap-2 pb-2">
             <div className="w-12 h-12 rounded-xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md mb-1">
@@ -168,39 +182,72 @@ export function CreateAgentLeaderModal({ onSuccess }: Props) {
           <Separator />
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 pt-1">
-
             {/* Personal Information */}
             <div>
               <p className="text-xs font-bold tracking-widest uppercase text-slate-400 mb-3">
                 Personal Information
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
                 <div className="space-y-1.5">
-                  <Label htmlFor="al-name" className="text-xs font-semibold tracking-widest uppercase">
+                  <Label
+                    htmlFor="al-name"
+                    className="text-xs font-semibold tracking-widest uppercase"
+                  >
                     Full Name <span className="text-red-500">*</span>
                   </Label>
-                  <Input id="al-name" placeholder="e.g. Md. Karimul Islam" {...register("name")} />
-                  {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
+                  <Input
+                    id="al-name"
+                    placeholder="e.g. Md. Karimul Islam"
+                    {...register("name")}
+                  />
+                  {errors.name && (
+                    <p className="text-xs text-red-400">
+                      {errors.name.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="al-phone" className="text-xs font-semibold tracking-widest uppercase">
+                  <Label
+                    htmlFor="al-phone"
+                    className="text-xs font-semibold tracking-widest uppercase"
+                  >
                     Phone Number <span className="text-red-500">*</span>
                   </Label>
-                  <Input id="al-phone" placeholder="01XXXXXXXXX" {...register("phone")} />
-                  {errors.phone && <p className="text-xs text-red-400">{errors.phone.message}</p>}
+                  <Input
+                    id="al-phone"
+                    placeholder="01XXXXXXXXX"
+                    {...register("phone")}
+                  />
+                  {errors.phone && (
+                    <p className="text-xs text-red-400">
+                      {errors.phone.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-1.5 sm:col-span-2">
-                  <Label htmlFor="al-email" className="text-xs font-semibold tracking-widest uppercase">
+                  <Label
+                    htmlFor="al-email"
+                    className="text-xs font-semibold tracking-widest uppercase"
+                  >
                     Email{" "}
-                    <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+                    <span className="text-[#96999A] normal-case font-normal">
+                      (optional)
+                    </span>
                   </Label>
-                  <Input id="al-email" type="email" placeholder="example@email.com" {...register("email")} />
-                  {errors.email && <p className="text-xs text-red-400">{errors.email.message}</p>}
+                  <Input
+                    id="al-email"
+                    type="email"
+                    placeholder="example@email.com"
+                    {...register("email")}
+                  />
+                  {errors.email && (
+                    <p className="text-xs text-red-400">
+                      {errors.email.message}
+                    </p>
+                  )}
                 </div>
-
               </div>
             </div>
 
@@ -210,26 +257,52 @@ export function CreateAgentLeaderModal({ onSuccess }: Props) {
             <div>
               <p className="text-xs font-bold tracking-widest uppercase text-slate-400 mb-3">
                 Compensation{" "}
-                <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+                <span className="text-[#96999A] normal-case font-normal">
+                  (optional)
+                </span>
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
                 <div className="space-y-1.5">
-                  <Label htmlFor="al-salary" className="text-xs font-semibold tracking-widest uppercase">
+                  <Label
+                    htmlFor="al-salary"
+                    className="text-xs font-semibold tracking-widest uppercase"
+                  >
                     Monthly Salary (BDT)
                   </Label>
-                  <Input id="al-salary" type="number" min={0} placeholder="e.g. 20000" {...register("salary")} />
-                  {errors.salary && <p className="text-xs text-red-400">{errors.salary.message}</p>}
+                  <Input
+                    id="al-salary"
+                    type="number"
+                    min={0}
+                    placeholder="e.g. 20000"
+                    {...register("salary")}
+                  />
+                  {errors.salary && (
+                    <p className="text-xs text-red-400">
+                      {errors.salary.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="al-per-customer" className="text-xs font-semibold tracking-widest uppercase">
+                  <Label
+                    htmlFor="al-per-customer"
+                    className="text-xs font-semibold tracking-widest uppercase"
+                  >
                     Salary Per Customer (BDT)
                   </Label>
-                  <Input id="al-per-customer" type="number" min={0} placeholder="e.g. 300" {...register("salaryPerCustomer")} />
-                  {errors.salaryPerCustomer && <p className="text-xs text-red-400">{errors.salaryPerCustomer.message}</p>}
+                  <Input
+                    id="al-per-customer"
+                    type="number"
+                    min={0}
+                    placeholder="e.g. 300"
+                    {...register("salaryPerCustomer")}
+                  />
+                  {errors.salaryPerCustomer && (
+                    <p className="text-xs text-red-400">
+                      {errors.salaryPerCustomer.message}
+                    </p>
+                  )}
                 </div>
-
               </div>
             </div>
 
@@ -239,24 +312,62 @@ export function CreateAgentLeaderModal({ onSuccess }: Props) {
             <div>
               <p className="text-xs font-bold tracking-widest uppercase text-slate-400 mb-3">
                 Address{" "}
-                <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+                <span className="text-[#96999A] normal-case font-normal">
+                  (optional)
+                </span>
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="al-division" className="text-xs font-semibold tracking-widest uppercase">Division</Label>
-                  <Input id="al-division" placeholder="e.g. Dhaka" {...register("division")} />
+                  <Label
+                    htmlFor="al-division"
+                    className="text-xs font-semibold tracking-widest uppercase"
+                  >
+                    Division
+                  </Label>
+                  <Input
+                    id="al-division"
+                    placeholder="e.g. Dhaka"
+                    {...register("division")}
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="al-district" className="text-xs font-semibold tracking-widest uppercase">District</Label>
-                  <Input id="al-district" placeholder="e.g. Dhaka" {...register("district")} />
+                  <Label
+                    htmlFor="al-district"
+                    className="text-xs font-semibold tracking-widest uppercase"
+                  >
+                    District
+                  </Label>
+                  <Input
+                    id="al-district"
+                    placeholder="e.g. Dhaka"
+                    {...register("district")}
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="al-thana" className="text-xs font-semibold tracking-widest uppercase">Thana</Label>
-                  <Input id="al-thana" placeholder="e.g. Mirpur" {...register("thana")} />
+                  <Label
+                    htmlFor="al-thana"
+                    className="text-xs font-semibold tracking-widest uppercase"
+                  >
+                    Thana
+                  </Label>
+                  <Input
+                    id="al-thana"
+                    placeholder="e.g. Mirpur"
+                    {...register("thana")}
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="al-union" className="text-xs font-semibold tracking-widest uppercase">Union / Ward</Label>
-                  <Input id="al-union" placeholder="e.g. Ward-10" {...register("union")} />
+                  <Label
+                    htmlFor="al-union"
+                    className="text-xs font-semibold tracking-widest uppercase"
+                  >
+                    Union / Ward
+                  </Label>
+                  <Input
+                    id="al-union"
+                    placeholder="e.g. Ward-10"
+                    {...register("union")}
+                  />
                 </div>
               </div>
             </div>
@@ -267,22 +378,38 @@ export function CreateAgentLeaderModal({ onSuccess }: Props) {
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold tracking-widest uppercase">
                 Profile Picture{" "}
-                <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+                <span className="text-[#96999A] normal-case font-normal">
+                  (optional)
+                </span>
               </Label>
               {imagePreview ? (
                 <div className="relative flex items-center gap-3 rounded-md border border-slate-200 dark:border-slate-700 p-2">
-                  <img
+                  <Image
+                    width={150}
+                    height={150}
+                    priority
+                    quality={90}
                     src={imagePreview}
                     alt="Preview"
                     className="h-14 w-14 rounded-full object-cover shrink-0 border-2 border-slate-200 dark:border-slate-700"
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-slate-500 truncate">{imageFile?.name}</p>
+                    <p className="text-xs text-slate-500 truncate">
+                      {imageFile?.name}
+                    </p>
                     <p className="text-xs text-slate-400">
-                      {imageFile ? (imageFile.size / 1024).toFixed(1) + " KB" : ""}
+                      {imageFile
+                        ? (imageFile.size / 1024).toFixed(1) + " KB"
+                        : ""}
                     </p>
                   </div>
-                  <Button variant="destructive" type="button" size="sm" onClick={clearImage} className="shrink-0">
+                  <Button
+                    variant="destructive"
+                    type="button"
+                    size="sm"
+                    onClick={clearImage}
+                    className="shrink-0"
+                  >
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
@@ -293,8 +420,12 @@ export function CreateAgentLeaderModal({ onSuccess }: Props) {
                 >
                   <Upload className="h-6 w-6 text-slate-400" />
                   <div className="text-center">
-                    <p className="text-sm text-slate-500">Click to upload a photo</p>
-                    <p className="text-xs text-slate-400">PNG, JPG, WEBP — max 2MB</p>
+                    <p className="text-sm text-slate-500">
+                      Click to upload a photo
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      PNG, JPG, WEBP — max 2MB
+                    </p>
                   </div>
                   <input
                     id="al-image-upload"
@@ -315,9 +446,11 @@ export function CreateAgentLeaderModal({ onSuccess }: Props) {
                 Account Security
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
                 <div className="space-y-1.5">
-                  <Label htmlFor="al-password" className="text-xs font-semibold tracking-widest uppercase">
+                  <Label
+                    htmlFor="al-password"
+                    className="text-xs font-semibold tracking-widest uppercase"
+                  >
                     Password <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
@@ -334,14 +467,25 @@ export function CreateAgentLeaderModal({ onSuccess }: Props) {
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                       tabIndex={-1}
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
-                  {errors.password && <p className="text-xs text-red-400">{errors.password.message}</p>}
+                  {errors.password && (
+                    <p className="text-xs text-red-400">
+                      {errors.password.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="al-confirm-password" className="text-xs font-semibold tracking-widest uppercase">
+                  <Label
+                    htmlFor="al-confirm-password"
+                    className="text-xs font-semibold tracking-widest uppercase"
+                  >
                     Confirm Password <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
@@ -358,12 +502,19 @@ export function CreateAgentLeaderModal({ onSuccess }: Props) {
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                       tabIndex={-1}
                     >
-                      {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showConfirm ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
-                  {errors.confirmPassword && <p className="text-xs text-red-400">{errors.confirmPassword.message}</p>}
+                  {errors.confirmPassword && (
+                    <p className="text-xs text-red-400">
+                      {errors.confirmPassword.message}
+                    </p>
+                  )}
                 </div>
-
               </div>
             </div>
 

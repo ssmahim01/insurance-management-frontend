@@ -40,7 +40,7 @@ export function SubscriptionStatsCards({ stats, isLoading }: SubscriptionStatsCa
       {cards.map(({ label, value, icon: Icon }) => (
         <div
           key={label}
-          className="rounded-xl border border-border bg-card p-5 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
+          className="bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
         >
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">

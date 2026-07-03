@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/incompatible-library */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 "use client";
 
@@ -192,7 +194,7 @@ export function CreateSubscriptionModal({ onSuccess }: { onSuccess?: () => void 
         [packages, selectedPackageId],
     );
 
-    const availablePlans = selectedPackage?.plans ?? [];
+    const availablePlans = useMemo(() => selectedPackage?.plans ?? [], [selectedPackage]);
 
     const selectedPlan = useMemo(
         () => availablePlans.find((p) => p.type === selectedPlanType),
@@ -205,7 +207,7 @@ export function CreateSubscriptionModal({ onSuccess }: { onSuccess?: () => void 
             const price = selectedPlan.discountPrice || selectedPlan.regularPrice;
             form.setValue("price", price, { shouldValidate: true });
         }
-    }, [selectedPlan]);
+    }, [selectedPlan, form]);
 
     // reset planType if package changes and current plan not available anymore
     useEffect(() => {
@@ -213,7 +215,7 @@ export function CreateSubscriptionModal({ onSuccess }: { onSuccess?: () => void 
             form.setValue("planType", undefined as any);
             form.setValue("price", 0);
         }
-    }, [selectedPackageId]);
+    }, [selectedPackageId, form]);
 
     const resetAll = () => {
         form.reset(defaultValues);
@@ -352,7 +354,7 @@ export function CreateSubscriptionModal({ onSuccess }: { onSuccess?: () => void 
     return (
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetAll(); }}>
             <DialogTrigger>
-                <Button className="gap-2">
+                <Button className="bg-indigo-700 hover:bg-indigo-800 text-white gap-2 hover:cursor-pointer hover:scale-105 transition-transform duration-200 ease-in-out">
                     <Plus className="w-4 h-4" /> New Subscription
                 </Button>
             </DialogTrigger>

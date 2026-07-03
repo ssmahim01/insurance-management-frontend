@@ -14,7 +14,7 @@ import { IUser } from "@/types/user.types";
 import { TrashStatusBadge } from "@/components/shared/trash/TrashStatusBadge";
 import { TrashActions } from "@/components/shared/trash/TrashActions";
 
-interface TrashTableProps {
+interface AgentLeaderTrashTableProps {
   items: IUser[];
   isLoading: boolean;
   onRestore: (id: string) => void;
@@ -27,12 +27,17 @@ const COLUMNS = [
   "Phone",
   "Email",
   "Deleted Date",
-  "Created Date",
+  "Joined Date",
   "Status",
   "Actions",
 ] as const;
 
-export function TrashTable({ items, isLoading, onRestore, onPermanentDelete }: TrashTableProps) {
+export function AgentLeaderTrashTable({
+  items,
+  isLoading,
+  onRestore,
+  onPermanentDelete,
+}: AgentLeaderTrashTableProps) {
   if (isLoading) {
     return (
       <div className="rounded-lg border border-border overflow-hidden overflow-x-auto">
@@ -102,7 +107,8 @@ export function TrashTable({ items, isLoading, onRestore, onPermanentDelete }: T
                 {item.email || "—"}
               </TableCell>
               <TableCell className="text-sm text-muted-foreground">
-                {/* Proxy via updatedAt — see caveat in TrashStatsCards */}
+                {/* No dedicated deletedAt field — same updatedAt proxy
+                    caveat noted on the Agent Leader's own trash table. */}
                 {item.updatedAt ? format(new Date(item.updatedAt), "MMM dd, yyyy") : "—"}
               </TableCell>
               <TableCell className="text-sm text-muted-foreground">

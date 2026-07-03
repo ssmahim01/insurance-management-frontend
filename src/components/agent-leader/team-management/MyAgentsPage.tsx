@@ -167,7 +167,7 @@ export function MyAgentsPage() {
         filters={filters}
         onFiltersChange={handleFiltersChange}
         onReset={handleResetFilters}
-      ></AgentFilters>
+      />
       {/* Table or Empty State */}
       {data?.data && data.data.length > 0 ? (
         <>

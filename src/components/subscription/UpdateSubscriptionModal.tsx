@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/incompatible-library */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // // components/subscription/UpdateSubscriptionModal.tsx
 
 // "use client";
@@ -350,7 +352,7 @@ export function UpdateSubscriptionModal({
                 price: item.price,
             });
         }
-    }, [open, item]);
+    }, [open, item, form]);
 
     const status = form.watch("status");
     const paymentStatus = form.watch("paymentStatus");

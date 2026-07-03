@@ -21,7 +21,7 @@ interface AgentTableProps {
   onViewDetails: (agentId: string) => void;
   onViewCustomers?: (agentId: string) => void;
   onEdit?: (agentId: string) => void;
-  onToggleBlock: (agentId: string, isBlocked: boolean) => void;
+  onToggleBlock?: (agentId: string, isBlocked: boolean) => void;
   onDelete: (agentId: string) => void;
 }
 
@@ -31,7 +31,6 @@ export function AgentTable({
   onViewDetails,
   // onViewCustomers,
   // onEdit,
-  onToggleBlock,
   onDelete,
 }: AgentTableProps) {
   // const router = useRouter();
@@ -189,12 +188,12 @@ export function AgentTable({
                   // onEdit={() => {
                   //   router.push(`/agent-leader/my-agents/${agent._id}/edit`);
                   // }}
-                  onToggleBlock={() =>
-                    onToggleBlock(
-                      agent._id as string,
-                      agent.isActive ?? IsActive.BLOCKED,
-                    )
-                  }
+                  // onToggleBlock={() =>
+                  //   onToggleBlock(
+                  //     agent._id as string,
+                  //     agent.isActive ?? IsActive.BLOCKED,
+                  //   )
+                  // }
                   onDelete={() => onDelete(agent._id as string)}
                 />
               </TableCell>
