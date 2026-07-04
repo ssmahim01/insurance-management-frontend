@@ -201,7 +201,7 @@ export function MyAgentsPage() {
       )}
 
       {/* Error State */}
-      {error && (
+      {Boolean(error) && (
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive">
           <p>Failed to load agents. Please try again.</p>
         </div>
