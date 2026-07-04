@@ -1,5 +1,11 @@
-import { SubscriptionTrashManagement } from "@/components/subscription/trash/SubscriptionTrashPage";
+import { Metadata } from "next";
+import { AdminSubscriptionTrash } from "@/components/subscription/AdminSubscriptionTrash";
 
-export default function SubscriptionTrashPage() {
-  return <SubscriptionTrashManagement />;
+export const metadata: Metadata = {
+  title: "Subscription Trash",
+  description: "Restore or permanently remove deleted subscriptions.",
+};
+
+export default function Page() {
+  return <AdminSubscriptionTrash />;
 }

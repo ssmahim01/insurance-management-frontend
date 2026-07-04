@@ -143,12 +143,12 @@ export function SubscriptionPageContent({
     trashHref || headerAction ? (
       <div className="flex items-center gap-2">
         {trashHref && (
-          <Button variant="outline">
-            <Link href={trashHref}>
-              <Trash2 className="mr-2 h-4 w-4" />
+          <Link href={trashHref}>
+          <Button variant="outline" className="flex items-center hover:cursor-pointer">
+              <Trash2 className="h-4 w-4" />
               Trash
-            </Link>
           </Button>
+            </Link>
         )}
         {headerAction}
       </div>

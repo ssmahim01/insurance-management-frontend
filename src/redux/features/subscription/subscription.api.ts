@@ -82,6 +82,18 @@ export const subscriptionApi = baseApi.injectEndpoints({
       providesTags: ["SUBSCRIPTIONS"],
     }),
 
+    getAgentLeaderTrashSubscriptions: builder.query<
+      ISubscriptionListResponse,
+      GetSubscriptionsParams | undefined
+    >({
+      query: (params) => ({
+        url: "/subscription/leader-trash-subscriptions/me",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["SUBSCRIPTIONS"],
+    }),
+
     // ── AGENT LEADER SUBSCRIPTIONS BY ADMIN ───────────────────────────────────
 
     getAgentLeaderSubscriptionsByAdmin: builder.query<
@@ -104,6 +116,18 @@ export const subscriptionApi = baseApi.injectEndpoints({
     >({
       query: (params) => ({
         url: "/subscription/my-subscriptions",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["SUBSCRIPTIONS"],
+    }),
+
+    getMyTrashSubscriptions: builder.query<
+      ISubscriptionListResponse,
+      GetSubscriptionsParams | undefined
+    >({
+      query: (params) => ({
+        url: "/subscription/my-trash-subscriptions",
         method: "GET",
         params,
       }),
@@ -172,6 +196,8 @@ export const {
   useGetAgentsAllSubscriptionsQuery,
   useGetAgentLeaderSubscriptionsQuery,
   useGetAgentLeaderSubscriptionsByAdminQuery,
+  useGetMyTrashSubscriptionsQuery,
+  useGetAgentLeaderTrashSubscriptionsQuery,
   useGetMySubscriptionsQuery,
   useGetSingleSubscriptionQuery,
   useUpdateSubscriptionMutation,

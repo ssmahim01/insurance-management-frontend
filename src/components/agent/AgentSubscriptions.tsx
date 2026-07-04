@@ -6,7 +6,7 @@ import { useGetMySubscriptionsQuery } from "@/redux/features/subscription/subscr
 export function AgentSubscriptions() {
   return (
     <SubscriptionPageContent
-      title="My Subscriptions"
+      title="My Customer Subscriptions"
       description="Subscriptions you've created for your customers."
       breadcrumbs={[
         { label: "Dashboard", href: "/agent" },

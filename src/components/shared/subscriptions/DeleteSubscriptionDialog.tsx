@@ -41,7 +41,7 @@ export function DeleteSubscriptionDialog({
           <AlertDialogAction
             onClick={(e) => { e.preventDefault(); onConfirm(); }}
             disabled={isLoading}
-            className="gap-2 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="gap-2 bg-destructive text-white hover:cursor-pointer hover:bg-destructive/90"
           >
             {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
             Delete

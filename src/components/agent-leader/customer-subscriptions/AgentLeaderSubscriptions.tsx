@@ -12,6 +12,7 @@ export function AgentLeaderSubscriptions() {
         { label: "Dashboard", href: "/agent-leader" },
         { label: "Subscriptions" },
       ]}
+      trashHref="/agent-leader/customers/trash"
       useQuery={useGetAgentLeaderSubscriptionsQuery}
       showAgentColumn
       allowUpdate

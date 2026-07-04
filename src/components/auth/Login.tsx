@@ -40,7 +40,17 @@ export default function Login() {
       const response = await loginUser(data);
       if (response.success) {
         toast.success("Login successful!");
-        router.push("/admin/dashboard");
+        if (response?.user?.user?.role === "ADMIN") {
+          router.push("/admin/dashboard");
+        } else if (response?.user?.user?.role === "SUPER_ADMIN") {
+          router.push("/superadmin/dashboard");
+        } else if (response?.user?.user?.role === "AGENT_LEADER") {
+          router.push("/agent-leader");
+        } else if (response?.user?.user?.role === "AGENT") {
+          router.push("/agent");
+        } else {
+          router.push("/customer");
+        }
       }
 
       // console.log(' Login data:', data);

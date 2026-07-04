@@ -1,7 +1,8 @@
 import { Role } from "@/types/user.types";
 
-import { adminNavigation } from "./admin.navigation";
-import { agentLeaderNavigation } from "./agentLeader.navigation";
+import { adminNavigation } from "./navigations/admin.navigation";
+import { agentLeaderNavigation } from "./navigations/agentLeader.navigation";
+import { agentNavigation } from "./navigations/agent.navigation";
 
 export const getDashboardNavigation = (role?: Role) => {
   switch (role) {
@@ -12,8 +13,8 @@ export const getDashboardNavigation = (role?: Role) => {
     case Role.AGENT_LEADER:
       return agentLeaderNavigation;
 
-    // case Role.AGENT:
-    //   return agentNavigation;
+    case Role.AGENT:
+      return agentNavigation;
 
     default:
       return [];

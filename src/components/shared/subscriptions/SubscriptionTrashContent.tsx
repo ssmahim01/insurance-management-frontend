@@ -5,16 +5,15 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import {
-  useGetAllTrashSubscriptionsQuery,
   useRestoreSubscriptionMutation,
   usePermanentDeleteSubscriptionMutation,
 } from "@/redux/features/subscription/subscription.api";
 import { ITrashFilters } from "@/types/agent-leader";
-import { ISubscription } from "@/types/subscription.types";
+import { GetSubscriptionsParams, ISubscription, ISubscriptionListResponse } from "@/types/subscription.types";
 import { getNestedName } from "@/lib/utils/format-subscription";
 
 import { PageHeader } from "@/components/shared/PageHeader";
-import { SubscriptionStatsCards } from "@/components/agent-leader/customer-subscriptions/SubscriptionStatsCards";
+import { SubscriptionStatsCards } from "@/components/shared/subscriptions/SubscriptionStatsCards";
 import { TrashFilters } from "@/components/shared/trash/TrashFilters";
 import { TrashPagination } from "@/components/shared/trash/TrashPagination";
 import { TrashEmptyState } from "@/components/shared/trash/TrashEmptyState";
@@ -30,7 +29,44 @@ interface DialogState {
 
 const EMPTY_DIALOG: DialogState = { isOpen: false, itemId: "", itemName: "" };
 
-export function SubscriptionTrashManagement() {
+interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+export interface SubscriptionTrashQueryResult {
+  data?: ISubscriptionListResponse;
+  isLoading: boolean;
+  isError: boolean;
+}
+
+export type UseSubscriptionTrashListQuery = (
+  params: GetSubscriptionsParams | undefined,
+) => SubscriptionTrashQueryResult;
+
+interface SubscriptionTrashPageContentProps {
+  title: string;
+  description: string;
+  breadcrumbs: BreadcrumbItem[];
+  useQuery: UseSubscriptionTrashListQuery;
+  /** Where "Go Back" / empty-state navigation returns to. */
+  backHref: string;
+  /** Hide "Created By" column — e.g. an agent viewing their own trashed items. Default true. */
+  showCreatedByColumn?: boolean;
+  allowRestore?: boolean;
+  allowPermanentDelete?: boolean;
+}
+
+export function SubscriptionTrashContent({
+  title,
+  description,
+  breadcrumbs,
+  useQuery,
+  backHref,
+  showCreatedByColumn = true,
+  allowRestore = false,
+  allowPermanentDelete = false,
+}: SubscriptionTrashPageContentProps) {
   const router = useRouter();
   const [page, setPage] = useState<number>(1);
   const [limit] = useState<number>(10);
@@ -61,10 +97,8 @@ export function SubscriptionTrashManagement() {
     [page, limit, filters],
   );
 
-  const { data, isLoading, isError } =
-    useGetAllTrashSubscriptionsQuery(queryParams);
-  const [restoreSubscription, { isLoading: isRestoring }] =
-    useRestoreSubscriptionMutation();
+  const { data, isLoading, isError } = useQuery(queryParams);
+  const [restoreSubscription, { isLoading: isRestoring }] = useRestoreSubscriptionMutation();
   const [permanentDeleteSubscription, { isLoading: isDeleting }] =
     usePermanentDeleteSubscriptionMutation();
 
@@ -126,18 +160,7 @@ export function SubscriptionTrashManagement() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Subscription Trash"
-        description="Restore or permanently remove deleted subscriptions."
-        breadcrumbs={[
-          { label: "Dashboard", href: "/admin/dashboard" },
-          {
-            label: "Subscription Management",
-            href: "/admin/dashboard/subscriptions",
-          },
-          { label: "Trash" },
-        ]}
-      />
+      <PageHeader title={title} description={description} breadcrumbs={breadcrumbs} />
 
       <SubscriptionStatsCards stats={stats} isLoading={isLoading} />
 
@@ -156,21 +179,30 @@ export function SubscriptionTrashManagement() {
           hasFilters={hasFilters}
           title="No deleted subscriptions found"
           onClearFilters={hasFilters ? handleResetFilters : undefined}
-          onGoBack={() => router.push("/admin/dashboard/subscriptions")}
+          onGoBack={() => router.push(backHref)}
         />
       ) : (
         <>
           <SubscriptionTrashTable
             items={subscriptions}
             isLoading={isLoading}
-            onRestore={(id) => {
-              const item = subscriptions.find((s) => s._id === id);
-              if (item) handleRestoreClick(id, getNestedName(item.customer));
-            }}
-            onPermanentDelete={(id) => {
-              const item = subscriptions.find((s) => s._id === id);
-              if (item) handleDeleteClick(id, getNestedName(item.customer));
-            }}
+            showCreatedByColumn={showCreatedByColumn}
+            onRestore={
+              allowRestore
+                ? (id) => {
+                    const item = subscriptions.find((s) => s._id === id);
+                    if (item) handleRestoreClick(id, getNestedName(item.customer));
+                  }
+                : undefined
+            }
+            onPermanentDelete={
+              allowPermanentDelete
+                ? (id) => {
+                    const item = subscriptions.find((s) => s._id === id);
+                    if (item) handleDeleteClick(id, getNestedName(item.customer));
+                  }
+                : undefined
+            }
           />
           <TrashPagination
             meta={meta}
@@ -181,22 +213,26 @@ export function SubscriptionTrashManagement() {
         </>
       )}
 
-      <RestoreDialog
-        isOpen={restoreDialog.isOpen}
-        itemName={restoreDialog.itemName}
-        entityName="Subscription"
-        onConfirm={handleRestoreConfirm}
-        onCancel={() => setRestoreDialog(EMPTY_DIALOG)}
-        isLoading={isRestoring}
-      />
+      {allowRestore && (
+        <RestoreDialog
+          isOpen={restoreDialog.isOpen}
+          itemName={restoreDialog.itemName}
+          entityName="Subscription"
+          onConfirm={handleRestoreConfirm}
+          onCancel={() => setRestoreDialog(EMPTY_DIALOG)}
+          isLoading={isRestoring}
+        />
+      )}
 
-      <PermanentDeleteDialog
-        isOpen={deleteDialog.isOpen}
-        itemName={deleteDialog.itemName}
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => setDeleteDialog(EMPTY_DIALOG)}
-        isLoading={isDeleting}
-      />
+      {allowPermanentDelete && (
+        <PermanentDeleteDialog
+          isOpen={deleteDialog.isOpen}
+          itemName={deleteDialog.itemName}
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setDeleteDialog(EMPTY_DIALOG)}
+          isLoading={isDeleting}
+        />
+      )}
     </div>
   );
 }
