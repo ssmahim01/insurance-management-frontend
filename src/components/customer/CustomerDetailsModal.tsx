@@ -101,6 +101,12 @@ const STATUS_CONFIG: Record<IsActive, { label: string; icon: React.ElementType; 
     badge:
       "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400",
   },
+    [IsActive.ALL]: {
+    label: "All",
+    icon: ShieldCheck,
+    badge:
+      "border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
+  },
 };
 
 // ─── Props ────────────────────────────────────────────────────────────────────
