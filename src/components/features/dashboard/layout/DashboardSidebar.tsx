@@ -69,7 +69,7 @@ export function DashboardSidebar({ isCollapsed, onToggle }: DashboardSidebarProp
                 {group.items.map((item) => (
                   <SidebarItem
                     key={item.id}
-                    item={item}
+                    item={item as any}
                     isCollapsed={isCollapsed}
                     showTooltip={handleShowTooltip}
                     hideTooltip={handleHideTooltip}
