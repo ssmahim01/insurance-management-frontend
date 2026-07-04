@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { SubscriptionPageContent } from "@/components/agent-leader/customer-subscriptions/SubscriptionPageContent";
+import { AgentLeaderSubscriptions } from "@/components/agent-leader/customer-subscriptions/AgentLeaderSubscriptions";
 
 export const metadata: Metadata = {
   title: "Insurance Subscriptions",
@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <SubscriptionPageContent />;
+  return <AgentLeaderSubscriptions />;
 }

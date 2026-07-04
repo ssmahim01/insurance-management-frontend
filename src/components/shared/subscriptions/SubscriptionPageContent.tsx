@@ -1,13 +1,16 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
+import { Trash2 } from "lucide-react";
 
-import { useGetAgentLeaderSubscriptionsQuery, useSoftDeleteSubscriptionMutation } from "@/redux/features/subscription/subscription.api";
-import { ISubscription } from "@/types/subscription.types";
+import { GetSubscriptionsParams, ISubscription, ISubscriptionListResponse } from "@/types/subscription.types";
 import { ISubscriptionFilters } from "@/types/subscription-filters";
+import { useSoftDeleteSubscriptionMutation } from "@/redux/features/subscription/subscription.api";
 
 import { PageHeader } from "@/components/shared/PageHeader";
+import { Button } from "@/components/ui/button";
 import { SubscriptionStatsCards } from "./SubscriptionStatsCards";
 import { SubscriptionFilters } from "./SubscriptionFilters";
 import { SubscriptionTable } from "./SubscriptionTable";
@@ -27,7 +30,50 @@ const DEFAULT_FILTERS: ISubscriptionFilters = {
   sortBy: "newest",
 };
 
-export function SubscriptionPageContent() {
+interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+export interface SubscriptionQueryResult {
+  data?: ISubscriptionListResponse;
+  isLoading: boolean;
+  isError: boolean;
+  refetch: () => void;
+}
+
+export type UseSubscriptionListQuery = (
+  params: GetSubscriptionsParams | undefined,
+) => SubscriptionQueryResult;
+
+interface SubscriptionPageContentProps {
+  title: string;
+  description: string;
+  breadcrumbs: BreadcrumbItem[];
+  useQuery: UseSubscriptionListQuery;
+  /** Link to a role-appropriate trash page. Omit to hide the Trash button. */
+  trashHref?: string;
+  /** Extra header actions, e.g. Admin's "New Subscription" button. */
+  headerAction?: React.ReactNode;
+  /** Hide the "Agent" (createdBy) column. Default true. */
+  showAgentColumn?: boolean;
+  /** Show the Update action + dialog. Set this to match what the backend route actually authorizes for the viewer's role. Default true. */
+  allowUpdate?: boolean;
+  /** Show the Delete action + dialog. Set this to match what the backend route actually authorizes for the viewer's role. Default true. */
+  allowDelete?: boolean;
+}
+
+export function SubscriptionPageContent({
+  title,
+  description,
+  breadcrumbs,
+  useQuery,
+  trashHref,
+  headerAction,
+  showAgentColumn = true,
+  allowUpdate = true,
+  allowDelete = true,
+}: SubscriptionPageContentProps) {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [filters, setFilters] = useState<ISubscriptionFilters>(DEFAULT_FILTERS);
@@ -54,7 +100,7 @@ export function SubscriptionPageContent() {
     [page, limit, filters],
   );
 
-  const { data, isLoading, isError, refetch } = useGetAgentLeaderSubscriptionsQuery(queryParams);
+  const { data, isLoading, isError, refetch } = useQuery(queryParams);
   const [softDeleteSubscription, { isLoading: isDeleting }] = useSoftDeleteSubscriptionMutation();
 
   const subscriptions = data?.data?.data ?? [];
@@ -93,15 +139,28 @@ export function SubscriptionPageContent() {
     }
   }, [softDeleteSubscription, deleteSub]);
 
+  const combinedHeaderAction =
+    trashHref || headerAction ? (
+      <div className="flex items-center gap-2">
+        {trashHref && (
+          <Button variant="outline">
+            <Link href={trashHref}>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Trash
+            </Link>
+          </Button>
+        )}
+        {headerAction}
+      </div>
+    ) : undefined;
+
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Insurance Subscriptions"
-        description="Manage paid insurance subscriptions created by your assigned agents."
-        breadcrumbs={[
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Subscriptions" },
-        ]}
+        title={title}
+        description={description}
+        breadcrumbs={breadcrumbs}
+        action={combinedHeaderAction}
       />
 
       <SubscriptionStatsCards stats={stats} isLoading={isLoading} />
@@ -125,9 +184,10 @@ export function SubscriptionPageContent() {
           <SubscriptionTable
             subscriptions={subscriptions}
             isLoading={isLoading}
+            showAgentColumn={showAgentColumn}
             onViewDetails={setDetailsSub}
-            onUpdate={setUpdateSub}
-            onDelete={setDeleteSub}
+            onUpdate={allowUpdate ? setUpdateSub : undefined}
+            onDelete={allowDelete ? setDeleteSub : undefined}
           />
           <SubscriptionPagination
             meta={meta}
@@ -146,7 +206,7 @@ export function SubscriptionPageContent() {
         />
       )}
 
-      {updateSub && (
+      {allowUpdate && updateSub && (
         <UpdateSubscriptionModal
           open={Boolean(updateSub)}
           onOpenChange={(open) => !open && setUpdateSub(null)}
@@ -155,13 +215,15 @@ export function SubscriptionPageContent() {
         />
       )}
 
-      <DeleteSubscriptionDialog
-        isOpen={Boolean(deleteSub)}
-        customerName={deleteSub ? getNestedName(deleteSub.customer) : ""}
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => setDeleteSub(null)}
-        isLoading={isDeleting}
-      />
+      {allowDelete && (
+        <DeleteSubscriptionDialog
+          isOpen={Boolean(deleteSub)}
+          customerName={deleteSub ? getNestedName(deleteSub.customer) : ""}
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setDeleteSub(null)}
+          isLoading={isDeleting}
+        />
+      )}
     </div>
   );
 }

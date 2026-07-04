@@ -52,7 +52,7 @@ export const agentLeaderNavigation: NavGroup[] = [
       {
         id: "subscriptions",
         label: "Customer Subscriptions",
-        href: "/agent-leader/subscriptions",
+        href: "/agent-leader/customers",
         icon: ShieldCheck,
       },
     ],

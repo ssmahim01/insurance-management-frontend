@@ -12,8 +12,8 @@ import { Button } from "@/components/ui/button";
 
 interface SubscriptionActionsProps {
   onViewDetails: () => void;
-  onUpdate: () => void;
-  onDelete: () => void;
+  onUpdate?: () => void;
+  onDelete?: () => void;
 }
 
 export function SubscriptionActions({ onViewDetails, onUpdate, onDelete }: SubscriptionActionsProps) {
@@ -29,18 +29,25 @@ export function SubscriptionActions({ onViewDetails, onUpdate, onDelete }: Subsc
           <Eye className="w-4 h-4" />
           View Details
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={onUpdate} className="gap-2 cursor-pointer">
-          <Edit2 className="w-4 h-4" />
-          Update Subscription
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={onDelete}
-          className="gap-2 cursor-pointer text-destructive focus:text-destructive"
-        >
-          <Trash2 className="w-4 h-4" />
-          Delete
-        </DropdownMenuItem>
+
+        {(onUpdate || onDelete) && <DropdownMenuSeparator />}
+
+        {onUpdate && (
+          <DropdownMenuItem onClick={onUpdate} className="gap-2 cursor-pointer">
+            <Edit2 className="w-4 h-4" />
+            Update Subscription
+          </DropdownMenuItem>
+        )}
+
+        {onDelete && (
+          <DropdownMenuItem
+            onClick={onDelete}
+            className="gap-2 cursor-pointer text-destructive focus:text-destructive"
+          >
+            <Trash2 className="w-4 h-4" />
+            Delete
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
