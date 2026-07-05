@@ -70,6 +70,12 @@ export const dashboardNavigation: NavGroup[] = [
         icon: Handshake,
       },
       {
+        id: "admins",
+        label: "Admins",
+        href: "/admin/dashboard/admins",
+        icon: User,
+      },
+      {
         id: "agents",
         label: "Agents",
         href: "/admin/dashboard/agents",
@@ -185,7 +191,7 @@ export function DashboardLayoutWrapper({
   defaultOpen = true,
 }: DashboardLayoutProps) {
   const router = useRouter();
-  const { data: user } = useGetMeQuery(undefined);
+  const { data: user, isLoading } = useGetMeQuery(undefined);
 
   const { logout } = useUser();
 
@@ -198,7 +204,7 @@ export function DashboardLayoutWrapper({
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
       <TooltipProvider>
-        <AppSidebar user={user?.data} onLogout={handleLogout} />
+        <AppSidebar user={user?.data} onLogout={handleLogout} isLoading={isLoading} />
         <SidebarInset className="flex flex-col min-h-screen">
           <DashboardHeader pageTitle={pageTitle} />
 

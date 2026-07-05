@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { NavGroup } from "@/types/dashboard";
 
-export const adminNavigation: NavGroup[] = [
+export const superAdminNavigation: NavGroup[] = [
   {
     label: "Overview",
     items: [
@@ -32,18 +32,18 @@ export const adminNavigation: NavGroup[] = [
         href: "/admin/dashboard/packages",
         icon: Package,
       },
-      // {
-      //   id: "subscriptions",
-      //   label: "Subscriptions",
-      //   href: "/admin/dashboard/subscriptions",
-      //   icon: ShieldCheck,
-      // },
     ],
   },
 
   {
     label: "Team Management",
     items: [
+      {
+        id: "admins",
+        label: "Admins",
+        href: "/admin/dashboard/admin",
+        icon: User,
+      },
       {
         id: "agent-leaders",
         label: "Agent Leaders",

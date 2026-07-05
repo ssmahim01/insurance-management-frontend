@@ -43,7 +43,7 @@ export default function Login() {
         if (response?.user?.user?.role === "ADMIN") {
           router.push("/admin/dashboard");
         } else if (response?.user?.user?.role === "SUPER_ADMIN") {
-          router.push("/superadmin/dashboard");
+          router.push("/admin/dashboard");
         } else if (response?.user?.user?.role === "AGENT_LEADER") {
           router.push("/agent-leader");
         } else if (response?.user?.user?.role === "AGENT") {
