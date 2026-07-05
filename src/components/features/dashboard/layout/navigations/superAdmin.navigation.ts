@@ -32,6 +32,13 @@ export const superAdminNavigation: NavGroup[] = [
         href: "/admin/dashboard/packages",
         icon: Package,
       },
+
+        {
+        id: "claims",
+        label: "Claims",
+        href: "/admin/dashboard/claims",
+        icon: ShieldCheck,
+      },
     ],
   },
 
