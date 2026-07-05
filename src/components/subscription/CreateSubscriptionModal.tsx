@@ -533,7 +533,7 @@ export function CreateSubscriptionModal({ onSuccess }: { onSuccess?: () => void 
                                     {form.formState.errors.thana && <p className="text-xs text-red-500">{form.formState.errors.thana.message}</p>}
                                 </div>
 
-                                <Input placeholder="Union" className="h-12 w-full text-base px-4" {...form.register("union")} />
+                                <Input placeholder="Union" className="h-8 w-full text-base px-4" {...form.register("union")} />
                             </div>
 
                             <Separator />

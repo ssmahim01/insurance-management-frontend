@@ -29,10 +29,12 @@ import Image from "next/image";
 import { ChevronDown, LogOut, Settings, User } from "lucide-react";
 import { IUser } from "@/types/user.types";
 import { getDashboardNavigation } from "./navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface AppSidebarProps {
   user?: IUser | null;
   onLogout?: () => void;
+  isLoading?: boolean;
 }
 
 function NavItemRow({ item }: { item: NavItem }) {
@@ -75,12 +77,63 @@ function NavItemRow({ item }: { item: NavItem }) {
   return <SidebarMenuItem>{content}</SidebarMenuItem>;
 }
 
-export function AppSidebar({ user, onLogout }: AppSidebarProps) {
+export function AppSidebarSkeleton() {
+  return (
+    <Sidebar collapsible="icon" className="border-r border-gray-200/80 dark:border-gray-800">
+      <SidebarHeader className="border-b mb-3 border-gray-200/80 dark:border-gray-800">
+        <div className="ml-2 my-2">
+          <Skeleton className="h-12 w-12 rounded-md" />
+        </div>
+      </SidebarHeader>
+
+      <SidebarContent className="py-3">
+        {Array.from({ length: 3 }).map((_, groupIdx) => (
+          <SidebarGroup key={groupIdx} className="px-2 py-1">
+            <div className="px-2 pb-2">
+              <Skeleton className="h-3 w-20" />
+            </div>
+            <SidebarMenu>
+              {Array.from({ length: 4 }).map((_, itemIdx) => (
+                <SidebarMenuItem key={itemIdx}>
+                  <div className="flex items-center gap-3 px-2 py-2">
+                    <Skeleton className="h-4 w-4 rounded shrink-0" />
+                    <Skeleton className="h-4 flex-1" />
+                  </div>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
+        ))}
+      </SidebarContent>
+
+      <SidebarFooter className="border-t border-gray-200/80 dark:border-gray-800 p-2">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <div className="flex items-center gap-3 rounded-xl p-2">
+              <Skeleton className="h-8 w-8 rounded-lg shrink-0" />
+              <div className="flex-1 space-y-1.5">
+                <Skeleton className="h-3.5 w-24" />
+                <Skeleton className="h-2.5 w-16" />
+              </div>
+            </div>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+
+      <SidebarRail />
+    </Sidebar>
+  );
+}
+
+export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const navigation = getDashboardNavigation(user?.role);
 
+  if (isLoading) return <AppSidebarSkeleton />;
+
   return (
+
     <Sidebar
       collapsible="icon"
       className="border-r border-gray-200/80 dark:border-gray-800"

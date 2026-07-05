@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
@@ -14,7 +15,7 @@ import {
   UserCheck,
   UserX,
   ShieldAlert,
-  UserCog,
+  ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -46,19 +47,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  useGetAllAgentsQuery,
+  useGetAllAdminsQuery,
   useDeleteUserMutation,
-  useGetAllAgentLeadersQuery,
-
 } from "@/redux/features/user/user.api";
 
 import { PageHeader } from "../shared/PageHeader";
 import { Pagination } from "../pagination/Pagination";
-import { CreateAgentModal } from "./CreateAgent";
-import { AgentDetailsModal } from "./AgentDetailsModal";
-import { UpdateAgentModal } from "./UpdateAgent";
-import { IsActive, IUser } from "@/types/user.types";
+import { IsActive, IUser, Role } from "@/types/user.types";
+import { AdminDetailsModal } from "./AdminDetailsModal";
 import Link from "next/link";
+import { CreateAdminModal } from "./CreateAdminModal";
+import { UpdateAdminModal } from "./UpdateAdminModal";
+import { useUser } from "@/context/UserContext";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -103,7 +103,7 @@ const formatDate = (iso?: string) => {
 
 // ─── Skeleton Row ─────────────────────────────────────────────────────────────
 
-function AgentRowSkeleton() {
+function AdminRowSkeleton() {
   return (
     <TableRow>
       <TableCell>
@@ -115,7 +115,7 @@ function AgentRowSkeleton() {
           </div>
         </div>
       </TableCell>
-      {Array.from({ length: 5 }).map((_, i) => (
+      {Array.from({ length: 4 }).map((_, i) => (
         <TableCell key={i}>
           <Skeleton className="h-4 w-20" />
         </TableCell>
@@ -174,6 +174,7 @@ const STAT_COLOR_MAP: Record<
   },
 };
 
+
 function StatCard({
   label,
   value,
@@ -226,10 +227,9 @@ function SortIcon({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function AgentManagement() {
+export default function AdminManagement() {
   // ── filters & pagination ──
   const [searchTerm, setSearchTerm] = useState("");
-  const [leaderFilter, setLeaderFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState<IsActive | "all">("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -241,108 +241,127 @@ export default function AgentManagement() {
   const [sortDir, setSortDir] = useState<SortDir>(null);
 
   // ── modals ──
-  const [editingAgent, setEditingAgent] = useState<IUser | null>(null);
+  const [editingAdmin, setEditingAdmin] = useState<IUser | null>(null);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
-  const [viewingAgent, setViewingAgent] = useState<IUser | null>(null);
+  const [viewingAdmin, setViewingAdmin] = useState<IUser | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [deletingAgent, setDeletingAgent] = useState<IUser | null>(null);
+  const [deletingAdmin, setDeletingAdmin] = useState<IUser | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   // ── reset page on filter change ──
-  useEffect(() => { setPage(1); }, [searchTerm, leaderFilter, statusFilter]);
+  useEffect(() => {
+    setTimeout(() => {
+      setPage(1);
+    }, 100);
+  }, [searchTerm, statusFilter]);
 
-  // ── API calls ──
-  // const { data, isLoading, refetch } = useGetAllAgentsQuery({
-  //   searchTerm: searchTerm || undefined,
-  //   isActive:   statusFilter !== "all" ? statusFilter : undefined,
-  //   page,
-  //   limit,
-  //   ...(startDate && { startDate }),
-  //   ...(endDate   && { endDate }),
-  // });
-
-  // ── API calls ──
-  const { data, isLoading, refetch } = useGetAllAgentsQuery({
+  // ── API ──
+  const { data, isLoading, refetch } = useGetAllAdminsQuery({
     searchTerm: searchTerm || undefined,
-    isActive: statusFilter !== "all" ? (statusFilter as IsActive) : undefined,
+    isActive: statusFilter !== "all" ? statusFilter : undefined,
     page,
     limit,
     ...(startDate && { startDate }),
     ...(endDate && { endDate }),
   });
 
-
-  console.log("agents all ", data)
-  const { data: leadersData } = useGetAllAgentLeadersQuery({ limit: 100 });
-
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
 
-  // ── derived data ──
-  const agents: IUser[] = data?.data ?? [];
+  // ── derived ──
+  const admins: IUser[] = useMemo(() => data?.data ?? [], [data]);
   const stats = data?.stats;
   const meta = data?.meta;
   const totalPage = meta?.totalPage ?? 1;
 
-  const hasActiveFilters = leaderFilter !== "all" || statusFilter !== "all";
+  const hasActiveFilters = statusFilter !== "all";
   const hasDateFilter = !!(startDate || endDate);
+  const { user, logout } = useUser();
 
-  // ── client-side leader filter (backend doesn't support it directly) ──
-  const filteredAgents = useMemo(() => {
-    if (leaderFilter === "all") return agents;
-    return agents.filter((a) => {
-      const leader = a.agentLeader;
-      if (!leader) return false;
-      if (typeof leader === "string") return leader === leaderFilter;
-      return leader._id === leaderFilter;
-    });
-  }, [agents, leaderFilter]);
+  const userRole = user?.role;
 
   // ── client-side sort ──
-  const sortedAgents = useMemo(() => {
-    if (!sortField || !sortDir) return filteredAgents;
-    return [...filteredAgents].sort((a, b) => {
-      let aVal: string = "";
-      let bVal: string = "";
-
-      if (sortField === "name") { aVal = a.name ?? ""; bVal = b.name ?? ""; }
-      if (sortField === "phone") { aVal = a.phone ?? ""; bVal = b.phone ?? ""; }
-      if (sortField === "isActive") { aVal = a.isActive ?? ""; bVal = b.isActive ?? ""; }
-      if (sortField === "createdAt") { aVal = a.createdAt ?? ""; bVal = b.createdAt ?? ""; }
-
+  const sortedAdmins = useMemo(() => {
+    if (!sortField || !sortDir) return admins;
+    return [...admins].sort((a, b) => {
+      let aVal = "";
+      let bVal = "";
+      if (sortField === "name") {
+        aVal = a.name ?? "";
+        bVal = b.name ?? "";
+      }
+      if (sortField === "phone") {
+        aVal = a.phone ?? "";
+        bVal = b.phone ?? "";
+      }
+      if (sortField === "isActive") {
+        aVal = a.isActive ?? "";
+        bVal = b.isActive ?? "";
+      }
+      if (sortField === "createdAt") {
+        aVal = a.createdAt ?? "";
+        bVal = b.createdAt ?? "";
+      }
       return sortDir === "asc"
         ? aVal.localeCompare(bVal)
         : bVal.localeCompare(aVal);
     });
-  }, [filteredAgents, sortField, sortDir]);
+  }, [admins, sortField, sortDir]);
 
   // ── handlers ──
   const handleSort = (field: SortField) => {
-    if (sortField !== field) { setSortField(field); setSortDir("asc"); return; }
-    if (sortDir === "asc") { setSortDir("desc"); return; }
-    setSortField(null); setSortDir(null);
+    if (sortField !== field) {
+      setSortField(field);
+      setSortDir("asc");
+      return;
+    }
+    if (sortDir === "asc") {
+      setSortDir("desc");
+      return;
+    }
+    setSortField(null);
+    setSortDir(null);
   };
 
-  const clearFilters = () => { setLeaderFilter("all"); setStatusFilter("all"); };
-  const clearDateFilter = () => { setStartDate(""); setEndDate(""); };
+  const clearFilters = () => setStatusFilter("all");
+  const clearDateFilter = () => {
+    setStartDate("");
+    setEndDate("");
+  };
 
-  const openEditDialog = (a: IUser) => { setEditingAgent(a); setIsUpdateOpen(true); };
-  const openDetailsDialog = (a: IUser) => { setViewingAgent(a); setIsDetailsOpen(true); };
-  const openDeleteDialog = (a: IUser) => { setDeletingAgent(a); setIsDeleteOpen(true); };
+  const openEditDialog = (a: IUser) => {
+    setEditingAdmin(a);
+    setIsUpdateOpen(true);
+  };
+  const openDetailsDialog = (a: IUser) => {
+    setViewingAdmin(a);
+    setIsDetailsOpen(true);
+  };
+  const openDeleteDialog = (a: IUser) => {
+    setDeletingAdmin(a);
+    setIsDeleteOpen(true);
+  };
 
   const handleDelete = async () => {
-    if (!deletingAgent?._id) return;
+    if (!deletingAdmin?._id) return;
     try {
-      await deleteUser(String(deletingAgent._id)).unwrap();
-      toast.success("Agent deleted successfully");
+      await deleteUser(String(deletingAdmin._id)).unwrap();
+      toast.success("Admin deleted successfully");
       setIsDeleteOpen(false);
-      setDeletingAgent(null);
+      setDeletingAdmin(null);
       refetch();
     } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to delete agent");
+      toast.error(err?.data?.message || "Failed to delete admin");
     }
   };
 
-  // ── reusable sortable header ──
+  const getCreatedByName = (u: IUser): string => {
+    const c = u.createdBy;
+    if (!c) return "—";
+    if (typeof c === "string") return c;
+    return c.name ?? "—";
+  };
+
+  // ── sortable th ──
   const SortableTh = ({
     field,
     label,
@@ -361,45 +380,43 @@ export default function AgentManagement() {
     </TableHead>
   );
 
-  // ── leader name helper ──
-  const getLeaderName = (a: IUser): string => {
-    const l = a.agentLeader;
-    if (!l) return "—";
-    if (typeof l === "string") return l;
-    return l.name ?? "—";
-  };
-
-  // ── created-by helper ──
-  const getCreatedByName = (a: IUser): string => {
-    const c = a.createdBy;
-    if (!c) return "—";
-    if (typeof c === "string") return c;
-    return c.name ?? "—";
-  };
-
   // ─────────────────────────────────────────────────────────────────────────────
+
+  if (userRole !== Role.SUPER_ADMIN) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)]">
+        <p className="text-lg text-muted-foreground">
+          You are not authorized to view this page.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       {/* Page Header */}
       <PageHeader
-        title="Agent Management"
-        description="Manage all agents and monitor their activity"
+        title="Admin Management"
+        description="Manage all admins and monitor their activity"
         breadcrumbs={[
           { label: "Dashboard", href: "/dashboard" },
-          { label: "Agent Management" },
+          { label: "Admin Management" },
         ]}
-        // action={<CreateAgentModal onSuccess={refetch} />}
-        action={<div className="flex items-center gap-2">
-          <Link href="/admin/dashboard/agents/trash">
-            <Button variant="outline" className="hover:cursor-pointer flex items-center">
-              <Trash2 className="mr-2 h-4 w-4" />
-              <span>Trash</span>
-            </Button>
-          </Link>
+        action={
+          <div className="flex items-center gap-2">
+            <Link href="/admin/dashboard/admin/trash">
+              <Button
+                variant="outline"
+                className="hover:cursor-pointer flex items-center"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                <span>Trash</span>
+              </Button>
+            </Link>
 
-          <CreateAgentModal onSuccess={refetch} />
-        </div>}
+            <CreateAdminModal onSuccess={refetch} />
+          </div>
+        }
       />
 
       {/* ── Stat Cards ── */}
@@ -447,28 +464,28 @@ export default function AgentManagement() {
         ) : (
           <>
             <StatCard
-              label="Total Agents"
+              label="Total Admins"
               value={stats?.total ?? 0}
               sub="registered in the system"
               icon={Users}
               color="blue"
             />
             <StatCard
-              label="Active Agents"
+              label="Active Admins"
               value={stats?.active ?? 0}
               sub={`${stats?.total ? Math.round(((stats?.active ?? 0) / stats.total) * 100) : 0}% of total`}
               icon={UserCheck}
               color="emerald"
             />
             <StatCard
-              label="Inactive Agents"
+              label="Inactive Admins"
               value={stats?.inactive ?? 0}
               sub="not currently active"
               icon={UserX}
               color="slate"
             />
             <StatCard
-              label="Blocked Agents"
+              label="Blocked Admins"
               value={stats?.blocked ?? 0}
               sub="access restricted"
               icon={ShieldAlert}
@@ -480,7 +497,6 @@ export default function AgentManagement() {
 
       {/* ── Search & Filters ── */}
       <div className="flex flex-col sm:flex-row gap-3">
-        {/* Search */}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
@@ -491,33 +507,6 @@ export default function AgentManagement() {
           />
         </div>
 
-        {/* Agent Leader filter */}
-        <Select
-          value={leaderFilter}
-          // onValueChange={(v) => setLeaderFilter(v)}
-          onValueChange={(v) => setLeaderFilter(String(v))}
-        >
-          <SelectTrigger className="w-56 h-9 text-sm">
-            <span className="flex items-center gap-2">
-              <UserCog className="w-4 h-4 text-slate-400 shrink-0" />
-              {leaderFilter === "all"
-                ? "All Leaders"
-                : (leadersData?.data ?? []).find(
-                  (l: IUser) => String(l._id) === leaderFilter,
-                )?.name || "Select leader"}
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Leaders</SelectItem>
-            {(leadersData?.data ?? []).map((leader: IUser) => (
-              <SelectItem key={String(leader._id)} value={String(leader._id)}>
-                {leader.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Status filter */}
         <Select
           value={statusFilter as any}
           onValueChange={(v) => setStatusFilter(v as IsActive | "all")}
@@ -556,39 +545,44 @@ export default function AgentManagement() {
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50 dark:bg-slate-800/50">
-                <SortableTh field="name" label="Agent" />
+                <SortableTh field="name" label="Admin" />
                 <SortableTh field="phone" label="Phone" />
-                <TableHead className="whitespace-nowrap">Agent Leader</TableHead>
                 <TableHead className="whitespace-nowrap">Created By</TableHead>
                 <SortableTh field="createdAt" label="Joined" />
                 <TableHead className="whitespace-nowrap">Last Login</TableHead>
                 <SortableTh field="isActive" label="Status" />
-                <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
+                <TableHead className="text-right whitespace-nowrap">
+                  Actions
+                </TableHead>
               </TableRow>
             </TableHeader>
 
             <TableBody>
               {isLoading ? (
                 Array.from({ length: 6 }).map((_, i) => (
-                  <AgentRowSkeleton key={i} />
+                  <AdminRowSkeleton key={i} />
                 ))
-              ) : sortedAgents.length === 0 ? (
+              ) : sortedAdmins.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8}>
+                  <TableCell colSpan={7}>
                     <div className="flex flex-col items-center justify-center py-16 text-slate-400">
-                      <Users className="w-12 h-12 mb-4 opacity-30" />
+                      <ShieldCheck className="w-12 h-12 mb-4 opacity-30" />
                       {searchTerm || hasActiveFilters ? (
                         <>
-                          <p className="text-base font-medium">No results found</p>
+                          <p className="text-base font-medium">
+                            No results found
+                          </p>
                           <p className="text-sm mt-1">
                             Try adjusting your search or filters
                           </p>
                         </>
                       ) : (
                         <>
-                          <p className="text-base font-medium">No agents added yet</p>
+                          <p className="text-base font-medium">
+                            No admins added yet
+                          </p>
                           <p className="text-sm mt-1">
-                            Click the Add Agent button to get started
+                            Click the Add Admin button to get started
                           </p>
                         </>
                       )}
@@ -596,73 +590,72 @@ export default function AgentManagement() {
                   </TableCell>
                 </TableRow>
               ) : (
-                sortedAgents.map((agent) => {
-                  const status = agent.isActive ?? IsActive.INACTIVE;
+                sortedAdmins.map((admin) => {
+                  const status = admin.isActive ?? IsActive.INACTIVE;
                   return (
                     <TableRow
-                      key={String(agent._id)}
+                      key={String(admin._id)}
                       className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
                     >
-                      {/* Agent name + phone */}
+                      {/* Name + phone */}
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          {agent.picture ? (
+                          {admin.picture ? (
                             <img
-                              src={agent.picture}
-                              alt={agent.name}
+                              src={admin.picture}
+                              alt={admin.name}
                               className="w-9 h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 shrink-0"
                             />
                           ) : (
-                            <div className="w-9 h-9 rounded-full bg-linear-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                              {agent.name?.charAt(0)?.toUpperCase() ?? "A"}
+                            <div className="w-9 h-9 rounded-full bg-linear-to-br from-indigo-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                              {admin.name?.charAt(0)?.toUpperCase() ?? "A"}
                             </div>
                           )}
                           <div className="min-w-0">
                             <p className="font-medium text-slate-900 dark:text-white truncate max-w-36">
-                              {agent.name ?? "—"}
+                              {admin.name ?? "—"}
                             </p>
                             <p className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate max-w-36">
-                              {agent.phone ?? "—"}
+                              {admin.phone ?? "—"}
                             </p>
                           </div>
                         </div>
                       </TableCell>
 
-                      {/* Phone (standalone) */}
+                      {/* Phone */}
                       <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
-                        {agent.phone ?? "—"}
-                      </TableCell>
-
-                      {/* Agent Leader */}
-                      <TableCell>
-                        <span className="inline-flex items-center gap-1.5 text-sm text-slate-700 dark:text-slate-300">
-                          <UserCog className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          {getLeaderName(agent)}
-                        </span>
+                        {admin.phone ?? "—"}
                       </TableCell>
 
                       {/* Created By */}
                       <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
-                        {getCreatedByName(agent)}
+                        {getCreatedByName(admin)}
                       </TableCell>
 
-                      {/* Joined date */}
+                      {/* Joined */}
                       <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
-                        {formatDate(agent.createdAt)}
+                        {formatDate(admin.createdAt)}
                       </TableCell>
 
-                      {/* Last login */}
+                      {/* Last Login */}
                       <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
-                        {agent.lastLoginAt ? formatDate(agent.lastLoginAt) : (
-                          <span className="text-slate-300 dark:text-slate-600 italic text-xs">Never</span>
+                        {admin.lastLoginAt ? (
+                          formatDate(admin.lastLoginAt)
+                        ) : (
+                          <span className="text-slate-300 dark:text-slate-600 italic text-xs">
+                            Never
+                          </span>
                         )}
                       </TableCell>
 
-                      {/* Status badge */}
+                      {/* Status */}
                       <TableCell>
                         <Badge
                           variant="outline"
-                          className={STATUS_STYLES[status as IsActive] ?? STATUS_STYLES[IsActive.INACTIVE]}
+                          className={
+                            STATUS_STYLES[status as IsActive] ??
+                            STATUS_STYLES[IsActive.INACTIVE]
+                          }
                         >
                           <span
                             className={`h-1.5 w-1.5 rounded-full mr-1.5 inline-block ${STATUS_DOT[status as IsActive] ?? STATUS_DOT[IsActive.INACTIVE]}`}
@@ -679,7 +672,7 @@ export default function AgentManagement() {
                             size="icon"
                             className="h-8 w-8"
                             title="View details"
-                            onClick={() => openDetailsDialog(agent)}
+                            onClick={() => openDetailsDialog(admin)}
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </Button>
@@ -687,8 +680,8 @@ export default function AgentManagement() {
                             variant="outline"
                             size="icon"
                             className="h-8 w-8"
-                            title="Edit agent"
-                            onClick={() => openEditDialog(agent)}
+                            title="Edit admin"
+                            onClick={() => openEditDialog(admin)}
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </Button>
@@ -696,8 +689,8 @@ export default function AgentManagement() {
                             variant="destructive"
                             size="icon"
                             className="h-8 w-8"
-                            title="Delete agent"
-                            onClick={() => openDeleteDialog(agent)}
+                            title="Delete admin"
+                            onClick={() => openDeleteDialog(admin)}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </Button>
@@ -717,15 +710,15 @@ export default function AgentManagement() {
           />
         </div>
 
-        {/* Footer row count */}
-        {!isLoading && sortedAgents.length > 0 && (
+        {/* Footer */}
+        {!isLoading && sortedAdmins.length > 0 && (
           <div className="px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Showing{" "}
               <span className="font-semibold text-slate-700 dark:text-slate-300">
-                {sortedAgents.length}
+                {sortedAdmins.length}
               </span>{" "}
-              agent{sortedAgents.length !== 1 ? "s" : ""}
+              admin{sortedAdmins.length !== 1 ? "s" : ""}
               {hasActiveFilters && " (filtered)"}
             </p>
             {totalPage > 1 && (
@@ -738,20 +731,19 @@ export default function AgentManagement() {
       </div>
 
       {/* ── Modals ── */}
-      {editingAgent && (
-        <UpdateAgentModal
+      {editingAdmin && (
+        <UpdateAdminModal
           open={isUpdateOpen}
           onOpenChange={setIsUpdateOpen}
-          item={editingAgent}
+          item={editingAdmin}
           onSuccess={refetch}
         />
       )}
-
-      {viewingAgent && (
-        <AgentDetailsModal
+      {viewingAdmin && (
+        <AdminDetailsModal
           open={isDetailsOpen}
           onOpenChange={setIsDetailsOpen}
-          item={viewingAgent}
+          item={viewingAdmin}
         />
       )}
 
@@ -759,10 +751,10 @@ export default function AgentManagement() {
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Agent</AlertDialogTitle>
+            <AlertDialogTitle>Delete Admin</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete{" "}
-              <strong>{deletingAgent?.name}</strong>? This action cannot be
+              <strong>{deletingAdmin?.name}</strong>? This action cannot be
               undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

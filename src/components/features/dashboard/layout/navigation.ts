@@ -3,10 +3,13 @@ import { Role } from "@/types/user.types";
 import { adminNavigation } from "./navigations/admin.navigation";
 import { agentLeaderNavigation } from "./navigations/agentLeader.navigation";
 import { agentNavigation } from "./navigations/agent.navigation";
+import { superAdminNavigation } from "./navigations/superAdmin.navigation";
 
 export const getDashboardNavigation = (role?: Role) => {
   switch (role) {
     case Role.SUPER_ADMIN:
+      return superAdminNavigation;
+
     case Role.ADMIN:
       return adminNavigation;
 

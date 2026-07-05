@@ -27,11 +27,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <ReduxProvider>
-    <DashboardLayoutWrapper
-      defaultOpen={true}
-    >
+      <DashboardLayoutWrapper
+        defaultOpen={true}
+      >
         {children}
-    </DashboardLayoutWrapper>
-      </ReduxProvider>
+      </DashboardLayoutWrapper>
+    </ReduxProvider>
   );
 }
