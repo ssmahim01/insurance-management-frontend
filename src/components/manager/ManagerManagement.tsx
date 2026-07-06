@@ -47,18 +47,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  useGetAllAdminsQuery,
+  useGetAllManagersQuery,
   useDeleteUserMutation,
 } from "@/redux/features/user/user.api";
 
 import { PageHeader } from "../shared/PageHeader";
 import { Pagination } from "../pagination/Pagination";
 import { IsActive, IUser, Role } from "@/types/user.types";
-import { AdminDetailsModal } from "./AdminDetailsModal";
 import Link from "next/link";
-import { CreateAdminModal } from "./CreateAdminModal";
-import { UpdateAdminModal } from "./UpdateAdminModal";
+
 import { useUser } from "@/context/UserContext";
+import { CreateManagerModal } from "./CreateManager";
+import { UpdateManagerModal } from "./UpdateManager";
+import { ManagerDetailsModal } from "./ManagerDetailsModal";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -103,7 +104,7 @@ const formatDate = (iso?: string) => {
 
 // ─── Skeleton Row ─────────────────────────────────────────────────────────────
 
-function AdminRowSkeleton() {
+function ManagerRowSkeleton() {
   return (
     <TableRow>
       <TableCell>
@@ -174,7 +175,6 @@ const STAT_COLOR_MAP: Record<
   },
 };
 
-
 function StatCard({
   label,
   value,
@@ -227,7 +227,7 @@ function SortIcon({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function AdminManagement() {
+export default function ManagerManagement() {
   // ── filters & pagination ──
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<IsActive | "all">("all");
@@ -241,11 +241,11 @@ export default function AdminManagement() {
   const [sortDir, setSortDir] = useState<SortDir>(null);
 
   // ── modals ──
-  const [editingAdmin, setEditingAdmin] = useState<IUser | null>(null);
+  const [editingManager, setEditingManager] = useState<IUser | null>(null);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
-  const [viewingAdmin, setViewingAdmin] = useState<IUser | null>(null);
+  const [viewingManager, setViewingManager] = useState<IUser | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [deletingAdmin, setDeletingAdmin] = useState<IUser | null>(null);
+  const [deletingManager, setDeletingManager] = useState<IUser | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   // ── reset page on filter change ──
@@ -256,7 +256,7 @@ export default function AdminManagement() {
   }, [searchTerm, statusFilter]);
 
   // ── API ──
-  const { data, isLoading, refetch } = useGetAllAdminsQuery({
+  const { data, isLoading, refetch } = useGetAllManagersQuery({
     searchTerm: searchTerm || undefined,
     isActive: statusFilter !== "all" ? statusFilter : undefined,
     page,
@@ -268,7 +268,7 @@ export default function AdminManagement() {
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
 
   // ── derived ──
-  const admins: IUser[] = useMemo(() => data?.data ?? [], [data]);
+  const managers: IUser[] = useMemo(() => data?.data ?? [], [data]);
   const stats = data?.stats;
   const meta = data?.meta;
   const totalPage = meta?.totalPage ?? 1;
@@ -280,9 +280,9 @@ export default function AdminManagement() {
   const userRole = user?.role;
 
   // ── client-side sort ──
-  const sortedAdmins = useMemo(() => {
-    if (!sortField || !sortDir) return admins;
-    return [...admins].sort((a, b) => {
+  const sortedManagers = useMemo(() => {
+    if (!sortField || !sortDir) return managers;
+    return [...managers].sort((a, b) => {
       let aVal = "";
       let bVal = "";
       if (sortField === "name") {
@@ -305,7 +305,7 @@ export default function AdminManagement() {
         ? aVal.localeCompare(bVal)
         : bVal.localeCompare(aVal);
     });
-  }, [admins, sortField, sortDir]);
+  }, [managers, sortField, sortDir]);
 
   // ── handlers ──
   const handleSort = (field: SortField) => {
@@ -328,29 +328,29 @@ export default function AdminManagement() {
     setEndDate("");
   };
 
-  const openEditDialog = (a: IUser) => {
-    setEditingAdmin(a);
+  const openEditDialog = (m: IUser) => {
+    setEditingManager(m);
     setIsUpdateOpen(true);
   };
-  const openDetailsDialog = (a: IUser) => {
-    setViewingAdmin(a);
+  const openDetailsDialog = (m: IUser) => {
+    setViewingManager(m);
     setIsDetailsOpen(true);
   };
-  const openDeleteDialog = (a: IUser) => {
-    setDeletingAdmin(a);
+  const openDeleteDialog = (m: IUser) => {
+    setDeletingManager(m);
     setIsDeleteOpen(true);
   };
 
   const handleDelete = async () => {
-    if (!deletingAdmin?._id) return;
+    if (!deletingManager?._id) return;
     try {
-      await deleteUser(String(deletingAdmin._id)).unwrap();
-      toast.success("Admin deleted successfully");
+      await deleteUser(String(deletingManager._id)).unwrap();
+      toast.success("Manager deleted successfully");
       setIsDeleteOpen(false);
-      setDeletingAdmin(null);
+      setDeletingManager(null);
       refetch();
     } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to delete admin");
+      toast.error(err?.data?.message || "Failed to delete manager");
     }
   };
 
@@ -384,15 +384,15 @@ export default function AdminManagement() {
     <div className="space-y-6">
       {/* Page Header */}
       <PageHeader
-        title="Admin Management"
-        description="Manage all admins and monitor their activity"
+        title="Manager Management"
+        description="Manage all managers and monitor their activity"
         breadcrumbs={[
           { label: "Dashboard", href: "/dashboard" },
-          { label: "Admin Management" },
+          { label: "Manager Management" },
         ]}
         action={
           <div className="flex items-center gap-2">
-            <Link href="/admin/dashboard/admin/trash">
+            <Link href="/admin/dashboard/managers/trash">
               <Button
                 variant="outline"
                 className="hover:cursor-pointer flex items-center"
@@ -402,7 +402,7 @@ export default function AdminManagement() {
               </Button>
             </Link>
 
-            <CreateAdminModal onSuccess={refetch} />
+            <CreateManagerModal onSuccess={refetch} />
           </div>
         }
       />
@@ -452,28 +452,28 @@ export default function AdminManagement() {
         ) : (
           <>
             <StatCard
-              label="Total Admins"
+              label="Total Managers"
               value={stats?.total ?? 0}
               sub="registered in the system"
               icon={Users}
               color="blue"
             />
             <StatCard
-              label="Active Admins"
+              label="Active Managers"
               value={stats?.active ?? 0}
               sub={`${stats?.total ? Math.round(((stats?.active ?? 0) / stats.total) * 100) : 0}% of total`}
               icon={UserCheck}
               color="emerald"
             />
             <StatCard
-              label="Inactive Admins"
+              label="Inactive Managers"
               value={stats?.inactive ?? 0}
               sub="not currently active"
               icon={UserX}
               color="slate"
             />
             <StatCard
-              label="Blocked Admins"
+              label="Blocked Managers"
               value={stats?.blocked ?? 0}
               sub="access restricted"
               icon={ShieldAlert}
@@ -533,7 +533,7 @@ export default function AdminManagement() {
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50 dark:bg-slate-800/50">
-                <SortableTh field="name" label="Admin" />
+                <SortableTh field="name" label="Manager" />
                 <SortableTh field="phone" label="Phone" />
                 <TableHead className="whitespace-nowrap">Created By</TableHead>
                 <SortableTh field="createdAt" label="Joined" />
@@ -548,9 +548,9 @@ export default function AdminManagement() {
             <TableBody>
               {isLoading ? (
                 Array.from({ length: 6 }).map((_, i) => (
-                  <AdminRowSkeleton key={i} />
+                  <ManagerRowSkeleton key={i} />
                 ))
-              ) : sortedAdmins.length === 0 ? (
+              ) : sortedManagers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7}>
                     <div className="flex flex-col items-center justify-center py-16 text-slate-400">
@@ -567,10 +567,10 @@ export default function AdminManagement() {
                       ) : (
                         <>
                           <p className="text-base font-medium">
-                            No admins added yet
+                            No managers added yet
                           </p>
                           <p className="text-sm mt-1">
-                            Click the Add Admin button to get started
+                            Click the Add Manager button to get started
                           </p>
                         </>
                       )}
@@ -578,33 +578,33 @@ export default function AdminManagement() {
                   </TableCell>
                 </TableRow>
               ) : (
-                sortedAdmins.map((admin) => {
-                  const status = admin.isActive ?? IsActive.INACTIVE;
+                sortedManagers.map((manager) => {
+                  const status = manager.isActive ?? IsActive.INACTIVE;
                   return (
                     <TableRow
-                      key={String(admin._id)}
+                      key={String(manager._id)}
                       className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
                     >
                       {/* Name + phone */}
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          {admin.picture ? (
+                          {manager.picture ? (
                             <img
-                              src={admin.picture}
-                              alt={admin.name}
+                              src={manager.picture}
+                              alt={manager.name}
                               className="w-9 h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 shrink-0"
                             />
                           ) : (
                             <div className="w-9 h-9 rounded-full bg-linear-to-br from-indigo-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                              {admin.name?.charAt(0)?.toUpperCase() ?? "A"}
+                              {manager.name?.charAt(0)?.toUpperCase() ?? "M"}
                             </div>
                           )}
                           <div className="min-w-0">
                             <p className="font-medium text-slate-900 dark:text-white truncate max-w-36">
-                              {admin.name ?? "—"}
+                              {manager.name ?? "—"}
                             </p>
                             <p className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate max-w-36">
-                              {admin.phone ?? "—"}
+                              {manager.phone ?? "—"}
                             </p>
                           </div>
                         </div>
@@ -612,23 +612,23 @@ export default function AdminManagement() {
 
                       {/* Phone */}
                       <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
-                        {admin.phone ?? "—"}
+                        {manager.phone ?? "—"}
                       </TableCell>
 
                       {/* Created By */}
                       <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
-                        {getCreatedByName(admin)}
+                        {getCreatedByName(manager)}
                       </TableCell>
 
                       {/* Joined */}
                       <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
-                        {formatDate(admin.createdAt)}
+                        {formatDate(manager.createdAt)}
                       </TableCell>
 
                       {/* Last Login */}
                       <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
-                        {admin.lastLoginAt ? (
-                          formatDate(admin.lastLoginAt)
+                        {manager.lastLoginAt ? (
+                          formatDate(manager.lastLoginAt)
                         ) : (
                           <span className="text-slate-300 dark:text-slate-600 italic text-xs">
                             Never
@@ -660,7 +660,7 @@ export default function AdminManagement() {
                             size="icon"
                             className="h-8 w-8"
                             title="View details"
-                            onClick={() => openDetailsDialog(admin)}
+                            onClick={() => openDetailsDialog(manager)}
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </Button>
@@ -668,8 +668,8 @@ export default function AdminManagement() {
                             variant="outline"
                             size="icon"
                             className="h-8 w-8"
-                            title="Edit admin"
-                            onClick={() => openEditDialog(admin)}
+                            title="Edit manager"
+                            onClick={() => openEditDialog(manager)}
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </Button>
@@ -677,8 +677,8 @@ export default function AdminManagement() {
                             variant="destructive"
                             size="icon"
                             className="h-8 w-8"
-                            title="Delete admin"
-                            onClick={() => openDeleteDialog(admin)}
+                            title="Delete manager"
+                            onClick={() => openDeleteDialog(manager)}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </Button>
@@ -699,14 +699,14 @@ export default function AdminManagement() {
         </div>
 
         {/* Footer */}
-        {!isLoading && sortedAdmins.length > 0 && (
+        {!isLoading && sortedManagers.length > 0 && (
           <div className="px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Showing{" "}
               <span className="font-semibold text-slate-700 dark:text-slate-300">
-                {sortedAdmins.length}
+                {sortedManagers.length}
               </span>{" "}
-              admin{sortedAdmins.length !== 1 ? "s" : ""}
+              manager{sortedManagers.length !== 1 ? "s" : ""}
               {hasActiveFilters && " (filtered)"}
             </p>
             {totalPage > 1 && (
@@ -719,19 +719,19 @@ export default function AdminManagement() {
       </div>
 
       {/* ── Modals ── */}
-      {editingAdmin && (
-        <UpdateAdminModal
+      {editingManager && (
+        <UpdateManagerModal
           open={isUpdateOpen}
           onOpenChange={setIsUpdateOpen}
-          item={editingAdmin}
+          item={editingManager}
           onSuccess={refetch}
         />
       )}
-      {viewingAdmin && (
-        <AdminDetailsModal
+      {viewingManager && (
+        <ManagerDetailsModal
           open={isDetailsOpen}
           onOpenChange={setIsDetailsOpen}
-          item={viewingAdmin}
+          item={viewingManager}
         />
       )}
 
@@ -739,10 +739,10 @@ export default function AdminManagement() {
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Admin</AlertDialogTitle>
+            <AlertDialogTitle>Delete Manager</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete{" "}
-              <strong>{deletingAdmin?.name}</strong>? This action cannot be
+              <strong>{deletingManager?.name}</strong>? This action cannot be
               undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

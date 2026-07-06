@@ -31,36 +31,18 @@ export const agentNavigation: NavGroup[] = [
         href: "/agent/customers",
         icon: Users,
       },
-      {
-        id: "subscriptions",
-        label: "Subscriptions",
-        href: "/agent/subscriptions",
-        icon: ShieldCheck,
-      },
-      {
-        id: "trash",
-        label: "Trash",
-        href: "/agent/trash",
-        icon: Trash2,
-      },
-    ],
-  },
-
-  {
-    label: "System",
-    items: [
-      {
-        id: "profile",
-        label: "Profile",
-        href: "/dashboard/profile",
-        icon: User,
-      },
-      {
-        id: "settings",
-        label: "Settings",
-        href: "/dashboard/settings",
-        icon: Settings,
-      },
+      // {
+      //   id: "subscriptions",
+      //   label: "Subscriptions",
+      //   href: "/agent/subscriptions",
+      //   icon: ShieldCheck,
+      // },
+      // {
+      //   id: "trash",
+      //   label: "Trash",
+      //   href: "/agent/trash",
+      //   icon: Trash2,
+      // },
     ],
   },
 ];

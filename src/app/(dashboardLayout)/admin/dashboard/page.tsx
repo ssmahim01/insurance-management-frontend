@@ -15,6 +15,8 @@ export default function DashboardPage() {
         title="Dashboard"
         description="Welcome to your insurance management system"
         breadcrumbs={[{ label: 'Dashboard' }]}
+
+        
       />
 
       {/* Overview Stats */}

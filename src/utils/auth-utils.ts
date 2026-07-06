@@ -1,100 +1,3 @@
-// // export type UserRole = "ADMIN" | "EDITOR";
-// export type UserRole =
-//   | "ADMIN"
-//   | "OWNER" 
-//   | "CUSTOMER";
-
-// export type RouteConfig = {
-//   exact: string[];
-//   patterns: RegExp[];
-// };
-
-
-// export const customerRoutes: RouteConfig = {
-//   exact: ["/dashboard"],
-//   patterns: [/^\/dashboard/],
-// };
-
-// export const adminRoutes: RouteConfig = {
-//   exact: ["/dashboard/admin"],
-//   patterns: [/^\/dashboard\/admin/],
-// };
-
-// export const userRoutes: RouteConfig = {
-//   exact: ["/dashboard"],
-//   patterns: [/^\/dashboard/],
-// };
-
-// export const ownerRoutes: RouteConfig = {
-//   exact: ["/dashboard/owner"],
-//   patterns: [/^\/dashboard\/owner/],
-// };
-
-
-// export const isRouteMatches = (
-//   pathname: string,
-//   routes: RouteConfig
-// ): boolean => {
-//   if (routes.exact.includes(pathname)) return true;
-//   return routes.patterns.some((pattern) => pattern.test(pathname));
-// };
-
-// export const getRouteOwner = (
-//   pathname: string
-// ): UserRole | "USER" | null => {
-
-//   if (isRouteMatches(pathname, ownerRoutes)) {
-//     return "ADMIN";
-//   }
-
-//   if (isRouteMatches(pathname, userRoutes)) {
-//     return "CUSTOMER";
-//   }
-
-//   return null;
-// };
-
-// export const isValidRouteForRole = (
-//   pathname: string,
-//   role: UserRole
-// ): boolean => {
-//   // Public
-//   if (!pathname.startsWith("/customer")) {
-//     return true;
-//   }
-
-//   // Customer
-//   if (pathname.startsWith("/customer")) {
-//     return role === "CUSTOMER";
-//   }
-
-//   // Admin only
-//   if (pathname.startsWith("/dashboard/admin")) {
-//     return role === "ADMIN";
-//   }
-
-//   // Staff access
-//   if (pathname.startsWith("/dashboard")) {
-//     return ["ADMIN", "OWNER", "CUSTOMER"].includes(role);
-//   }
-
-//   return false;
-// };
-
-
-// export const getDefaultDashboardRoute = (role: UserRole): string => {
-//   switch (role) {
-//     case "CUSTOMER":
-//       return "/dashboard";
-    
-//     case "ADMIN":
-//       return "/dashboard/admin";
-//     default:
-//       return "/";
-//   }
-// };
-
-
 
 import { Role } from "@/types/user.types";
 
@@ -112,12 +15,6 @@ export const superAdminOnlyRoutes: RouteConfig = {
   patterns: [
     /^\/admin\/dashboard\/admin\/trash/,
     /^\/admin\/dashboard\/admin/,
-    /^\/admin\/dashboard\/claims\/trash/,
-    /^\/admin\/dashboard\/agent-leader\/trash/,
-    /^\/admin\/dashboard\/agents\/trash/,
-    /^\/admin\/dashboard\/customers\/trash/,
-    /^\/admin\/dashboard\/partners\/trash/,
-    /^\/admin\/dashboard\/branches\/trash/,
   ],
 };
 
@@ -126,19 +23,24 @@ export const adminRoutes: RouteConfig = {
   patterns: [/^\/admin\/dashboard/],
 };
 
+export const managerRoutes: RouteConfig = {
+  exact: [],
+  patterns: [/^\/manager\/dashboard/],
+};
+
 export const agentLeaderRoutes: RouteConfig = {
   exact: [],
-  patterns: [/^\/agent-leader/],
+  patterns: [/^\/agent-leader\/dashboard/],
 };
 
 export const agentRoutes: RouteConfig = {
   exact: [],
-  patterns: [/^\/agent(?!-leader)/], // "/agent" but NOT "/agent-leader"
+  patterns: [/^\/agent\/dashboard/],
 };
 
 export const customerRoutes: RouteConfig = {
-  exact: ["/dashboard"],
-  patterns: [/^\/dashboard(?!\/admin)/], // "/dashboard*" but NOT "/dashboard/admin"
+  exact: ["/customer/dashboard"],
+  patterns: [/^\/customer\/dashboard(?!\/admin)/], // "/customer/dashboard*" but NOT "/customer/dashboard/admin"
 };
 
 export const sharedAuthRoutes: RouteConfig = {
@@ -156,24 +58,16 @@ export const isRouteMatches = (
   return routes.patterns.some((pattern) => pattern.test(pathname));
 };
 
-/**
- * Route-ta kon "owner" er (i.e. protected route hole minimum jei role
- * lagbe). Public route hole null.
- */
 export const getRouteOwner = (pathname: string): UserRole | null => {
   if (isRouteMatches(pathname, superAdminOnlyRoutes)) return Role.SUPER_ADMIN;
   if (isRouteMatches(pathname, adminRoutes)) return Role.ADMIN;
+  if (isRouteMatches(pathname, managerRoutes)) return Role.MANAGER;
   if (isRouteMatches(pathname, agentLeaderRoutes)) return Role.AGENT_LEADER;
   if (isRouteMatches(pathname, agentRoutes)) return Role.AGENT;
   if (isRouteMatches(pathname, customerRoutes)) return Role.CUSTOMER;
   return null;
 };
 
-/**
- * Given pathname + role, check kore role ei route access korte pare kina.
- * Shared routes (profile/settings) shob logged-in role e access pabে.
- * Order matters: most specific route age check hocche.
- */
 export const isValidRouteForRole = (
   pathname: string,
   role: UserRole
@@ -191,6 +85,11 @@ export const isValidRouteForRole = (
   // Admin section — SUPER_ADMIN and ADMIN
   if (isRouteMatches(pathname, adminRoutes)) {
     return role === Role.SUPER_ADMIN || role === Role.ADMIN;
+  }
+
+  // Manager section
+  if (isRouteMatches(pathname, managerRoutes)) {
+    return role === Role.MANAGER;
   }
 
   // Agent Leader section
@@ -220,12 +119,14 @@ export const getDefaultDashboardRoute = (role: UserRole): string => {
     case Role.SUPER_ADMIN:
     case Role.ADMIN:
       return "/admin/dashboard";
+    case Role.MANAGER:
+      return "/manager/dashboard";
     case Role.AGENT_LEADER:
       return "/agent-leader/dashboard";
     case Role.AGENT:
-      return "/agent";
+      return "/agent/dashboard";
     case Role.CUSTOMER:
-      return "/dashboard";
+      return "/customer/dashboard";
     default:
       return "/";
   }

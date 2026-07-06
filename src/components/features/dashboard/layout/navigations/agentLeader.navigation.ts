@@ -37,12 +37,12 @@ export const agentLeaderNavigation: NavGroup[] = [
         href: "/agent-leader/my-agents/create",
         icon: Plus,
       },
-      {
-        id: "trash-agents",
-        label: "Trash",
-        href: "/agent-leader/my-agents/trash",
-        icon: Trash2,
-      },
+      // {
+      //   id: "trash-agents",
+      //   label: "Trash",
+      //   href: "/agent-leader/my-agents/trash",
+      //   icon: Trash2,
+      // },
     ],
   },
 

@@ -44,6 +44,12 @@ export const adminNavigation: NavGroup[] = [
   {
     label: "Team Management",
     items: [
+            {
+        id: "managers",
+        label: "Managers",
+        href: "/admin/dashboard/managers",
+        icon: Users,
+    },
       {
         id: "agent-leaders",
         label: "Agent Leaders",
@@ -75,23 +81,5 @@ export const adminNavigation: NavGroup[] = [
         icon: Building2,
       },
     ],
-  },
-
-  {
-    label: "System",
-    items: [
-      {
-        id: "settings",
-        label: "Settings",
-        href: "/dashboard/settings",
-        icon: Settings,
-      },
-      {
-        id: "profile",
-        label: "Profile",
-        href: "/dashboard/profile",
-        icon: User,
-      },
-    ],
-  },
+  }
 ];

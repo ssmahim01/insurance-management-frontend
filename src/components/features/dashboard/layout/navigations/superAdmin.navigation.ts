@@ -33,7 +33,7 @@ export const superAdminNavigation: NavGroup[] = [
         icon: Package,
       },
 
-        {
+      {
         id: "claims",
         label: "Claims",
         href: "/admin/dashboard/claims",
@@ -50,6 +50,12 @@ export const superAdminNavigation: NavGroup[] = [
         label: "Admins",
         href: "/admin/dashboard/admin",
         icon: User,
+      },
+      {
+        id: "managers",
+        label: "Managers",
+        href: "/admin/dashboard/managers",
+        icon: Users,
       },
       {
         id: "agent-leaders",
@@ -80,24 +86,6 @@ export const superAdminNavigation: NavGroup[] = [
         label: "Branches",
         href: "/admin/dashboard/branches",
         icon: Building2,
-      },
-    ],
-  },
-
-  {
-    label: "System",
-    items: [
-      {
-        id: "settings",
-        label: "Settings",
-        href: "/dashboard/settings",
-        icon: Settings,
-      },
-      {
-        id: "profile",
-        label: "Profile",
-        href: "/dashboard/profile",
-        icon: User,
       },
     ],
   },

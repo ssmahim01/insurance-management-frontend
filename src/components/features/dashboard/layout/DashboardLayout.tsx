@@ -106,24 +106,7 @@ export const dashboardNavigation: NavGroup[] = [
         icon: Package,
       },
     ],
-  },
-  {
-    label: "System",
-    items: [
-      {
-        id: "settings",
-        label: "Settings",
-        href: "/admin/dashboard/settings",
-        icon: Settings,
-      },
-      {
-        id: "profile",
-        label: "Profile",
-        href: "/dashboard/profile",
-        icon: User,
-      },
-    ],
-  },
+  }
 ];
 
 interface DashboardHeaderProps {

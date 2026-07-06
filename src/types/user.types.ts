@@ -6,6 +6,7 @@ export enum Role {
   AGENT_LEADER = "AGENT_LEADER",
   AGENT = "AGENT",
   CUSTOMER = "CUSTOMER",
+  MANAGER = "MANAGER",
 }
 
 export enum IsActive {
@@ -131,6 +132,7 @@ export interface IAllUsersResponse {
     total: number;
     superAdmin: IStats;
     admin: IStats;
+    manager: IStats;
     agentLeader: IStats;
     agent: IStats;
     customer: IStats;

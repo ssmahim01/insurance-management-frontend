@@ -61,7 +61,7 @@ function Field({
           </a>
         ) : (
           <p
-            className={`text-sm text-slate-800 dark:text-slate-200 break-words ${
+            className={`text-sm text-slate-800 dark:text-slate-200 wrap-break-word ${
               mono ? "font-mono" : ""
             }`}
           >
@@ -115,10 +115,10 @@ export function PartnerDetailsModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto p-0">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] scrollbar-none overflow-y-auto p-0">
 
         {/* ── Header ── */}
-        <div className="relative bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 px-6 pt-8 pb-6 rounded-t-lg">
+        <div className="relative bg-linear-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 px-6 pt-8 pb-6 rounded-t-lg">
           <DialogHeader className="sr-only">
             <DialogTitle>Partner Details</DialogTitle>
             <DialogDescription>
@@ -135,7 +135,7 @@ export function PartnerDetailsModal({
                 className="w-20 h-20 rounded-xl object-contain border-4 border-white dark:border-slate-800 shadow-md bg-white p-1 shrink-0"
               />
             ) : (
-              <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white font-bold text-3xl border-4 border-white dark:border-slate-800 shadow-md shrink-0">
+              <div className="w-20 h-20 rounded-xl bg-linear-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white font-bold text-3xl border-4 border-white dark:border-slate-800 shadow-md shrink-0">
                 {item.name?.charAt(0)?.toUpperCase() ?? "P"}
               </div>
             )}
