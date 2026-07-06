@@ -203,7 +203,7 @@ export function CreatePackageModal({ onSuccess }: CreatePackageModalProps) {
       </Button>
 
       <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); else setOpen(true); }}>
-        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto p-6">
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] scrollbar-none overflow-y-auto p-6">
           <DialogHeader className="flex flex-col items-center gap-2 pb-2">
             <div className="w-12 h-12 rounded-xl bg-linear-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-md mb-1">
               <Package className="w-6 h-6 text-white" />

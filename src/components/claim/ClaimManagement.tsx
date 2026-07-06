@@ -262,7 +262,7 @@ export default function ClaimManagement() {
               </Button>
             </Link>
 
-            <CreateClaimModal onSuccess={refetch} />
+            {/* <CreateClaimModal onSuccess={refetch} /> */}
           </div>
         }
       />

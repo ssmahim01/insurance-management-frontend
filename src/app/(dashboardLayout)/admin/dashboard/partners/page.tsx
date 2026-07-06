@@ -1,800 +1,747 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// import type { Metadata } from 'next';
-// import { PageHeader } from '@/components/features/dashboard/components/PageHeader';
-// import { PartnerStats } from '@/components/features/dashboard/partners/PartnerStats';
-// import { PartnerTable } from '@/components/features/dashboard/partners/PartnerTable';
 
-// export const metadata: Metadata = {
-//   title: 'Partners | Shurokkha',
-//   description: 'Manage your insurance partners',
+
+// "use client";
+
+// import React, { useState, useEffect } from "react";
+// import {
+//   Edit2,
+//   Trash2,
+//   Search,
+//   Eye,
+//   ChevronUp,
+//   ChevronDown,
+//   ChevronsUpDown,
+//   X,
+//   Handshake,
+//   CheckCircle2,
+//   XCircle,
+//   LayoutGrid,
+// } from "lucide-react";
+// import { toast } from "sonner";
+
+// import {
+//   AlertDialog,
+//   AlertDialogAction,
+//   AlertDialogCancel,
+//   AlertDialogContent,
+//   AlertDialogDescription,
+//   AlertDialogHeader,
+//   AlertDialogTitle,
+// } from "@/components/ui/alert-dialog";
+// import { Button } from "@/components/ui/button";
+// import { Input } from "@/components/ui/input";
+// import { Badge } from "@/components/ui/badge";
+// import { Skeleton } from "@/components/ui/skeleton";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+// } from "@/components/ui/select";
+// import {
+//   Table,
+//   TableBody,
+//   TableCell,
+//   TableHead,
+//   TableHeader,
+//   TableRow,
+// } from "@/components/ui/table";
+
+// // import { PageHeader } from "../shared/PageHeader";
+// // import { Pagination } from "../pagination/Pagination";
+// // import { CreatePartnerModal } from "./CreatePartner";
+// // import { UpdatePartnerModal } from "./UpdatePartner";
+// // import { PartnerDetailsModal } from "./PartnerDetailsModal";
+
+// // ─── Replace with your actual RTK Query hooks ─────────────────────────────────
+// import {
+//   useGetAllPartnersQuery,
+//   useSoftDeletePartnerMutation,
+// } from "@/redux/features/partner/partner.api";
+// import { IPartner } from "@/types/partner.types";
+// import { PageHeader } from "@/components/shared/PageHeader";
+// import { CreatePartnerModal } from "@/components/partner/CreatePartner";
+// import { Pagination } from "@/components/pagination/Pagination";
+// import { PartnerDetailsModal } from "@/components/partner/PartnerDetailsModal";
+// import { UpdatePartnerModal } from "@/components/partner/UpdatePartner";
+// import Image from "next/image";
+
+// // ─── Types ────────────────────────────────────────────────────────────────────
+
+// type SortField = "name" | "phone" | "isActive" | "createdAt";
+// type SortDir = "asc" | "desc" | null;
+
+// // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+// const formatDate = (iso?: string) => {
+//   if (!iso) return "—";
+//   return new Date(iso).toLocaleDateString("en-GB", {
+//     day: "2-digit",
+//     month: "short",
+//     year: "numeric",
+//   });
 // };
 
-// // Mock data for now - replace with RTK Query
-// const mockPartners = [
-//   {
-//     id: '1',
-//     name: 'ABC Insurance Co.',
-//     email: 'contact@abcins.com',
-//     phone: '+880 1700 000001',
-//     website: 'https://abcins.com',
-//     logo: 'https://via.placeholder.com/100',
-//     description: 'Leading insurance provider',
-//     status: 'active' as const,
-//     createdAt: new Date('2024-01-15'),
-//   },
-//   {
-//     id: '2',
-//     name: 'XYZ Insurance Ltd.',
-//     email: 'info@xyzins.com',
-//     phone: '+880 1700 000002',
-//     website: 'https://xyzins.com',
-//     logo: 'https://via.placeholder.com/100',
-//     description: 'Comprehensive insurance solutions',
-//     status: 'active' as const,
-//     createdAt: new Date('2024-02-20'),
-//   },
-//   {
-//     id: '3',
-//     name: 'PQR Insurance Group',
-//     email: 'support@pqrins.com',
-//     phone: '+880 1700 000003',
-//     website: 'https://pqrins.com',
-//     logo: 'https://via.placeholder.com/100',
-//     description: 'Insurance for everyone',
-//     status: 'inactive' as const,
-//     createdAt: new Date('2024-03-10'),
-//   },
-// ];
+// // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
-// export default function PartnersPage() {
+// function PartnerRowSkeleton() {
 //   return (
-//     <div>
-//       <PageHeader
-//         title="Partners"
-//         description="Manage and view all your insurance partners"
-//         breadcrumbs={[
-//           { label: 'Dashboard', href: '/dashboard' },
-//           { label: 'Partners' },
-//         ]}
-//         action={{
-//           label: 'Create Partner',
-//           href: '/dashboard/partners/create',
-//         }}
-//       />
+//     <TableRow>
+//       <TableCell>
+//         <div className="flex items-center gap-3">
+//           <Skeleton className="w-10 h-10 rounded-lg shrink-0" />
+//           <div className="space-y-1.5">
+//             <Skeleton className="h-4 w-32" />
+//             <Skeleton className="h-3 w-20" />
+//           </div>
+//         </div>
+//       </TableCell>
+//       {Array.from({ length: 4 }).map((_, i) => (
+//         <TableCell key={i}>
+//           <Skeleton className="h-4 w-20" />
+//         </TableCell>
+//       ))}
+//       <TableCell>
+//         <div className="flex gap-1.5 justify-end">
+//           <Skeleton className="h-8 w-8 rounded-md" />
+//           <Skeleton className="h-8 w-8 rounded-md" />
+//           <Skeleton className="h-8 w-8 rounded-md" />
+//         </div>
+//       </TableCell>
+//     </TableRow>
+//   );
+// }
 
-//       <PartnerStats partners={mockPartners} />
+// // ─── Stat Card ────────────────────────────────────────────────────────────────
 
-//       <div className="space-y-6">
-//         <PartnerTable partners={mockPartners} />
+// function StatCardSkeleton() {
+//   return (
+//     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
+//       <div className="flex items-center justify-between mb-3">
+//         <Skeleton className="h-4 w-28" />
+//         <Skeleton className="h-9 w-9 rounded-lg" />
 //       </div>
+//       <Skeleton className="h-7 w-16 mb-1" />
+//       <Skeleton className="h-3 w-24" />
 //     </div>
 //   );
 // }
 
-"use client";
+// type StatColor = "violet" | "emerald" | "slate";
 
-import React, { useState, useEffect } from "react";
-import {
-  Edit2,
-  Trash2,
-  Search,
-  Eye,
-  ChevronUp,
-  ChevronDown,
-  ChevronsUpDown,
-  X,
-  Handshake,
-  CheckCircle2,
-  XCircle,
-  LayoutGrid,
-} from "lucide-react";
-import { toast } from "sonner";
+// const STAT_COLOR_MAP: Record<
+//   StatColor,
+//   { bg: string; icon: string; text: string }
+// > = {
+//   violet: {
+//     bg: "bg-violet-50 dark:bg-violet-900/20",
+//     icon: "text-violet-600 dark:text-violet-400",
+//     text: "text-violet-600 dark:text-violet-400",
+//   },
+//   emerald: {
+//     bg: "bg-emerald-50 dark:bg-emerald-900/20",
+//     icon: "text-emerald-600 dark:text-emerald-400",
+//     text: "text-emerald-600 dark:text-emerald-400",
+//   },
+//   slate: {
+//     bg: "bg-slate-100 dark:bg-slate-800",
+//     icon: "text-slate-500 dark:text-slate-400",
+//     text: "text-slate-500 dark:text-slate-400",
+//   },
+// };
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+// function StatCard({
+//   label,
+//   value,
+//   sub,
+//   icon: Icon,
+//   color,
+// }: {
+//   label: string;
+//   value: string | number;
+//   sub?: string;
+//   icon: React.ElementType;
+//   color: StatColor;
+// }) {
+//   const c = STAT_COLOR_MAP[color];
+//   return (
+//     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
+//       <div className="flex items-center justify-between mb-3">
+//         <p className="text-sm text-slate-500 dark:text-slate-400">{label}</p>
+//         <div className={`p-2 rounded-lg ${c.bg}`}>
+//           <Icon className={`w-5 h-5 ${c.icon}`} />
+//         </div>
+//       </div>
+//       <p className="text-2xl font-semibold text-slate-900 dark:text-white">
+//         {value}
+//       </p>
+//       {sub && <p className={`text-xs mt-1 ${c.text}`}>{sub}</p>}
+//     </div>
+//   );
+// }
 
-// import { PageHeader } from "../shared/PageHeader";
-// import { Pagination } from "../pagination/Pagination";
-// import { CreatePartnerModal } from "./CreatePartner";
-// import { UpdatePartnerModal } from "./UpdatePartner";
-// import { PartnerDetailsModal } from "./PartnerDetailsModal";
+// // ─── Sort Icon ────────────────────────────────────────────────────────────────
 
-// ─── Replace with your actual RTK Query hooks ─────────────────────────────────
-import {
-  useGetAllPartnersQuery,
-  useSoftDeletePartnerMutation,
-} from "@/redux/features/partner/partner.api";
-import { IPartner } from "@/types/partner.types";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { CreatePartnerModal } from "@/components/partner/CreatePartner";
-import { Pagination } from "@/components/pagination/Pagination";
-import { PartnerDetailsModal } from "@/components/partner/PartnerDetailsModal";
-import { UpdatePartnerModal } from "@/components/partner/UpdatePartner";
-import Image from "next/image";
+// function SortIcon({
+//   field,
+//   sortField,
+//   sortDir,
+// }: {
+//   field: SortField;
+//   sortField: SortField | null;
+//   sortDir: SortDir;
+// }) {
+//   if (sortField !== field)
+//     return <ChevronsUpDown className="w-3.5 h-3.5 ml-1 text-slate-400" />;
+//   return sortDir === "asc" ? (
+//     <ChevronUp className="w-3.5 h-3.5 ml-1 text-violet-500" />
+//   ) : (
+//     <ChevronDown className="w-3.5 h-3.5 ml-1 text-violet-500" />
+//   );
+// }
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// // ─── Main Component ───────────────────────────────────────────────────────────
 
-type SortField = "name" | "phone" | "isActive" | "createdAt";
-type SortDir = "asc" | "desc" | null;
+// export default function PartnerManagement() {
+//   // ── filters ──
+//   const [searchTerm, setSearchTerm] = useState("");
+//   const [statusFilter, setStatusFilter] = useState<"all" | "true" | "false">(
+//     "all",
+//   );
+//   const [startDate, setStartDate] = useState("");
+//   const [endDate, setEndDate] = useState("");
+//   const [page, setPage] = useState(1);
+//   const limit = 10;
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+//   // ── sort ──
+//   const [sortField, setSortField] = useState<SortField | null>(null);
+//   const [sortDir, setSortDir] = useState<SortDir>(null);
 
-const formatDate = (iso?: string) => {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+//   // ── modals ──
+//   const [viewingPartner, setViewingPartner] = useState<IPartner | null>(null);
+//   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+//   const [editingPartner, setEditingPartner] = useState<IPartner | null>(null);
+//   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
+//   const [deletingPartner, setDeletingPartner] = useState<IPartner | null>(null);
+//   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+//   useEffect(() => {
+//     setTimeout(() => {
+//       setPage(1);
+//     }, 100);
+//   }, [searchTerm, statusFilter]);
+
+//   // ── API ──
+//   const { data, isLoading, refetch } = useGetAllPartnersQuery({
+//     searchTerm: searchTerm || undefined,
+//     isActive: statusFilter !== "all" ? statusFilter : undefined,
+//     page,
+//     limit,
+//     ...(startDate && { startDate }),
+//     ...(endDate && { endDate }),
+//   });
+
+//   console.log("Partners response ", data);
+
+//   const [softDeletePartner, { isLoading: isDeleting }] =
+//     useSoftDeletePartnerMutation();
+
+//   // ── derived ──
+//   const partners: IPartner[] = data?.data ?? [];
+//   const stats = data?.stats;
+//   const meta = data?.meta;
+//   const totalPage = meta?.totalPage ?? 1;
+
+//   const hasActiveFilters = statusFilter !== "all";
+//   const hasDateFilter = !!(startDate || endDate);
+
+//   // ── client sort ──
+//   const sortedPartners = React.useMemo(() => {
+//     if (!sortField || !sortDir) return partners;
+//     return [...partners].sort((a, b) => {
+//       let aVal = "";
+//       let bVal = "";
+//       if (sortField === "name") {
+//         aVal = a.name ?? "";
+//         bVal = b.name ?? "";
+//       }
+//       if (sortField === "phone") {
+//         aVal = a.phone ?? "";
+//         bVal = b.phone ?? "";
+//       }
+//       if (sortField === "isActive") {
+//         aVal = String(a.isActive);
+//         bVal = String(b.isActive);
+//       }
+//       if (sortField === "createdAt") {
+//         aVal = a.createdAt ?? "";
+//         bVal = b.createdAt ?? "";
+//       }
+//       return sortDir === "asc"
+//         ? aVal.localeCompare(bVal)
+//         : bVal.localeCompare(aVal);
+//     });
+//   }, [partners, sortField, sortDir]);
+
+//   // ── handlers ──
+//   const handleSort = (field: SortField) => {
+//     if (sortField !== field) {
+//       setSortField(field);
+//       setSortDir("asc");
+//       return;
+//     }
+//     if (sortDir === "asc") {
+//       setSortDir("desc");
+//       return;
+//     }
+//     setSortField(null);
+//     setSortDir(null);
+//   };
+
+//   const clearFilters = () => {
+//     setStatusFilter("all");
+//   };
+//   const clearDateFilter = () => {
+//     setStartDate("");
+//     setEndDate("");
+//   };
+
+//   const openDetailsDialog = (p: IPartner) => {
+//     setViewingPartner(p);
+//     setIsDetailsOpen(true);
+//   };
+//   const openEditDialog = (p: IPartner) => {
+//     setEditingPartner(p);
+//     setIsUpdateOpen(true);
+//   };
+//   const openDeleteDialog = (p: IPartner) => {
+//     setDeletingPartner(p);
+//     setIsDeleteOpen(true);
+//   };
+
+//   const handleDelete = async () => {
+//     if (!deletingPartner?._id) return;
+//     try {
+//       await softDeletePartner(String(deletingPartner._id)).unwrap();
+//       toast.success("Partner moved to trash");
+//       setIsDeleteOpen(false);
+//       setDeletingPartner(null);
+//       refetch();
+//     } catch (err: any) {
+//       toast.error(err?.data?.message || "Failed to delete partner");
+//     }
+//   };
+
+//   // ── sortable header ──
+//   const SortableTh = ({
+//     field,
+//     label,
+//   }: {
+//     field: SortField;
+//     label: string;
+//   }) => (
+//     <TableHead
+//       className="cursor-pointer select-none whitespace-nowrap"
+//       onClick={() => handleSort(field)}
+//     >
+//       <span className="inline-flex items-center hover:text-slate-900 dark:hover:text-white transition-colors">
+//         {label}
+//         <SortIcon field={field} sortField={sortField} sortDir={sortDir} />
+//       </span>
+//     </TableHead>
+//   );
+
+//   // ─────────────────────────────────────────────────────────────────────────────
+
+//   return (
+//     <div className="space-y-6">
+//       {/* Page Header */}
+//       <PageHeader
+//         title="Partner Management"
+//         description="Manage insurance partners and their details"
+//         breadcrumbs={[
+//           { label: "Dashboard", href: "/dashboard" },
+//           { label: "Partner Management" },
+//         ]}
+//         // action={<CreatePartnerModal onSuccess={refetch} />}
+//       />
+
+//       {/* ── Stat Cards ── */}
+//       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+//         {/* Date filter row */}
+//         <div className="sm:col-span-3 flex flex-wrap items-center gap-3">
+//           <p className="text-sm text-slate-500 dark:text-slate-400 shrink-0">
+//             Filter stats by date:
+//           </p>
+//           <div className="flex items-center gap-2 flex-wrap">
+//             <Input
+//               type="date"
+//               className="h-9 w-40 text-sm"
+//               value={startDate}
+//               onChange={(e) => setStartDate(e.target.value)}
+//             />
+//             <span className="text-slate-400 text-sm">to</span>
+//             <Input
+//               type="date"
+//               className="h-9 w-40 text-sm"
+//               value={endDate}
+//               onChange={(e) => setEndDate(e.target.value)}
+//             />
+//             {hasDateFilter && (
+//               <Button
+//                 variant="outline"
+//                 size="icon"
+//                 className="h-9 w-9 shrink-0"
+//                 onClick={clearDateFilter}
+//                 title="Clear date filter"
+//               >
+//                 <X className="w-4 h-4" />
+//               </Button>
+//             )}
+//           </div>
+//         </div>
+
+//         {isLoading ? (
+//           <>
+//             <StatCardSkeleton />
+//             <StatCardSkeleton />
+//             <StatCardSkeleton />
+//           </>
+//         ) : (
+//           <>
+//             <StatCard
+//               label="Total Partners"
+//               value={stats?.total ?? 0}
+//               sub="registered partners"
+//               icon={LayoutGrid}
+//               color="violet"
+//             />
+//             <StatCard
+//               label="Active Partners"
+//               value={stats?.active ?? 0}
+//               sub={`${stats?.total ? Math.round(((stats?.active ?? 0) / stats.total) * 100) : 0}% of total`}
+//               icon={CheckCircle2}
+//               color="emerald"
+//             />
+//             <StatCard
+//               label="Inactive Partners"
+//               value={stats?.inactive ?? 0}
+//               sub="currently disabled"
+//               icon={XCircle}
+//               color="slate"
+//             />
+//           </>
+//         )}
+//       </div>
+
+//       {/* ── Search & Filters ── */}
+//       <div className="flex flex-col sm:flex-row gap-3">
+//         <div className="relative flex-1">
+//           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+//           <Input
+//             placeholder="Search by name, phone or email..."
+//             className="pl-10"
+//             value={searchTerm}
+//             onChange={(e) => setSearchTerm(e.target.value)}
+//           />
+//         </div>
+
+//         <Select
+//           value={statusFilter}
+//           onValueChange={(v) => setStatusFilter(v as "all" | "true" | "false")}
+//         >
+//           <SelectTrigger className="w-40 h-9 text-sm">
+//             <span>
+//               {statusFilter === "all"
+//                 ? "All Status"
+//                 : statusFilter === "true"
+//                   ? "Active"
+//                   : "Inactive"}
+//             </span>
+//           </SelectTrigger>
+//           <SelectContent>
+//             <SelectItem value="all">All Status</SelectItem>
+//             <SelectItem value="true">Active</SelectItem>
+//             <SelectItem value="false">Inactive</SelectItem>
+//           </SelectContent>
+//         </Select>
+
+//         {hasActiveFilters && (
+//           <Button
+//             variant="outline"
+//             size="icon"
+//             onClick={clearFilters}
+//             title="Clear filters"
+//             className="shrink-0"
+//           >
+//             <X className="w-4 h-4" />
+//           </Button>
+//         )}
+//       </div>
+
+//       {/* ── Table ── */}
+//       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+//         <div className="overflow-x-auto">
+//           <Table>
+//             <TableHeader>
+//               <TableRow className="bg-slate-50 dark:bg-slate-800/50">
+//                 <SortableTh field="name" label="Partner" />
+//                 <SortableTh field="phone" label="Phone" />
+//                 <TableHead className="whitespace-nowrap">Email</TableHead>
+//                 <TableHead className="whitespace-nowrap">Website</TableHead>
+//                 <SortableTh field="createdAt" label="Added" />
+//                 <SortableTh field="isActive" label="Status" />
+//                 <TableHead className="text-right whitespace-nowrap">
+//                   Actions
+//                 </TableHead>
+//               </TableRow>
+//             </TableHeader>
+
+//             <TableBody>
+//               {isLoading ? (
+//                 Array.from({ length: 6 }).map((_, i) => (
+//                   <PartnerRowSkeleton key={i} />
+//                 ))
+//               ) : sortedPartners.length === 0 ? (
+//                 <TableRow>
+//                   <TableCell colSpan={7}>
+//                     <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+//                       <Handshake className="w-12 h-12 mb-4 opacity-30" />
+//                       {searchTerm || hasActiveFilters ? (
+//                         <>
+//                           <p className="text-base font-medium">
+//                             No results found
+//                           </p>
+//                           <p className="text-sm mt-1">
+//                             Try adjusting your search or filters
+//                           </p>
+//                         </>
+//                       ) : (
+//                         <>
+//                           <p className="text-base font-medium">
+//                             No partners added yet
+//                           </p>
+//                           <p className="text-sm mt-1">
+//                             Click the Add Partner button to get started
+//                           </p>
+//                         </>
+//                       )}
+//                     </div>
+//                   </TableCell>
+//                 </TableRow>
+//               ) : (
+//                 sortedPartners.map((partner) => (
+//                   <TableRow
+//                     key={String(partner._id)}
+//                     className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+//                   >
+//                     {/* Partner name + logo */}
+//                     <TableCell>
+//                       <div className="flex items-center gap-3">
+//                         {partner.logo ? (
+//                           <Image
+//                           width={400}
+//                           height={400}
+//                           priority
+//                           quality={90}
+//                             src={partner.logo}
+//                             alt={partner.name}
+//                             className="w-10 h-10 rounded-lg object-contain border border-slate-200 dark:border-slate-700 bg-white p-1 shrink-0"
+//                           />
+//                         ) : (
+//                           <div className="w-10 h-10 rounded-lg bg-linear-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+//                             {partner.name?.charAt(0)?.toUpperCase() ?? "P"}
+//                           </div>
+//                         )}
+//                         <div className="min-w-0">
+//                           <p className="font-medium text-slate-900 dark:text-white truncate max-w-40">
+//                             {partner.name}
+//                           </p>
+//                           {partner.description && (
+//                             <p className="text-xs text-slate-400 truncate max-w-40">
+//                               {partner.description}
+//                             </p>
+//                           )}
+//                         </div>
+//                       </div>
+//                     </TableCell>
+
+//                     {/* Phone */}
+//                     <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
+//                       {partner.phone ?? "—"}
+//                     </TableCell>
+
+//                     {/* Email */}
+//                     <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
+//                       {partner.email ?? "—"}
+//                     </TableCell>
+
+//                     {/* Website */}
+//                     <TableCell>
+//                       {partner.website ? (
+//                         <a
+//                           href={partner.website}
+//                           target="_blank"
+//                           rel="noopener noreferrer"
+//                           className="text-violet-600 dark:text-violet-400 text-sm hover:underline truncate max-w-36 inline-block"
+//                         >
+//                           {partner.website.replace(/^https?:\/\//, "")}
+//                         </a>
+//                       ) : (
+//                         <span className="text-slate-400 text-sm">—</span>
+//                       )}
+//                     </TableCell>
+
+//                     {/* Added date */}
+//                     <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
+//                       {formatDate(partner.createdAt)}
+//                     </TableCell>
+
+//                     {/* Status */}
+//                     <TableCell>
+//                       {partner.isActive ? (
+//                         <Badge
+//                           variant="outline"
+//                           className="border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400"
+//                         >
+//                           <span className="h-1.5 w-1.5 rounded-full mr-1.5 inline-block bg-emerald-500" />
+//                           Active
+//                         </Badge>
+//                       ) : (
+//                         <Badge
+//                           variant="outline"
+//                           className="border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
+//                         >
+//                           <span className="h-1.5 w-1.5 rounded-full mr-1.5 inline-block bg-slate-400" />
+//                           Inactive
+//                         </Badge>
+//                       )}
+//                     </TableCell>
+
+//                     {/* Actions */}
+//                     <TableCell>
+//                       <div className="flex gap-1.5 justify-end">
+//                         <Button
+//                           variant="outline"
+//                           size="icon"
+//                           className="h-8 w-8"
+//                           title="View details"
+//                           onClick={() => openDetailsDialog(partner)}
+//                         >
+//                           <Eye className="w-3.5 h-3.5" />
+//                         </Button>
+//                         <Button
+//                           variant="outline"
+//                           size="icon"
+//                           className="h-8 w-8"
+//                           title="Edit partner"
+//                           onClick={() => openEditDialog(partner)}
+//                         >
+//                           <Edit2 className="w-3.5 h-3.5" />
+//                         </Button>
+//                         <Button
+//                           variant="destructive"
+//                           size="icon"
+//                           className="h-8 w-8"
+//                           title="Delete partner"
+//                           onClick={() => openDeleteDialog(partner)}
+//                         >
+//                           <Trash2 className="w-3.5 h-3.5" />
+//                         </Button>
+//                       </div>
+//                     </TableCell>
+//                   </TableRow>
+//                 ))
+//               )}
+//             </TableBody>
+//           </Table>
+
+//           <Pagination
+//             page={page}
+//             totalPage={totalPage}
+//             onPageChange={setPage}
+//           />
+//         </div>
+
+//         {/* Footer count */}
+//         {!isLoading && sortedPartners.length > 0 && (
+//           <div className="px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+//             <p className="text-xs text-slate-500 dark:text-slate-400">
+//               Showing{" "}
+//               <span className="font-semibold text-slate-700 dark:text-slate-300">
+//                 {sortedPartners.length}
+//               </span>{" "}
+//               partner{sortedPartners.length !== 1 ? "s" : ""}
+//               {hasActiveFilters && " (filtered)"}
+//             </p>
+//             {totalPage > 1 && (
+//               <p className="text-xs text-slate-500 dark:text-slate-400">
+//                 Page {page} of {totalPage}
+//               </p>
+//             )}
+//           </div>
+//         )}
+//       </div>
+
+//       {/* ── Modals ── */}
+//       {viewingPartner && (
+//         <PartnerDetailsModal
+//           open={isDetailsOpen}
+//           onOpenChange={setIsDetailsOpen}
+//           item={viewingPartner}
+//         />
+//       )}
+
+//       {editingPartner && (
+//         <UpdatePartnerModal
+//           open={isUpdateOpen}
+//           onOpenChange={setIsUpdateOpen}
+//           item={editingPartner}
+//           onSuccess={refetch}
+//         />
+//       )}
+
+//       {/* Delete confirm */}
+//       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+//         <AlertDialogContent>
+//           <AlertDialogHeader>
+//             <AlertDialogTitle>Move to Trash</AlertDialogTitle>
+//             <AlertDialogDescription>
+//               Are you sure you want to move{" "}
+//               <strong>{deletingPartner?.name}</strong> to trash? This can be
+//               restored later.
+//             </AlertDialogDescription>
+//           </AlertDialogHeader>
+//           <div className="flex gap-2">
+//             <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+//             <AlertDialogAction
+//               onClick={handleDelete}
+//               disabled={isDeleting}
+//               className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+//             >
+//               {isDeleting ? "Moving..." : "Move to Trash"}
+//             </AlertDialogAction>
+//           </div>
+//         </AlertDialogContent>
+//       </AlertDialog>
+//     </div>
+//   );
+// }
+
+import type { Metadata } from 'next';
+import PackageManagement from '@/components/package/PackageManagement';
+import PartnerManagement from '@/components/partner/PartnerManagement';
+
+export const metadata: Metadata = {
+  title: 'Insurance Packages | Shurokkha',
+  description: 'Manage your insurance packages',
 };
 
-// ─── Skeleton ─────────────────────────────────────────────────────────────────
-
-function PartnerRowSkeleton() {
+export default function PartnerManagementPage() {
   return (
-    <TableRow>
-      <TableCell>
-        <div className="flex items-center gap-3">
-          <Skeleton className="w-10 h-10 rounded-lg shrink-0" />
-          <div className="space-y-1.5">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-3 w-20" />
-          </div>
-        </div>
-      </TableCell>
-      {Array.from({ length: 4 }).map((_, i) => (
-        <TableCell key={i}>
-          <Skeleton className="h-4 w-20" />
-        </TableCell>
-      ))}
-      <TableCell>
-        <div className="flex gap-1.5 justify-end">
-          <Skeleton className="h-8 w-8 rounded-md" />
-          <Skeleton className="h-8 w-8 rounded-md" />
-          <Skeleton className="h-8 w-8 rounded-md" />
-        </div>
-      </TableCell>
-    </TableRow>
-  );
-}
-
-// ─── Stat Card ────────────────────────────────────────────────────────────────
-
-function StatCardSkeleton() {
-  return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
-      <div className="flex items-center justify-between mb-3">
-        <Skeleton className="h-4 w-28" />
-        <Skeleton className="h-9 w-9 rounded-lg" />
-      </div>
-      <Skeleton className="h-7 w-16 mb-1" />
-      <Skeleton className="h-3 w-24" />
+    <div>
+      <PartnerManagement />
     </div>
   );
 }
 
-type StatColor = "violet" | "emerald" | "slate";
-
-const STAT_COLOR_MAP: Record<
-  StatColor,
-  { bg: string; icon: string; text: string }
-> = {
-  violet: {
-    bg: "bg-violet-50 dark:bg-violet-900/20",
-    icon: "text-violet-600 dark:text-violet-400",
-    text: "text-violet-600 dark:text-violet-400",
-  },
-  emerald: {
-    bg: "bg-emerald-50 dark:bg-emerald-900/20",
-    icon: "text-emerald-600 dark:text-emerald-400",
-    text: "text-emerald-600 dark:text-emerald-400",
-  },
-  slate: {
-    bg: "bg-slate-100 dark:bg-slate-800",
-    icon: "text-slate-500 dark:text-slate-400",
-    text: "text-slate-500 dark:text-slate-400",
-  },
-};
-
-function StatCard({
-  label,
-  value,
-  sub,
-  icon: Icon,
-  color,
-}: {
-  label: string;
-  value: string | number;
-  sub?: string;
-  icon: React.ElementType;
-  color: StatColor;
-}) {
-  const c = STAT_COLOR_MAP[color];
-  return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-sm text-slate-500 dark:text-slate-400">{label}</p>
-        <div className={`p-2 rounded-lg ${c.bg}`}>
-          <Icon className={`w-5 h-5 ${c.icon}`} />
-        </div>
-      </div>
-      <p className="text-2xl font-semibold text-slate-900 dark:text-white">
-        {value}
-      </p>
-      {sub && <p className={`text-xs mt-1 ${c.text}`}>{sub}</p>}
-    </div>
-  );
-}
-
-// ─── Sort Icon ────────────────────────────────────────────────────────────────
-
-function SortIcon({
-  field,
-  sortField,
-  sortDir,
-}: {
-  field: SortField;
-  sortField: SortField | null;
-  sortDir: SortDir;
-}) {
-  if (sortField !== field)
-    return <ChevronsUpDown className="w-3.5 h-3.5 ml-1 text-slate-400" />;
-  return sortDir === "asc" ? (
-    <ChevronUp className="w-3.5 h-3.5 ml-1 text-violet-500" />
-  ) : (
-    <ChevronDown className="w-3.5 h-3.5 ml-1 text-violet-500" />
-  );
-}
-
-// ─── Main Component ───────────────────────────────────────────────────────────
-
-export default function PartnerManagement() {
-  // ── filters ──
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "true" | "false">(
-    "all",
-  );
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [page, setPage] = useState(1);
-  const limit = 10;
-
-  // ── sort ──
-  const [sortField, setSortField] = useState<SortField | null>(null);
-  const [sortDir, setSortDir] = useState<SortDir>(null);
-
-  // ── modals ──
-  const [viewingPartner, setViewingPartner] = useState<IPartner | null>(null);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [editingPartner, setEditingPartner] = useState<IPartner | null>(null);
-  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
-  const [deletingPartner, setDeletingPartner] = useState<IPartner | null>(null);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setPage(1);
-    }, 100);
-  }, [searchTerm, statusFilter]);
-
-  // ── API ──
-  const { data, isLoading, refetch } = useGetAllPartnersQuery({
-    searchTerm: searchTerm || undefined,
-    isActive: statusFilter !== "all" ? statusFilter : undefined,
-    page,
-    limit,
-    ...(startDate && { startDate }),
-    ...(endDate && { endDate }),
-  });
-
-  console.log("Partners response ", data);
-
-  const [softDeletePartner, { isLoading: isDeleting }] =
-    useSoftDeletePartnerMutation();
-
-  // ── derived ──
-  const partners: IPartner[] = data?.data ?? [];
-  const stats = data?.stats;
-  const meta = data?.meta;
-  const totalPage = meta?.totalPage ?? 1;
-
-  const hasActiveFilters = statusFilter !== "all";
-  const hasDateFilter = !!(startDate || endDate);
-
-  // ── client sort ──
-  const sortedPartners = React.useMemo(() => {
-    if (!sortField || !sortDir) return partners;
-    return [...partners].sort((a, b) => {
-      let aVal = "";
-      let bVal = "";
-      if (sortField === "name") {
-        aVal = a.name ?? "";
-        bVal = b.name ?? "";
-      }
-      if (sortField === "phone") {
-        aVal = a.phone ?? "";
-        bVal = b.phone ?? "";
-      }
-      if (sortField === "isActive") {
-        aVal = String(a.isActive);
-        bVal = String(b.isActive);
-      }
-      if (sortField === "createdAt") {
-        aVal = a.createdAt ?? "";
-        bVal = b.createdAt ?? "";
-      }
-      return sortDir === "asc"
-        ? aVal.localeCompare(bVal)
-        : bVal.localeCompare(aVal);
-    });
-  }, [partners, sortField, sortDir]);
-
-  // ── handlers ──
-  const handleSort = (field: SortField) => {
-    if (sortField !== field) {
-      setSortField(field);
-      setSortDir("asc");
-      return;
-    }
-    if (sortDir === "asc") {
-      setSortDir("desc");
-      return;
-    }
-    setSortField(null);
-    setSortDir(null);
-  };
-
-  const clearFilters = () => {
-    setStatusFilter("all");
-  };
-  const clearDateFilter = () => {
-    setStartDate("");
-    setEndDate("");
-  };
-
-  const openDetailsDialog = (p: IPartner) => {
-    setViewingPartner(p);
-    setIsDetailsOpen(true);
-  };
-  const openEditDialog = (p: IPartner) => {
-    setEditingPartner(p);
-    setIsUpdateOpen(true);
-  };
-  const openDeleteDialog = (p: IPartner) => {
-    setDeletingPartner(p);
-    setIsDeleteOpen(true);
-  };
-
-  const handleDelete = async () => {
-    if (!deletingPartner?._id) return;
-    try {
-      await softDeletePartner(String(deletingPartner._id)).unwrap();
-      toast.success("Partner moved to trash");
-      setIsDeleteOpen(false);
-      setDeletingPartner(null);
-      refetch();
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to delete partner");
-    }
-  };
-
-  // ── sortable header ──
-  const SortableTh = ({
-    field,
-    label,
-  }: {
-    field: SortField;
-    label: string;
-  }) => (
-    <TableHead
-      className="cursor-pointer select-none whitespace-nowrap"
-      onClick={() => handleSort(field)}
-    >
-      <span className="inline-flex items-center hover:text-slate-900 dark:hover:text-white transition-colors">
-        {label}
-        <SortIcon field={field} sortField={sortField} sortDir={sortDir} />
-      </span>
-    </TableHead>
-  );
-
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <PageHeader
-        title="Partner Management"
-        description="Manage insurance partners and their details"
-        breadcrumbs={[
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Partner Management" },
-        ]}
-        // action={<CreatePartnerModal onSuccess={refetch} />}
-      />
-
-      {/* ── Stat Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Date filter row */}
-        <div className="sm:col-span-3 flex flex-wrap items-center gap-3">
-          <p className="text-sm text-slate-500 dark:text-slate-400 shrink-0">
-            Filter stats by date:
-          </p>
-          <div className="flex items-center gap-2 flex-wrap">
-            <Input
-              type="date"
-              className="h-9 w-40 text-sm"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
-            <span className="text-slate-400 text-sm">to</span>
-            <Input
-              type="date"
-              className="h-9 w-40 text-sm"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
-            {hasDateFilter && (
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9 shrink-0"
-                onClick={clearDateFilter}
-                title="Clear date filter"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {isLoading ? (
-          <>
-            <StatCardSkeleton />
-            <StatCardSkeleton />
-            <StatCardSkeleton />
-          </>
-        ) : (
-          <>
-            <StatCard
-              label="Total Partners"
-              value={stats?.total ?? 0}
-              sub="registered partners"
-              icon={LayoutGrid}
-              color="violet"
-            />
-            <StatCard
-              label="Active Partners"
-              value={stats?.active ?? 0}
-              sub={`${stats?.total ? Math.round(((stats?.active ?? 0) / stats.total) * 100) : 0}% of total`}
-              icon={CheckCircle2}
-              color="emerald"
-            />
-            <StatCard
-              label="Inactive Partners"
-              value={stats?.inactive ?? 0}
-              sub="currently disabled"
-              icon={XCircle}
-              color="slate"
-            />
-          </>
-        )}
-      </div>
-
-      {/* ── Search & Filters ── */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <Input
-            placeholder="Search by name, phone or email..."
-            className="pl-10"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-
-        <Select
-          value={statusFilter}
-          onValueChange={(v) => setStatusFilter(v as "all" | "true" | "false")}
-        >
-          <SelectTrigger className="w-40 h-9 text-sm">
-            <span>
-              {statusFilter === "all"
-                ? "All Status"
-                : statusFilter === "true"
-                  ? "Active"
-                  : "Inactive"}
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="true">Active</SelectItem>
-            <SelectItem value="false">Inactive</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {hasActiveFilters && (
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={clearFilters}
-            title="Clear filters"
-            className="shrink-0"
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        )}
-      </div>
-
-      {/* ── Table ── */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-slate-50 dark:bg-slate-800/50">
-                <SortableTh field="name" label="Partner" />
-                <SortableTh field="phone" label="Phone" />
-                <TableHead className="whitespace-nowrap">Email</TableHead>
-                <TableHead className="whitespace-nowrap">Website</TableHead>
-                <SortableTh field="createdAt" label="Added" />
-                <SortableTh field="isActive" label="Status" />
-                <TableHead className="text-right whitespace-nowrap">
-                  Actions
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {isLoading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <PartnerRowSkeleton key={i} />
-                ))
-              ) : sortedPartners.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7}>
-                    <div className="flex flex-col items-center justify-center py-16 text-slate-400">
-                      <Handshake className="w-12 h-12 mb-4 opacity-30" />
-                      {searchTerm || hasActiveFilters ? (
-                        <>
-                          <p className="text-base font-medium">
-                            No results found
-                          </p>
-                          <p className="text-sm mt-1">
-                            Try adjusting your search or filters
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <p className="text-base font-medium">
-                            No partners added yet
-                          </p>
-                          <p className="text-sm mt-1">
-                            Click the Add Partner button to get started
-                          </p>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                sortedPartners.map((partner) => (
-                  <TableRow
-                    key={String(partner._id)}
-                    className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
-                  >
-                    {/* Partner name + logo */}
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        {partner.logo ? (
-                          <Image
-                          width={400}
-                          height={400}
-                          priority
-                          quality={90}
-                            src={partner.logo}
-                            alt={partner.name}
-                            className="w-10 h-10 rounded-lg object-contain border border-slate-200 dark:border-slate-700 bg-white p-1 shrink-0"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-lg bg-linear-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                            {partner.name?.charAt(0)?.toUpperCase() ?? "P"}
-                          </div>
-                        )}
-                        <div className="min-w-0">
-                          <p className="font-medium text-slate-900 dark:text-white truncate max-w-40">
-                            {partner.name}
-                          </p>
-                          {partner.description && (
-                            <p className="text-xs text-slate-400 truncate max-w-40">
-                              {partner.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </TableCell>
-
-                    {/* Phone */}
-                    <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
-                      {partner.phone ?? "—"}
-                    </TableCell>
-
-                    {/* Email */}
-                    <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
-                      {partner.email ?? "—"}
-                    </TableCell>
-
-                    {/* Website */}
-                    <TableCell>
-                      {partner.website ? (
-                        <a
-                          href={partner.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-violet-600 dark:text-violet-400 text-sm hover:underline truncate max-w-36 inline-block"
-                        >
-                          {partner.website.replace(/^https?:\/\//, "")}
-                        </a>
-                      ) : (
-                        <span className="text-slate-400 text-sm">—</span>
-                      )}
-                    </TableCell>
-
-                    {/* Added date */}
-                    <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
-                      {formatDate(partner.createdAt)}
-                    </TableCell>
-
-                    {/* Status */}
-                    <TableCell>
-                      {partner.isActive ? (
-                        <Badge
-                          variant="outline"
-                          className="border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400"
-                        >
-                          <span className="h-1.5 w-1.5 rounded-full mr-1.5 inline-block bg-emerald-500" />
-                          Active
-                        </Badge>
-                      ) : (
-                        <Badge
-                          variant="outline"
-                          className="border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
-                        >
-                          <span className="h-1.5 w-1.5 rounded-full mr-1.5 inline-block bg-slate-400" />
-                          Inactive
-                        </Badge>
-                      )}
-                    </TableCell>
-
-                    {/* Actions */}
-                    <TableCell>
-                      <div className="flex gap-1.5 justify-end">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8"
-                          title="View details"
-                          onClick={() => openDetailsDialog(partner)}
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8"
-                          title="Edit partner"
-                          onClick={() => openEditDialog(partner)}
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          className="h-8 w-8"
-                          title="Delete partner"
-                          onClick={() => openDeleteDialog(partner)}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-
-          <Pagination
-            page={page}
-            totalPage={totalPage}
-            onPageChange={setPage}
-          />
-        </div>
-
-        {/* Footer count */}
-        {!isLoading && sortedPartners.length > 0 && (
-          <div className="px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Showing{" "}
-              <span className="font-semibold text-slate-700 dark:text-slate-300">
-                {sortedPartners.length}
-              </span>{" "}
-              partner{sortedPartners.length !== 1 ? "s" : ""}
-              {hasActiveFilters && " (filtered)"}
-            </p>
-            {totalPage > 1 && (
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Page {page} of {totalPage}
-              </p>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* ── Modals ── */}
-      {viewingPartner && (
-        <PartnerDetailsModal
-          open={isDetailsOpen}
-          onOpenChange={setIsDetailsOpen}
-          item={viewingPartner}
-        />
-      )}
-
-      {editingPartner && (
-        <UpdatePartnerModal
-          open={isUpdateOpen}
-          onOpenChange={setIsUpdateOpen}
-          item={editingPartner}
-          onSuccess={refetch}
-        />
-      )}
-
-      {/* Delete confirm */}
-      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Move to Trash</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to move{" "}
-              <strong>{deletingPartner?.name}</strong> to trash? This can be
-              restored later.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="flex gap-2">
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
-            >
-              {isDeleting ? "Moving..." : "Move to Trash"}
-            </AlertDialogAction>
-          </div>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
-  );
-}

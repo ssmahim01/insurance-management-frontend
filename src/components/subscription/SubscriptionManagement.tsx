@@ -480,11 +480,11 @@ export default function SubscriptionManagement() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Subscription Management"
+        title="Customer and Subscription Management"
         description="Manage all customer subscriptions and monitor revenue"
         breadcrumbs={[
           { label: "Dashboard", href: "/admin/dashboard" },
-          { label: "Subscription Management" },
+          { label: "Customer and Subscription Management" },
         ]}
         action={
           <div className="flex items-center gap-2">
