@@ -40,20 +40,24 @@ export default function Login() {
       const response = await loginUser(data);
       if (response.success) {
         toast.success("Login successful!");
-        if (response?.user?.user?.role === "ADMIN") {
+        if (response?.user?.user?.role === "SUPER_ADMIN") {
           router.push("/admin/dashboard");
-        } else if (response?.user?.user?.role === "SUPER_ADMIN") {
+        } else if (response?.user?.user?.role === "ADMIN") {
           router.push("/admin/dashboard");
+        } else if (response?.user?.user?.role === "Manager") {
+          router.push("/manager/dashboard");
         } else if (response?.user?.user?.role === "AGENT_LEADER") {
           router.push("/agent-leader");
         } else if (response?.user?.user?.role === "AGENT") {
           router.push("/agent");
         } else {
-          router.push("/customer");
+          router.push("/customer/dashboard");
         }
       }
 
-      // console.log(' Login data:', data);
+      if (!response.success) {
+        toast.error(response.message || "Login failed. Please try again.");
+      }
     } catch (error) {
       console.error(" Login error:", error);
       if (error instanceof Error) {

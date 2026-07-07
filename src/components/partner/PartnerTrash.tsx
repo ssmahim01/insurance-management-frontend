@@ -1,3 +1,4 @@
+// PartnerTrash.tsx
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
@@ -5,12 +6,12 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import {
-  useGetAllTrashUsersQuery,
-  useRestoreUserMutation,
-  usePermanentDeleteUserMutation,
-} from "@/redux/features/user/user.api";
+  useGetAllTrashPartnersQuery,
+  useRestorePartnerMutation,
+  useDeletePartnerMutation,
+} from "@/redux/features/partner/partner.api";
 import { ITrashFilters } from "@/types/agent-leader";
-import { IUser, Role } from "@/types/user.types";
+import { IPartner } from "@/types/partner.types";
 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { TrashStatsCards } from "@/components/shared/trash/TrashStatsCards";
@@ -19,8 +20,8 @@ import { TrashPagination } from "@/components/shared/trash/TrashPagination";
 import { TrashEmptyState } from "@/components/shared/trash/TrashEmptyState";
 import { RestoreDialog } from "@/components/shared/trash/RestoreDialog";
 import { PermanentDeleteDialog } from "@/components/shared/trash/PermanentDeleteDialog";
-import { AdminTrashTable } from "./AdminTrashTable";
-import { useUser } from "@/context/UserContext";
+import { PartnerTrashTable } from "./PartnerTrashTable";
+
 interface DialogState {
   isOpen: boolean;
   itemId: string;
@@ -29,7 +30,7 @@ interface DialogState {
 
 const EMPTY_DIALOG: DialogState = { isOpen: false, itemId: "", itemName: "" };
 
-export function AdminTrash() {
+export function PartnerTrash() {
   const router = useRouter();
   const [page, setPage] = useState<number>(1);
   const [limit] = useState<number>(10);
@@ -45,7 +46,6 @@ export function AdminTrash() {
     () => ({
       page,
       limit,
-      role: Role.ADMIN,
       searchTerm: filters.searchTerm || undefined,
       sort:
         filters.sortBy === "newest"
@@ -61,19 +61,11 @@ export function AdminTrash() {
     [page, limit, filters],
   );
 
-  const { data, isLoading, isError } = useGetAllTrashUsersQuery(queryParams);
-  const [restoreUser, { isLoading: isRestoring }] = useRestoreUserMutation();
-  const [permanentDeleteUser, { isLoading: isDeleting }] =
-    usePermanentDeleteUserMutation();
+  const { data, isLoading, isError } = useGetAllTrashPartnersQuery(queryParams);
+  const [restorePartner, { isLoading: isRestoring }] = useRestorePartnerMutation();
+  const [deletePartner, { isLoading: isDeleting }] = useDeletePartnerMutation();
 
-  const { user, logout } = useUser();
-
-  const userRole = user?.role;
-
-  const admins: IUser[] = useMemo(
-    () => (data?.data ?? []).filter((u) => u.role === Role.ADMIN),
-    [data?.data],
-  );
+  const partners: IPartner[] = useMemo(() => data?.data ?? [], [data?.data]);
 
   const hasFilters = Boolean(
     filters.searchTerm || filters.startDate || filters.endDate,
@@ -99,62 +91,51 @@ export function AdminTrash() {
 
   const handleRestoreConfirm = useCallback(async () => {
     try {
-      await restoreUser(restoreDialog.itemId).unwrap();
-      toast.success("Admin restored successfully.");
+      await restorePartner(restoreDialog.itemId).unwrap();
+      toast.success("Partner restored successfully.");
       setRestoreDialog(EMPTY_DIALOG);
     } catch (err) {
       const message =
         err && typeof err === "object" && "data" in err
           ? ((err as { data?: { message?: string } }).data?.message ??
-            "Failed to restore admin.")
-          : "Failed to restore admin.";
+            "Failed to restore partner.")
+          : "Failed to restore partner.";
       toast.error(message);
     }
-  }, [restoreUser, restoreDialog.itemId]);
+  }, [restorePartner, restoreDialog.itemId]);
 
   const handleDeleteConfirm = useCallback(async () => {
     try {
-      await permanentDeleteUser(deleteDialog.itemId).unwrap();
-      toast.success("Admin permanently deleted.");
+      await deletePartner(deleteDialog.itemId).unwrap();
+      toast.success("Partner permanently deleted.");
       setDeleteDialog(EMPTY_DIALOG);
     } catch (err) {
       const message =
         err && typeof err === "object" && "data" in err
           ? ((err as { data?: { message?: string } }).data?.message ??
-            "Failed to delete admin.")
-          : "Failed to delete admin.";
+            "Failed to delete partner.")
+          : "Failed to delete partner.";
       toast.error(message);
     }
-  }, [permanentDeleteUser, deleteDialog.itemId]);
-
-
-  if (userRole !== Role.SUPER_ADMIN) {
-    return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)]">
-        <p className="text-lg text-muted-foreground">
-          You are not authorized to view this page.
-        </p>
-      </div>
-    );
-  }
+  }, [deletePartner, deleteDialog.itemId]);
 
   return (
     <div>
       <PageHeader
-        title="Admin Trash"
-        description="Restore or permanently remove deleted admins."
+        title="Partner Trash"
+        description="Restore or permanently remove deleted partners."
         breadcrumbs={[
           { label: "Dashboard", href: "/admin/dashboard" },
           {
-            label: "Admin Management",
-            href: "/admin/dashboard/admin",
+            label: "Partner Management",
+            href: "/admin/dashboard/partner",
           },
           { label: "Trash" },
         ]}
       />
 
       <TrashStatsCards
-        items={admins}
+        items={partners as any}
         totalCount={data?.meta.total}
         isLoading={isLoading}
       />
@@ -169,17 +150,17 @@ export function AdminTrash() {
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive">
           <p>Failed to load trash. Please try again.</p>
         </div>
-      ) : admins.length > 0 ? (
+      ) : partners.length > 0 ? (
         <>
-          <AdminTrashTable
-            items={admins}
+          <PartnerTrashTable
+            items={partners}
             isLoading={isLoading}
             onRestore={(id) => {
-              const item = admins.find((a) => a._id === id);
+              const item = partners.find((p) => p._id === id);
               if (item) handleRestoreClick(id, item.name);
             }}
             onPermanentDelete={(id) => {
-              const item = admins.find((a) => a._id === id);
+              const item = partners.find((p) => p._id === id);
               if (item) handleDeleteClick(id, item.name);
             }}
           />
@@ -194,9 +175,9 @@ export function AdminTrash() {
         !isLoading && (
           <TrashEmptyState
             hasFilters={hasFilters}
-            title="No deleted admins found"
+            title="No deleted partners found"
             onClearFilters={hasFilters ? handleResetFilters : undefined}
-            onGoBack={() => router.push("/admin/dashboard/admin")}
+            onGoBack={() => router.push("/admin/dashboard/partner")}
           />
         )
       )}
@@ -204,7 +185,7 @@ export function AdminTrash() {
       <RestoreDialog
         isOpen={restoreDialog.isOpen}
         itemName={restoreDialog.itemName}
-        entityName="Admin"
+        entityName="Partner"
         onConfirm={handleRestoreConfirm}
         onCancel={() => setRestoreDialog(EMPTY_DIALOG)}
         isLoading={isRestoring}
