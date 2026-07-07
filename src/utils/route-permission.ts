@@ -13,19 +13,19 @@ const routePermissions: RoutePermission[] = [
   { route: "/admin/dashboard", roles: [Role.SUPER_ADMIN, Role.ADMIN] },
 
   // ── Insurance Management ──
-  { route: "/admin/dashboard/packages", roles: [Role.SUPER_ADMIN, Role.ADMIN, Role.MANAGER] },
+  { route: "/admin/dashboard/packages", roles: [Role.SUPER_ADMIN, Role.ADMIN] },
   { route: "/admin/dashboard/claims/trash", roles: [Role.SUPER_ADMIN] },
   { route: "/admin/dashboard/claims", roles: [Role.SUPER_ADMIN, Role.ADMIN] },
 
   // ── Team Management ──
   { route: "/admin/dashboard/admin/trash", roles: [Role.SUPER_ADMIN] },
   { route: "/admin/dashboard/admin", roles: [Role.SUPER_ADMIN] },
-  { route: "/admin/dashboard/agent-leader/trash", roles: [Role.SUPER_ADMIN, Role.ADMIN, Role.MANAGER] },
-  { route: "/admin/dashboard/agent-leader", roles: [Role.SUPER_ADMIN, Role.ADMIN, Role.MANAGER] },
-  { route: "/admin/dashboard/agents/trash", roles: [Role.SUPER_ADMIN, Role.ADMIN, Role.MANAGER] },
-  { route: "/admin/dashboard/agents", roles: [Role.SUPER_ADMIN, Role.ADMIN, Role.MANAGER] },
-  { route: "/admin/dashboard/customers/trash", roles: [Role.SUPER_ADMIN, Role.ADMIN, Role.MANAGER] },
-  { route: "/admin/dashboard/customers", roles: [Role.SUPER_ADMIN, Role.ADMIN, Role.MANAGER] },
+  { route: "/admin/dashboard/agent-leader/trash", roles: [Role.SUPER_ADMIN, Role.ADMIN] },
+  { route: "/admin/dashboard/agent-leader", roles: [Role.SUPER_ADMIN, Role.ADMIN] },
+  { route: "/admin/dashboard/agents/trash", roles: [Role.SUPER_ADMIN, Role.ADMIN] },
+  { route: "/admin/dashboard/agents", roles: [Role.SUPER_ADMIN, Role.ADMIN] },
+  { route: "/admin/dashboard/customers/trash", roles: [Role.SUPER_ADMIN, Role.ADMIN] },
+  { route: "/admin/dashboard/customers", roles: [Role.SUPER_ADMIN, Role.ADMIN] },
   { route: "/admin/dashboard/partners/trash", roles: [Role.SUPER_ADMIN, Role.ADMIN, Role.MANAGER] },
   { route: "/admin/dashboard/partners", roles: [Role.SUPER_ADMIN, Role.ADMIN, Role.MANAGER] },
   { route: "/admin/dashboard/branches/trash", roles: [Role.SUPER_ADMIN, Role.ADMIN, Role.MANAGER] },
