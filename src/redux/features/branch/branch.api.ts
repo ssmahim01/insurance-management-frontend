@@ -1,14 +1,11 @@
 import { IPartnerBranch } from "@/types/branch.types";
 import { baseApi } from "../baseApi";
-import {
-  IResponse,
-  GetQueryParams,
-} from "@/types";
 
-interface BranchResponse {
-  success: boolean;
+interface IBranchListResponse {
   data: IPartnerBranch[];
   meta: {
+    page: number;
+    limit: number;
     total: number;
     totalPage: number;
   };
@@ -19,12 +16,31 @@ interface BranchResponse {
   };
 }
 
+interface ISingleBranchResponse {
+  data: IPartnerBranch;
+}
+
+interface GetBranchesParams {
+  searchTerm?: string;
+  isActive?:   string;
+  partner?:    string;
+  page?:       number;
+  limit?:      number;
+  startDate?:  string;
+  endDate?:    string;
+  sort?:       string;
+}
+
+interface IGetNearbyBranchesPayload {
+  latitude:   number;
+  longitude:  number;
+  partnerIds: string[];
+}
+
 export const branchApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    createBranch: builder.mutation<
-      IResponse<IPartnerBranch>,
-      Partial<IPartnerBranch>
-    >({
+
+    createBranch: builder.mutation<ISingleBranchResponse, Partial<IPartnerBranch>>({
       query: (data) => ({
         url: "/branch/create-branch",
         method: "POST",
@@ -33,25 +49,7 @@ export const branchApi = baseApi.injectEndpoints({
       invalidatesTags: ["BRANCHES"],
     }),
 
-    updateBranch: builder.mutation<
-      IResponse<IPartnerBranch>,
-      {
-        id: string;
-        data: Partial<IPartnerBranch>;
-      }
-    >({
-      query: ({ id, data }) => ({
-        url: `/branch/${id}`,
-        method: "PATCH",
-        data,
-      }),
-      invalidatesTags: ["BRANCHES"],
-    }),
-
-    getAllBranches: builder.query<
-      BranchResponse,
-      GetQueryParams
-    >({
+    getAllBranches: builder.query<IBranchListResponse, GetBranchesParams | undefined>({
       query: (params) => ({
         url: "/branch/all-branches",
         method: "GET",
@@ -60,21 +58,7 @@ export const branchApi = baseApi.injectEndpoints({
       providesTags: ["BRANCHES"],
     }),
 
-    getSingleBranch: builder.query<
-      IResponse<IPartnerBranch>,
-      string
-    >({
-      query: (id) => ({
-        url: `/branch/${id}`,
-        method: "GET",
-      }),
-      providesTags: ["BRANCH"],
-    }),
-
-    getAllTrashBranches: builder.query<
-      BranchResponse,
-      GetQueryParams
-    >({
+    getAllTrashBranches: builder.query<IBranchListResponse, GetBranchesParams | undefined>({
       query: (params) => ({
         url: "/branch/all-trash-branches",
         method: "GET",
@@ -83,10 +67,24 @@ export const branchApi = baseApi.injectEndpoints({
       providesTags: ["BRANCHES"],
     }),
 
-    softDeleteBranch: builder.mutation<
-      IResponse<IPartnerBranch>,
-      string
-    >({
+    getSingleBranch: builder.query<ISingleBranchResponse, string>({
+      query: (id) => ({
+        url: `/branch/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["BRANCHES"],
+    }),
+
+    updateBranch: builder.mutation<ISingleBranchResponse, { id: string; data: Partial<IPartnerBranch> }>({
+      query: ({ id, data }) => ({
+        url: `/branch/${id}`,
+        method: "PATCH",
+        data,
+      }),
+      invalidatesTags: ["BRANCHES"],
+    }),
+
+    softDeleteBranch: builder.mutation<ISingleBranchResponse, string>({
       query: (id) => ({
         url: `/branch/soft-delete/${id}`,
         method: "PATCH",
@@ -94,25 +92,40 @@ export const branchApi = baseApi.injectEndpoints({
       invalidatesTags: ["BRANCHES"],
     }),
 
-    deleteBranch: builder.mutation<
-      IResponse<null>,
-      string
-    >({
+    restoreBranch: builder.mutation<ISingleBranchResponse, string>({
+      query: (id) => ({
+        url: `/branch/restore/${id}`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["BRANCHES"],
+    }),
+
+    deleteBranch: builder.mutation<ISingleBranchResponse, string>({
       query: (id) => ({
         url: `/branch/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["BRANCHES"],
     }),
+
+    getNearbyBranches: builder.mutation<{ data: IPartnerBranch[] }, IGetNearbyBranchesPayload>({
+      query: (data) => ({
+        url: "/branch/nearby/search",
+        method: "GET",
+        data,
+      }),
+    }),
   }),
 });
 
 export const {
   useCreateBranchMutation,
-  useUpdateBranchMutation,
   useGetAllBranchesQuery,
-  useGetSingleBranchQuery,
   useGetAllTrashBranchesQuery,
+  useGetSingleBranchQuery,
+  useUpdateBranchMutation,
   useSoftDeleteBranchMutation,
+  useRestoreBranchMutation,
   useDeleteBranchMutation,
+  useGetNearbyBranchesMutation,
 } = branchApi;

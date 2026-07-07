@@ -20,7 +20,8 @@ export const superAdminOnlyRoutes: RouteConfig = {
 
 export const adminRoutes: RouteConfig = {
   exact: [],
-  patterns: [/^\/admin\/dashboard/],
+  patterns: [
+    /^\/admin\/dashboard/],
 };
 
 export const managerRoutes: RouteConfig = {
