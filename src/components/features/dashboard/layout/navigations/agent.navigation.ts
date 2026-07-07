@@ -16,7 +16,7 @@ export const agentNavigation: NavGroup[] = [
       {
         id: "dashboard",
         label: "Dashboard",
-        href: "/agent",
+        href: "/agent/dashboard",
         icon: LayoutDashboard,
       },
     ],
@@ -28,7 +28,7 @@ export const agentNavigation: NavGroup[] = [
       {
         id: "customers",
         label: "Customers",
-        href: "/agent/customers",
+        href: "/agent/dashboard/customers",
         icon: Users,
       },
       // {

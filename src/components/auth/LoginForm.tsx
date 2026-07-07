@@ -66,7 +66,7 @@ export function LoginForm({ onSubmit, isLoading = false }: LoginFormProps) {
       {/* Brand Header */}
       <div className="mb-8 text-center">
         <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#007A5A]/10">
-          <ShieldCheck className="h-8 w-8 text-[#007A5A]" />
+          <ShieldCheck className="h-8 w-8 text-indigo-600" />
         </div>
 
         <h1 className="text-3xl font-bold tracking-tight">Welcome Back</h1>
@@ -120,12 +120,12 @@ export function LoginForm({ onSubmit, isLoading = false }: LoginFormProps) {
             h-12
             w-full
             rounded-xl
-            bg-[#007A5A]
+            bg-indigo-600
             text-white
             shadow-lg
             shadow-[#007A5A]/20
   
-            hover:bg-[#006349]
+            hover:bg-indigo-600
             hover:shadow-xl hover:cursor-pointer hover:scale-105 transition-transform duration-500 ease-in-out
           "
         >
@@ -145,7 +145,7 @@ export function LoginForm({ onSubmit, isLoading = false }: LoginFormProps) {
         {/* Security Notice */}
         <div className="rounded-xl border bg-muted/30 p-4">
           <div className="flex items-center gap-2">
-            <Lock className="h-4 w-4 text-[#007A5A]" />
+            <Lock className="h-4 w-4 text-indigo-600" />
 
             <span className="text-xs text-muted-foreground">
               Your account is protected with secure authentication and encrypted

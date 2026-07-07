@@ -47,9 +47,9 @@ export default function Login() {
         } else if (response?.user?.user?.role === "Manager") {
           router.push("/manager/dashboard");
         } else if (response?.user?.user?.role === "AGENT_LEADER") {
-          router.push("/agent-leader");
+          router.push("/agent-leader/dashboard");
         } else if (response?.user?.user?.role === "AGENT") {
-          router.push("/agent");
+          router.push("/agent/dashboard");
         } else {
           router.push("/customer/dashboard");
         }
@@ -99,9 +99,9 @@ export default function Login() {
                 return (
                   <div
                     key={index}
-                    className="group flex items-start gap-4 rounded-2xl border border-white/10 bg-emerald-500/10 p-4 backdrop-blur-sm transition-all hover:bg-emerald-700/15"
+                    className="group flex items-start gap-4 rounded-2xl border border-white/10 bg-indigo-500/10 p-4 backdrop-blur-sm transition-all hover:bg-indigo-700/15"
                   >
-                    <div className="rounded-xl bg-emerald-500/60 p-3">
+                    <div className="rounded-xl bg-indigo-500/60 p-3">
                       <Icon className="h-5 w-5 text-white" />
                     </div>
 

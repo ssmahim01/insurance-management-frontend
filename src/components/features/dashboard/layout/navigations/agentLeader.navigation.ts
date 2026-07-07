@@ -28,15 +28,15 @@ export const agentLeaderNavigation: NavGroup[] = [
       {
         id: "my-agents",
         label: "My Agents",
-        href: "/agent-leader/my-agents",
+        href: "/agent-leader/dashboard/my-agents",
         icon: Users,
       },
-      {
-        id: "create-agent",
-        label: "Add Agent",
-        href: "/agent-leader/my-agents/create",
-        icon: Plus,
-      },
+      // {
+      //   id: "create-agent",
+      //   label: "Add Agent",
+      //   href: "/agent-leader/dashboard/my-agents/create",
+      //   icon: Plus,
+      // },
       // {
       //   id: "trash-agents",
       //   label: "Trash",
@@ -52,7 +52,7 @@ export const agentLeaderNavigation: NavGroup[] = [
       {
         id: "subscriptions",
         label: "Customer Subscriptions",
-        href: "/agent-leader/customers",
+        href: "/agent-leader/dashboard/customers",
         icon: ShieldCheck,
       },
     ],

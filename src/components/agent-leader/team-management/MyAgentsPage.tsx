@@ -20,6 +20,9 @@ import { AgentPagination } from "./AgentPagination";
 import { DeleteAgentDialog } from "./DeleteAgentDialog";
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { IUser } from "@/types/user.types";
+import { CreateAgentModal } from "./AgentForm";
+import { UpdateAgentModal } from "./UpdateAgent";
 
 export function MyAgentsPage() {
   const router = useRouter();
@@ -58,8 +61,16 @@ export function MyAgentsPage() {
     endDate: filters.endDate,
   };
 
-  const { data, isLoading, error } = useGetMyAgentsQuery(queryParams);
+  const { data, isLoading, error, refetch } = useGetMyAgentsQuery(queryParams);
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
+  const [editingAgent, setEditingAgent] = useState<IUser | null>(null);
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
+
+  // replace handleEdit stub with:
+  const handleEdit = useCallback((agent: IUser) => {
+    setEditingAgent(agent);
+    setIsUpdateOpen(true);
+  }, []);
 
   const hasFilters = Boolean(
     filters.searchTerm ||
@@ -95,10 +106,6 @@ export function MyAgentsPage() {
     },
     [router],
   );
-
-  const handleEdit = useCallback((agentId: string) => {
-    toast.info(`Edit agent: ${agentId}`);
-  }, []);
 
   const handleToggleBlock = useCallback(
     (agentId: string, isBlocked: boolean) => {
@@ -141,11 +148,6 @@ export function MyAgentsPage() {
           { label: "Dashboard", href: "/agent-leader" },
           { label: "Team Management" },
         ]}
-        actionButton={{
-          label: "Add Agent",
-          icon: Plus,
-          onClick: () => router.push("/agent-leader/my-agents/create"),
-        }}
       />
 
       <div className="mb-6 flex flex-wrap items-center justify-end gap-3">
@@ -157,6 +159,7 @@ export function MyAgentsPage() {
           <Trash2 className="mr-2 h-4 w-4 group-hover:rotate-6 transition-transform duration-300" />
           Trash
         </Button>
+        <CreateAgentModal onSuccess={refetch} />
       </div>
 
       {/* Stats Cards */}
@@ -175,16 +178,24 @@ export function MyAgentsPage() {
             agents={data.data}
             isLoading={isLoading}
             onViewDetails={handleViewDetails}
-            // onViewCustomers={handleViewCustomers}
-            // onEdit={handleEdit}
+            onEdit={(agentId) => {
+              const agent = data.data.find((a) => a._id === agentId);
+              if (agent) handleEdit(agent);
+            }}
             onToggleBlock={handleToggleBlock}
             onDelete={(agentId) => {
               const agent = data.data.find((a) => a._id === agentId);
-              if (agent) {
-                handleDeleteClick(agentId, agent.name);
-              }
+              if (agent) handleDeleteClick(agentId, agent.name);
             }}
           />
+          {editingAgent && (
+            <UpdateAgentModal
+              open={isUpdateOpen}
+              onOpenChange={setIsUpdateOpen}
+              item={editingAgent}
+              onSuccess={refetch}
+            />
+          )}
           <AgentPagination
             meta={data.meta}
             currentPage={page}

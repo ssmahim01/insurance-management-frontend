@@ -1,0 +1,700 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/incompatible-library */
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { UserCog, Upload, X, Eye, EyeOff } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { useUpdateUserMutation } from "@/redux/features/user/user.api";
+import { IsActive, IUser } from "@/types/user.types";
+import {
+  divisions,
+  getDistrictsByDivision,
+  getUpazilasByDistrict,
+} from "@/lib/bd-address";
+import Image from "next/image";
+
+const updateAgentSchema = z
+  .object({
+    name: z.string().min(2, "Name must be at least 2 characters").max(100),
+    phone: z.string().min(11, "Enter a valid phone number").max(15),
+    email: z
+      .string()
+      .email("Enter a valid email address")
+      .optional()
+      .or(z.literal("")),
+    isActive: z.boolean(),
+    salary: z.preprocess(
+      (val) => (val !== "" && val !== undefined ? Number(val) : undefined),
+      z.number().min(0).optional(),
+    ),
+    salaryPerCustomer: z.preprocess(
+      (val) => (val !== "" && val !== undefined ? Number(val) : undefined),
+      z.number().min(0).optional(),
+    ),
+    division: z.string().optional(),
+    district: z.string().optional(),
+    thana: z.string().optional(),
+    union: z.string().optional(),
+    newPassword: z
+      .string()
+      .min(6, "Password must be at least 6 characters")
+      .optional()
+      .or(z.literal("")),
+    confirmNewPassword: z.string().optional().or(z.literal("")),
+  })
+  .refine(
+    (d) => (d.newPassword ? d.newPassword === d.confirmNewPassword : true),
+    { message: "Passwords do not match", path: ["confirmNewPassword"] },
+  )
+  .refine((d) => (d.confirmNewPassword ? Boolean(d.newPassword) : true), {
+    message: "Please enter a new password first",
+    path: ["newPassword"],
+  });
+
+type UpdateAgentFormValues = z.infer<typeof updateAgentSchema>;
+
+interface UpdateAgentModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  item: IUser;
+  onSuccess?: () => void;
+}
+
+export function UpdateAgentModal({
+  open,
+  onOpenChange,
+  item,
+  onSuccess,
+}: UpdateAgentModalProps) {
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [divisionId, setDivisionId] = useState("");
+  const [districtId, setDistrictId] = useState("");
+  const [thanaId, setThanaId] = useState("");
+
+  const availableDistricts = useMemo(
+    () => getDistrictsByDivision(divisionId),
+    [divisionId],
+  );
+  const availableUpazilas = useMemo(
+    () => getUpazilasByDistrict(districtId),
+    [districtId],
+  );
+
+  const [updateUser, { isLoading }] = useUpdateUserMutation();
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+    reset,
+  } = useForm<UpdateAgentFormValues>({
+    resolver: zodResolver(updateAgentSchema as any),
+  });
+
+  const isActive = watch("isActive");
+
+  // Populate form + reverse-map saved address names back to bd-address ids
+  useEffect(() => {
+    if (open && item) {
+      reset({
+        name: item.name ?? "",
+        phone: item.phone ?? "",
+        email: item.email ?? "",
+        isActive: item.isActive === IsActive.ACTIVE,
+        salary: item.salary ? Number(item.salary) : undefined,
+        salaryPerCustomer: item.salaryPerCustomer
+          ? Number(item.salaryPerCustomer)
+          : undefined,
+        division: item.address?.division ?? "",
+        district: item.address?.district ?? "",
+        thana: item.address?.thana ?? "",
+        union: item.address?.union ?? "",
+        newPassword: "",
+        confirmNewPassword: "",
+      });
+
+      const matchedDivision = divisions.find(
+        (d) => d.name === item.address?.division,
+      );
+      const dId = matchedDivision?.id ?? "";
+      setDivisionId(dId);
+
+      const districtsForDivision = dId ? getDistrictsByDivision(dId) : [];
+      const matchedDistrict = districtsForDivision.find(
+        (d) => d.name === item.address?.district,
+      );
+      const distId = matchedDistrict?.id ?? "";
+      setDistrictId(distId);
+
+      const upazilasForDistrict = distId ? getUpazilasByDistrict(distId) : [];
+      const matchedThana = upazilasForDistrict.find(
+        (u) => u.name === item.address?.thana,
+      );
+      setThanaId(matchedThana?.id ?? "");
+
+      setImagePreview(item.picture ?? null);
+      setImageFile(null);
+      setShowNewPassword(false);
+      setShowConfirmPassword(false);
+    }
+  }, [open, item, reset]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image must be under 2MB");
+      return;
+    }
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const clearImage = () => {
+    setImageFile(null);
+    setImagePreview(item.picture ?? null);
+  };
+
+  const handleClose = () => {
+    clearImage();
+    onOpenChange(false);
+  };
+
+  const handleDivisionChange = (id: string | null) => {
+    const value = id ?? "";
+    const division = divisions.find((d) => d.id === value);
+    setDivisionId(value);
+    setDistrictId("");
+    setThanaId("");
+    setValue("division", division?.name ?? "", {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+    setValue("district", "", { shouldValidate: true, shouldDirty: true });
+    setValue("thana", "", { shouldValidate: true, shouldDirty: true });
+  };
+
+  const handleDistrictChange = (id: string | null) => {
+    const value = id ?? "";
+    const district = availableDistricts.find((d) => d.id === value);
+    setDistrictId(value);
+    setThanaId("");
+    setValue("district", district?.name ?? "", {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+    setValue("thana", "", { shouldValidate: true, shouldDirty: true });
+  };
+
+  const handleThanaChange = (id: string | null) => {
+    const value = id ?? "";
+    const upazila = availableUpazilas.find((u) => u.id === value);
+    setThanaId(value);
+    setValue("thana", upazila?.name ?? "", {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  };
+
+  const onSubmit = async (data: UpdateAgentFormValues) => {
+    try {
+      const formData = new FormData();
+      const payload: Record<string, unknown> = {
+        name: data.name,
+        phone: data.phone,
+        ...(data.email && { email: data.email }),
+        isActive: data.isActive ? IsActive.ACTIVE : IsActive.INACTIVE,
+        ...(data.salary !== undefined && { salary: String(data.salary) }),
+        ...(data.salaryPerCustomer !== undefined && {
+          salaryPerCustomer: String(data.salaryPerCustomer),
+        }),
+        address: {
+          division: data.division || "",
+          district: data.district || "",
+          thana: data.thana || "",
+          union: data.union || "",
+        },
+      };
+      if (data.newPassword && data.newPassword.trim().length > 0) {
+        payload.password = data.newPassword;
+      }
+      formData.append("data", JSON.stringify(payload));
+      if (imageFile) formData.append("picture", imageFile);
+
+      await updateUser({ id: String(item._id), data: formData }).unwrap();
+      toast.success("Agent updated successfully!");
+      handleClose();
+      onSuccess?.();
+    } catch (error) {
+      const message =
+        error && typeof error === "object" && "data" in error
+          ? ((error as { data?: { message?: string } }).data?.message ??
+            "Failed to update agent")
+          : "Failed to update agent";
+      toast.error(message);
+    }
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(val) => (val ? onOpenChange(true) : handleClose())}
+    >
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+        <DialogHeader className="flex flex-col items-center gap-2 pb-2">
+          <div className="w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-md mb-1">
+            <UserCog className="w-6 h-6 text-white" />
+          </div>
+          <DialogTitle className="text-xl font-bold tracking-widest uppercase">
+            Edit Agent
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground text-sm tracking-wide">
+            Update the agent&apos;s information below
+          </DialogDescription>
+        </DialogHeader>
+
+        <Separator />
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 pt-1">
+          <div>
+            <p className="text-xs font-bold tracking-widest uppercase text-slate-400 mb-3">
+              Personal Information
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="ua-name"
+                  className="text-xs font-semibold tracking-widest uppercase"
+                >
+                  Full Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="ua-name"
+                  placeholder="e.g. Md. Rafiqul Islam"
+                  {...register("name")}
+                />
+                {errors.name && (
+                  <p className="text-xs text-red-400">{errors.name.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="ua-phone"
+                  className="text-xs font-semibold tracking-widest uppercase"
+                >
+                  Phone Number <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="ua-phone"
+                  placeholder="01XXXXXXXXX"
+                  {...register("phone")}
+                />
+                {errors.phone && (
+                  <p className="text-xs text-red-400">{errors.phone.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label
+                  htmlFor="ua-email"
+                  className="text-xs font-semibold tracking-widest uppercase"
+                >
+                  Email{" "}
+                  <span className="text-muted-foreground normal-case font-normal">
+                    (optional)
+                  </span>
+                </Label>
+                <Input
+                  id="ua-email"
+                  type="email"
+                  placeholder="example@email.com"
+                  {...register("email")}
+                />
+                {errors.email && (
+                  <p className="text-xs text-red-400">{errors.email.message}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-muted/20">
+            <div className="space-y-0.5">
+              <Label className="text-sm font-medium text-foreground">
+                Agent Status
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Enable or disable this agent account
+              </p>
+            </div>
+            <Switch
+              checked={isActive}
+              onCheckedChange={(v) =>
+                setValue("isActive", v, { shouldDirty: true })
+              }
+            />
+          </div>
+
+          <Separator />
+
+          <div>
+            <p className="text-xs font-bold tracking-widest uppercase text-slate-400 mb-3">
+              Compensation{" "}
+              <span className="text-muted-foreground normal-case font-normal">
+                (optional)
+              </span>
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="ua-salary"
+                  className="text-xs font-semibold tracking-widest uppercase"
+                >
+                  Monthly Salary (BDT)
+                </Label>
+                <Input
+                  id="ua-salary"
+                  type="number"
+                  min={0}
+                  placeholder="e.g. 15000"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                  {...register("salary")}
+                />
+                {errors.salary && (
+                  <p className="text-xs text-red-400">
+                    {errors.salary.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="ua-per-customer"
+                  className="text-xs font-semibold tracking-widest uppercase"
+                >
+                  Salary Per Customer (BDT)
+                </Label>
+                <Input
+                  id="ua-per-customer"
+                  type="number"
+                  min={0}
+                  placeholder="e.g. 500"
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                  {...register("salaryPerCustomer")}
+                />
+                {errors.salaryPerCustomer && (
+                  <p className="text-xs text-red-400">
+                    {errors.salaryPerCustomer.message}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div>
+            <p className="text-xs font-bold tracking-widest uppercase text-slate-400 mb-3">
+              Address{" "}
+              <span className="text-muted-foreground normal-case font-normal">
+                (optional)
+              </span>
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold tracking-widest uppercase">
+                  Division
+                </Label>
+                <Select value={divisionId} onValueChange={handleDivisionChange}>
+                  <SelectTrigger className="w-full">
+                    <span className="text-sm">
+                      {divisionId
+                        ? divisions.find((d) => d.id === divisionId)?.name
+                        : "Select Division"}
+                    </span>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {divisions.map((d) => (
+                      <SelectItem key={d.id} value={d.id}>
+                        {d.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold tracking-widest uppercase">
+                  District
+                </Label>
+                <Select
+                  value={districtId}
+                  onValueChange={handleDistrictChange}
+                  disabled={!divisionId}
+                >
+                  <SelectTrigger className="w-full">
+                    <span className="text-sm">
+                      {districtId
+                        ? availableDistricts.find((d) => d.id === districtId)
+                            ?.name
+                        : "Select District"}
+                    </span>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableDistricts.map((d) => (
+                      <SelectItem key={d.id} value={d.id}>
+                        {d.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold tracking-widest uppercase">
+                  Thana
+                </Label>
+                <Select
+                  value={thanaId}
+                  onValueChange={handleThanaChange}
+                  disabled={!districtId}
+                >
+                  <SelectTrigger className="w-full">
+                    <span className="text-sm">
+                      {thanaId
+                        ? availableUpazilas.find((u) => u.id === thanaId)?.name
+                        : "Select Thana"}
+                    </span>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableUpazilas.map((u) => (
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="ua-union"
+                  className="text-xs font-semibold tracking-widest uppercase"
+                >
+                  Union / Ward
+                </Label>
+                <Input
+                  id="ua-union"
+                  placeholder="e.g. Ward-10"
+                  {...register("union")}
+                />
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold tracking-widest uppercase">
+              Profile Picture{" "}
+              <span className="text-muted-foreground normal-case font-normal">
+                (optional)
+              </span>
+            </Label>
+            {imagePreview ? (
+              <div className="relative flex items-center gap-3 rounded-md border border-border p-2">
+                <Image
+                  priority
+                  quality={90}
+                  width={300}
+                  height={300}
+                  src={imagePreview}
+                  alt="Preview"
+                  className="h-14 w-14 rounded-full object-cover shrink-0 border-2 border-border"
+                />
+                <div className="flex-1 min-w-0">
+                  {imageFile ? (
+                    <>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {imageFile.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {(imageFile.size / 1024).toFixed(1)} KB
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      Current profile photo
+                    </p>
+                  )}
+                </div>
+                <Button
+                  variant="destructive"
+                  type="button"
+                  size="sm"
+                  onClick={clearImage}
+                  className="shrink-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <label
+                htmlFor="update-agent-image"
+                className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed border-border hover:bg-muted/40 px-4 py-6 cursor-pointer transition-colors"
+              >
+                <Upload className="h-6 w-6 text-muted-foreground" />
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Click to upload a new photo
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    PNG, JPG, WEBP — max 2MB
+                  </p>
+                </div>
+                <input
+                  id="update-agent-image"
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+              </label>
+            )}
+          </div>
+
+          <Separator />
+
+          <div>
+            <p className="text-xs font-bold tracking-widest uppercase text-slate-400 mb-1">
+              Change Password
+            </p>
+            <p className="text-xs text-muted-foreground mb-3">
+              Leave blank to keep the current password
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="ua-new-password"
+                  className="text-xs font-semibold tracking-widest uppercase"
+                >
+                  New Password
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="ua-new-password"
+                    type={showNewPassword ? "text" : "password"}
+                    placeholder="At least 6 characters"
+                    className="pr-10"
+                    {...register("newPassword")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword((p) => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showNewPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+                {errors.newPassword && (
+                  <p className="text-xs text-red-400">
+                    {errors.newPassword.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="ua-confirm-password"
+                  className="text-xs font-semibold tracking-widest uppercase"
+                >
+                  Confirm New Password
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="ua-confirm-password"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Re-enter new password"
+                    className="pr-10"
+                    {...register("confirmNewPassword")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((p) => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+                {errors.confirmNewPassword && (
+                  <p className="text-xs text-red-400">
+                    {errors.confirmNewPassword.message}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60"
+          >
+            {isLoading ? (
+              <span className="flex items-center gap-2">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Updating...
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                <UserCog className="h-4 w-4" />
+                Update Agent
+              </span>
+            )}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
