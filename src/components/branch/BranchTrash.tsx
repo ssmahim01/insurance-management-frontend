@@ -1,3 +1,4 @@
+// BranchTrash.tsx
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
@@ -5,12 +6,12 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import {
-  useGetAllTrashManagersQuery,
-  useRestoreUserMutation,
-  usePermanentDeleteUserMutation,
-} from "@/redux/features/user/user.api";
+  useGetAllTrashBranchesQuery,
+  useRestoreBranchMutation,
+  useDeleteBranchMutation,
+} from "@/redux/features/branch/branch.api";
 import { ITrashFilters } from "@/types/agent-leader";
-import { IUser, Role } from "@/types/user.types";
+import { IPartnerBranch } from "@/types/branch.types";
 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { TrashStatsCards } from "@/components/shared/trash/TrashStatsCards";
@@ -19,8 +20,7 @@ import { TrashPagination } from "@/components/shared/trash/TrashPagination";
 import { TrashEmptyState } from "@/components/shared/trash/TrashEmptyState";
 import { RestoreDialog } from "@/components/shared/trash/RestoreDialog";
 import { PermanentDeleteDialog } from "@/components/shared/trash/PermanentDeleteDialog";
-import { useUser } from "@/context/UserContext";
-import { TrashTable } from "../agent-leader/trash/TrashTable";
+import { BranchTrashTable } from "./BranchTable";
 
 interface DialogState {
   isOpen: boolean;
@@ -30,7 +30,7 @@ interface DialogState {
 
 const EMPTY_DIALOG: DialogState = { isOpen: false, itemId: "", itemName: "" };
 
-export function ManagerTrash() {
+export function BranchTrash() {
   const router = useRouter();
   const [page, setPage] = useState<number>(1);
   const [limit] = useState<number>(10);
@@ -46,7 +46,6 @@ export function ManagerTrash() {
     () => ({
       page,
       limit,
-      role: Role.MANAGER,
       searchTerm: filters.searchTerm || undefined,
       sort:
         filters.sortBy === "newest"
@@ -54,27 +53,19 @@ export function ManagerTrash() {
           : filters.sortBy === "oldest"
             ? "updatedAt"
             : filters.sortBy === "name-asc"
-              ? "name"
-              : "-name",
+              ? "branchName"
+              : "-branchName",
       startDate: filters.startDate,
       endDate: filters.endDate,
     }),
     [page, limit, filters],
   );
 
-  const { data, isLoading, isError } = useGetAllTrashManagersQuery(queryParams);
-  const [restoreUser, { isLoading: isRestoring }] = useRestoreUserMutation();
-  const [permanentDeleteUser, { isLoading: isDeleting }] =
-    usePermanentDeleteUserMutation();
+  const { data, isLoading, isError } = useGetAllTrashBranchesQuery(queryParams);
+  const [restoreBranch, { isLoading: isRestoring }] = useRestoreBranchMutation();
+  const [deleteBranch, { isLoading: isDeleting }] = useDeleteBranchMutation();
 
-  const { user } = useUser();
-
-  const userRole = user?.role;
-
-  const managers: IUser[] = useMemo(
-    () => (data?.data ?? []).filter((u) => u.role === Role.MANAGER),
-    [data?.data],
-  );
+  const branches: IPartnerBranch[] = useMemo(() => data?.data ?? [], [data?.data]);
 
   const hasFilters = Boolean(
     filters.searchTerm || filters.startDate || filters.endDate,
@@ -100,51 +91,51 @@ export function ManagerTrash() {
 
   const handleRestoreConfirm = useCallback(async () => {
     try {
-      await restoreUser(restoreDialog.itemId).unwrap();
-      toast.success("Manager restored successfully.");
+      await restoreBranch(restoreDialog.itemId).unwrap();
+      toast.success("Branch restored successfully.");
       setRestoreDialog(EMPTY_DIALOG);
     } catch (err) {
       const message =
         err && typeof err === "object" && "data" in err
           ? ((err as { data?: { message?: string } }).data?.message ??
-            "Failed to restore manager.")
-          : "Failed to restore manager.";
+            "Failed to restore branch.")
+          : "Failed to restore branch.";
       toast.error(message);
     }
-  }, [restoreUser, restoreDialog.itemId]);
+  }, [restoreBranch, restoreDialog.itemId]);
 
   const handleDeleteConfirm = useCallback(async () => {
     try {
-      await permanentDeleteUser(deleteDialog.itemId).unwrap();
-      toast.success("Manager permanently deleted.");
+      await deleteBranch(deleteDialog.itemId).unwrap();
+      toast.success("Branch permanently deleted.");
       setDeleteDialog(EMPTY_DIALOG);
     } catch (err) {
       const message =
         err && typeof err === "object" && "data" in err
           ? ((err as { data?: { message?: string } }).data?.message ??
-            "Failed to delete manager.")
-          : "Failed to delete manager.";
+            "Failed to delete branch.")
+          : "Failed to delete branch.";
       toast.error(message);
     }
-  }, [permanentDeleteUser, deleteDialog.itemId]);
+  }, [deleteBranch, deleteDialog.itemId]);
 
   return (
     <div>
       <PageHeader
-        title="Manager Trash"
-        description="Restore or permanently remove deleted managers."
+        title="Branch Trash"
+        description="Restore or permanently remove deleted branches."
         breadcrumbs={[
           { label: "Dashboard", href: "/admin/dashboard" },
           {
-            label: "Manager Management",
-            href: "/admin/dashboard/manager",
+            label: "Branch Management",
+            href: "/admin/dashboard/branch",
           },
           { label: "Trash" },
         ]}
       />
 
       <TrashStatsCards
-        items={managers}
+        items={branches as any}
         totalCount={data?.meta.total}
         isLoading={isLoading}
       />
@@ -159,18 +150,18 @@ export function ManagerTrash() {
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive">
           <p>Failed to load trash. Please try again.</p>
         </div>
-      ) : managers.length > 0 ? (
+      ) : branches.length > 0 ? (
         <>
-          <TrashTable
-            items={managers}
+          <BranchTrashTable
+            items={branches}
             isLoading={isLoading}
             onRestore={(id) => {
-              const item = managers.find((m) => m._id === id);
-              if (item) handleRestoreClick(id, item.name);
+              const item = branches.find((b) => String(b._id) === id);
+              if (item) handleRestoreClick(id, item.branchName);
             }}
             onPermanentDelete={(id) => {
-              const item = managers.find((m) => m._id === id);
-              if (item) handleDeleteClick(id, item.name);
+              const item = branches.find((b) => String(b._id) === id);
+              if (item) handleDeleteClick(id, item.branchName);
             }}
           />
           <TrashPagination
@@ -184,9 +175,9 @@ export function ManagerTrash() {
         !isLoading && (
           <TrashEmptyState
             hasFilters={hasFilters}
-            title="No deleted managers found"
+            title="No deleted branches found"
             onClearFilters={hasFilters ? handleResetFilters : undefined}
-            onGoBack={() => router.push("/admin/dashboard/manager")}
+            onGoBack={() => router.push("/admin/dashboard/branch")}
           />
         )
       )}
@@ -194,7 +185,7 @@ export function ManagerTrash() {
       <RestoreDialog
         isOpen={restoreDialog.isOpen}
         itemName={restoreDialog.itemName}
-        entityName="Manager"
+        entityName="Branch"
         onConfirm={handleRestoreConfirm}
         onCancel={() => setRestoreDialog(EMPTY_DIALOG)}
         isLoading={isRestoring}
