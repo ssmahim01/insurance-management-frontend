@@ -277,8 +277,6 @@ export default function AdminManagement() {
   const hasDateFilter = !!(startDate || endDate);
   const { user, logout } = useUser();
 
-  const userRole = user?.role;
-
   // ── client-side sort ──
   const sortedAdmins = useMemo(() => {
     if (!sortField || !sortDir) return admins;

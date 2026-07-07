@@ -57,11 +57,14 @@ import {
   useSoftDeletePartnerMutation,
 } from "@/redux/features/partner/partner.api";
 import { IPartner } from "@/types/partner.types";
+import Link from "next/link";
+import { useUser } from "@/context/UserContext";
+import { Role } from "@/types/user.types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type SortField = "name" | "phone" | "isActive" | "createdAt";
-type SortDir   = "asc" | "desc" | null;
+type SortDir = "asc" | "desc" | null;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -123,17 +126,17 @@ type StatColor = "violet" | "emerald" | "slate";
 
 const STAT_COLOR_MAP: Record<StatColor, { bg: string; icon: string; text: string }> = {
   violet: {
-    bg:   "bg-violet-50 dark:bg-violet-900/20",
+    bg: "bg-violet-50 dark:bg-violet-900/20",
     icon: "text-violet-600 dark:text-violet-400",
     text: "text-violet-600 dark:text-violet-400",
   },
   emerald: {
-    bg:   "bg-emerald-50 dark:bg-emerald-900/20",
+    bg: "bg-emerald-50 dark:bg-emerald-900/20",
     icon: "text-emerald-600 dark:text-emerald-400",
     text: "text-emerald-600 dark:text-emerald-400",
   },
   slate: {
-    bg:   "bg-slate-100 dark:bg-slate-800",
+    bg: "bg-slate-100 dark:bg-slate-800",
     icon: "text-slate-500 dark:text-slate-400",
     text: "text-slate-500 dark:text-slate-400",
   },
@@ -191,50 +194,52 @@ function SortIcon({
 
 export default function PartnerManagement() {
   // ── filters ──
-  const [searchTerm, setSearchTerm]     = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "true" | "false">("all");
-  const [startDate, setStartDate]       = useState("");
-  const [endDate, setEndDate]           = useState("");
-  const [page, setPage]                 = useState(1);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [page, setPage] = useState(1);
   const limit = 10;
 
   // ── sort ──
   const [sortField, setSortField] = useState<SortField | null>(null);
-  const [sortDir, setSortDir]     = useState<SortDir>(null);
+  const [sortDir, setSortDir] = useState<SortDir>(null);
 
   // ── modals ──
-  const [viewingPartner, setViewingPartner]   = useState<IPartner | null>(null);
-  const [isDetailsOpen, setIsDetailsOpen]     = useState(false);
-  const [editingPartner, setEditingPartner]   = useState<IPartner | null>(null);
-  const [isUpdateOpen, setIsUpdateOpen]       = useState(false);
+  const [viewingPartner, setViewingPartner] = useState<IPartner | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [editingPartner, setEditingPartner] = useState<IPartner | null>(null);
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [deletingPartner, setDeletingPartner] = useState<IPartner | null>(null);
-  const [isDeleteOpen, setIsDeleteOpen]       = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+  const { user, logout } = useUser();
 
   useEffect(() => { setPage(1); }, [searchTerm, statusFilter]);
 
   // ── API ──
   const { data, isLoading, refetch } = useGetAllPartnersQuery({
     searchTerm: searchTerm || undefined,
-    isActive:   statusFilter !== "all" ? statusFilter : undefined,
+    isActive: statusFilter !== "all" ? statusFilter : undefined,
     page,
     limit,
     ...(startDate && { startDate }),
-    ...(endDate   && { endDate }),
+    ...(endDate && { endDate }),
   });
 
-console.log("Partner response ", data)
+  console.log("Partner response ", data)
 
 
   const [softDeletePartner, { isLoading: isDeleting }] = useSoftDeletePartnerMutation();
 
   // ── derived ──
   const partners: IPartner[] = data?.data ?? [];
-  const stats                = data?.stats;
-  const meta                 = data?.meta;
-  const totalPage            = meta?.totalPage ?? 1;
+  const stats = data?.stats;
+  const meta = data?.meta;
+  const totalPage = meta?.totalPage ?? 1;
 
   const hasActiveFilters = statusFilter !== "all";
-  const hasDateFilter    = !!(startDate || endDate);
+  const hasDateFilter = !!(startDate || endDate);
 
   // ── client sort ──
   const sortedPartners = React.useMemo(() => {
@@ -242,9 +247,9 @@ console.log("Partner response ", data)
     return [...partners].sort((a, b) => {
       let aVal = "";
       let bVal = "";
-      if (sortField === "name")      { aVal = a.name ?? ""; bVal = b.name ?? ""; }
-      if (sortField === "phone")     { aVal = a.phone ?? ""; bVal = b.phone ?? ""; }
-      if (sortField === "isActive")  { aVal = String(a.isActive); bVal = String(b.isActive); }
+      if (sortField === "name") { aVal = a.name ?? ""; bVal = b.name ?? ""; }
+      if (sortField === "phone") { aVal = a.phone ?? ""; bVal = b.phone ?? ""; }
+      if (sortField === "isActive") { aVal = String(a.isActive); bVal = String(b.isActive); }
       if (sortField === "createdAt") { aVal = a.createdAt ?? ""; bVal = b.createdAt ?? ""; }
       return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
     });
@@ -253,16 +258,16 @@ console.log("Partner response ", data)
   // ── handlers ──
   const handleSort = (field: SortField) => {
     if (sortField !== field) { setSortField(field); setSortDir("asc"); return; }
-    if (sortDir === "asc")   { setSortDir("desc"); return; }
+    if (sortDir === "asc") { setSortDir("desc"); return; }
     setSortField(null); setSortDir(null);
   };
 
-  const clearFilters    = () => { setStatusFilter("all"); };
+  const clearFilters = () => { setStatusFilter("all"); };
   const clearDateFilter = () => { setStartDate(""); setEndDate(""); };
 
   const openDetailsDialog = (p: IPartner) => { setViewingPartner(p); setIsDetailsOpen(true); };
-  const openEditDialog    = (p: IPartner) => { setEditingPartner(p); setIsUpdateOpen(true); };
-  const openDeleteDialog  = (p: IPartner) => { setDeletingPartner(p); setIsDeleteOpen(true); };
+  const openEditDialog = (p: IPartner) => { setEditingPartner(p); setIsUpdateOpen(true); };
+  const openDeleteDialog = (p: IPartner) => { setDeletingPartner(p); setIsDeleteOpen(true); };
 
   const handleDelete = async () => {
     if (!deletingPartner?._id) return;
@@ -290,7 +295,6 @@ console.log("Partner response ", data)
     </TableHead>
   );
 
-console.log("I am now in partner management page ")
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -301,7 +305,27 @@ console.log("I am now in partner management page ")
           { label: "Dashboard", href: "/dashboard" },
           { label: "Partner Management" },
         ]}
-        action={<CreatePartnerModal onSuccess={refetch} />}
+        action={
+          <div className="flex items-center gap-2">
+            <Link
+              href={
+                user?.role === Role.ADMIN || user?.role === Role.SUPER_ADMIN
+                  ? "/admin/dashboard/partners/trash"
+                  : "/manager/dashboard/partners/trash"
+              }
+            >
+              <Button
+                variant="outline"
+                className="hover:cursor-pointer flex items-center"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                <span>Trash</span>
+              </Button>
+            </Link>
+
+            <CreatePartnerModal onSuccess={refetch} />
+          </div>
+        }
       />
 
       {/* ── Stat Cards ── */}
@@ -393,8 +417,8 @@ console.log("I am now in partner management page ")
               {statusFilter === "all"
                 ? "All Status"
                 : statusFilter === "true"
-                ? "Active"
-                : "Inactive"}
+                  ? "Active"
+                  : "Inactive"}
             </span>
           </SelectTrigger>
           <SelectContent>
@@ -423,12 +447,12 @@ console.log("I am now in partner management page ")
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50 dark:bg-slate-800/50">
-                <SortableTh field="name"      label="Partner" />
-                <SortableTh field="phone"     label="Phone" />
+                <SortableTh field="name" label="Partner" />
+                <SortableTh field="phone" label="Phone" />
                 <TableHead className="whitespace-nowrap">Email</TableHead>
                 <TableHead className="whitespace-nowrap">Website</TableHead>
                 <SortableTh field="createdAt" label="Added" />
-                <SortableTh field="isActive"  label="Status" />
+                <SortableTh field="isActive" label="Status" />
                 <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
               </TableRow>
             </TableHeader>

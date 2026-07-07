@@ -4,6 +4,7 @@ import { adminNavigation } from "./navigations/admin.navigation";
 import { agentLeaderNavigation } from "./navigations/agentLeader.navigation";
 import { agentNavigation } from "./navigations/agent.navigation";
 import { superAdminNavigation } from "./navigations/superAdmin.navigation";
+import { managerNavigation } from "./navigations/manager.navigation";
 
 export const getDashboardNavigation = (role?: Role) => {
   switch (role) {
@@ -13,6 +14,9 @@ export const getDashboardNavigation = (role?: Role) => {
     case Role.ADMIN:
       return adminNavigation;
 
+    case Role.MANAGER:
+      return managerNavigation;
+      
     case Role.AGENT_LEADER:
       return agentLeaderNavigation;
 
