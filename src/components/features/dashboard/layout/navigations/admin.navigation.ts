@@ -1,7 +1,10 @@
 import {
+  BadgeDollarSign,
+  Bell,
   Building2,
   Handshake,
   LayoutDashboard,
+  MessageSquare,
   Package,
   Settings,
   ShieldCheck,
@@ -32,24 +35,37 @@ export const adminNavigation: NavGroup[] = [
         href: "/admin/dashboard/packages",
         icon: Package,
       },
-      // {
-      //   id: "subscriptions",
-      //   label: "Subscriptions",
-      //   href: "/admin/dashboard/subscriptions",
-      //   icon: ShieldCheck,
-      // },
+
+      {
+        id: "claims",
+        label: "Claims",
+        href: "/admin/dashboard/claims",
+        icon: ShieldCheck,
+      },
+      {
+        id: "notifications",
+        label: "Notifications",
+        href: "/admin/dashboard/notifications",
+        icon: Bell,
+      },
+      {
+        id: "messages",
+        label: "Messages",
+        href: "/admin/dashboard/messages",
+        icon: MessageSquare,
+      },
     ],
   },
 
   {
     label: "Team Management",
     items: [
-            {
+      {
         id: "managers",
         label: "Managers",
         href: "/admin/dashboard/managers",
         icon: Users,
-    },
+      },
       {
         id: "agent-leaders",
         label: "Agent Leaders",
@@ -80,6 +96,19 @@ export const adminNavigation: NavGroup[] = [
         href: "/admin/dashboard/branches",
         icon: Building2,
       },
+    ],
+  },
+
+    {
+    label: "Payment Management",
+    items: [
+      {
+        id: "payments",
+        label: "Payments",
+        href: "/admin/dashboard/payments",
+        icon: BadgeDollarSign,
+      },
+     
     ],
   }
 ];

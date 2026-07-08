@@ -139,7 +139,7 @@ export function AgentLeaderDetailsModal({ open, onOpenChange, item }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto p-0">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto p-0 scrollbar-none">
 
         {/* Header */}
         <div className="relative bg-linear-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 px-6 pt-8 pb-6 rounded-t-lg">

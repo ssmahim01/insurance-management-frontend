@@ -142,7 +142,7 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
       <SidebarHeader className="border-b mb-3 border-gray-200/80 dark:border-gray-800">
         <Link href="/dashboard">
           <Image
-            src={"/assets/shurokkha.png"}
+            src={"/assets/shurokkha-logo-1.png"}
             alt="Shurokkha Logo"
             width={200}
             height={200}

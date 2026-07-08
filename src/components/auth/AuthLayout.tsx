@@ -29,7 +29,7 @@ export function AuthLayout({
             <div className="space-y-2">
               <Link href="/login">
                 <Image
-                  src={"/assets/shurokkha.png"}
+                  src={"/assets/shurokkha-logo-1.png"}
                   alt="Shurokkha Logo"
                   width={500}
                   height={500}
