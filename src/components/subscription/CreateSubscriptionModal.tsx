@@ -235,16 +235,16 @@ const defaultValues: FormValues = {
 };
 
 // fields validated before leaving step 1 of the "new customer" wizard
-const STEP1_FIELDS: (keyof FormValues)[] = [
-  "name",
-  "phone",
-  "nid",
-  "dateOfBirth",
-  "gender",
-  "division",
-  "district",
-  "thana",
-];
+// const STEP1_FIELDS: (keyof FormValues)[] = [
+//   "name",
+//   "phone",
+//   "nid",
+//   "dateOfBirth",
+//   "gender",
+//   "division",
+//   "district",
+//   "thana",
+// ];
 
 interface CreateSubscriptionModalProps {
     onSuccess?: () => void;

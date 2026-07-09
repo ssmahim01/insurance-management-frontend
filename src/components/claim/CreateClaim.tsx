@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/incompatible-library */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useRef } from "react";
@@ -21,7 +23,8 @@ import {
 
 import { useCreateClaimMutation } from "@/redux/features/claim/claim.api";
 import { useGetAllSubscriptionsQuery } from "@/redux/features/subscription/subscription.api";
-import { ISubscription, SubscriptionStatus } from "@/types/subscription.types";
+import { GetSubscriptionsParams, ISubscription, ISubscriptionListResponse, SubscriptionStatus } from "@/types/subscription.types";
+import { useGetMeQuery } from "@/redux/features/user/user.api";
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
@@ -29,6 +32,7 @@ const createClaimSchema = z.object({
   subscription: z.string().min(1, "Subscription is required"),
   serviceTitle: z.string().min(2, "Service title must be at least 2 characters"),
   description:  z.string().min(10, "Description must be at least 10 characters"),
+  customer:  z.string().optional(),
 });
 
 type CreateClaimFormValues = z.infer<typeof createClaimSchema>;
@@ -46,19 +50,39 @@ const getPackageName = (sub?: ISubscription): string => {
     : String(sub._id);
 };
 
+export interface SubscriptionsQueryResult {
+  data?: { data?: { data?: ISubscription[] } } | { data?: ISubscription[] };
+  isLoading: boolean;
+}
+
+export type UseSubscriptionsForClaimQuery = (
+  params: GetSubscriptionsParams | undefined,
+  options: { skip: boolean },
+) => { data?: ISubscriptionListResponse; isLoading: boolean };
+
+interface CreateClaimModalProps {
+  onSuccess?: () => void;
+ 
+  useSubscriptionsQuery?: UseSubscriptionsForClaimQuery;
+}
+
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function CreateClaimModal({ onSuccess }: CreateClaimModalProps) {
+export function CreateClaimModal({
+  onSuccess,
+  useSubscriptionsQuery = useGetAllSubscriptionsQuery,
+}: CreateClaimModalProps) {
   const [open, setOpen] = useState(false);
   const [createClaim, { isLoading }] = useCreateClaimMutation();
+  const {data:me} = useGetMeQuery(undefined);
 
   // Attachments state
   const [files, setFiles]       = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const fileInputRef            = useRef<HTMLInputElement>(null);
 
-  // Fetch active subscriptions — only when modal is open
-  const { data: subsData, isLoading: isSubsLoading } = useGetAllSubscriptionsQuery(
+  const { data: subsData, isLoading: isSubsLoading } = useSubscriptionsQuery(
     { status: SubscriptionStatus.ACTIVE, limit: 100 },
     { skip: !open },
   );
@@ -71,7 +95,7 @@ export function CreateClaimModal({ onSuccess }: CreateClaimModalProps) {
     formState: { errors }, reset,
   } = useForm<CreateClaimFormValues>({
     resolver: zodResolver(createClaimSchema),
-    defaultValues: { subscription: "", serviceTitle: "", description: "" },
+    defaultValues: { subscription: "", serviceTitle: "", description: "", customer: "" },
   });
 
   const watchedSubscription = watch("subscription");
@@ -108,6 +132,7 @@ export function CreateClaimModal({ onSuccess }: CreateClaimModalProps) {
       formData.append("subscription", data.subscription);
       formData.append("serviceTitle", data.serviceTitle);
       formData.append("description", data.description);
+      formData.append("customer", me?.data?._id ?? "");
 
       await createClaim(formData).unwrap();
       toast.success("Claim submitted successfully!");
@@ -120,7 +145,7 @@ export function CreateClaimModal({ onSuccess }: CreateClaimModalProps) {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
+      <Button variant="outline" onClick={() => setOpen(true)} className="group hover:cursor-pointer border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white duration-300 w-full mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60">
         <Plus className="h-4 w-4" />
         Submit Claim
       </Button>
@@ -228,7 +253,7 @@ export function CreateClaimModal({ onSuccess }: CreateClaimModalProps) {
             </div>
 
             {/* ── Submit ── */}
-            <Button type="submit" disabled={isLoading} className="w-full mt-2 font-bold tracking-widest uppercase disabled:opacity-60">
+            <Button type="submit" variant="outline" disabled={isLoading} className="group hover:cursor-pointer border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white duration-300 cursor-pointer font-bold tracking-widest uppercase transition-colors w-full mt-2 disabled:opacity-60">
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
