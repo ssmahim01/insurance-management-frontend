@@ -144,6 +144,14 @@ export const subscriptionApi = baseApi.injectEndpoints({
       providesTags: ["SUBSCRIPTIONS"],
     }),
 
+    getCustomerSubscriptions: builder.query<ISubscriptionListResponse, string>({
+      query: (customerId) => ({
+        url: `/subscription/customer/${customerId}`,
+        method: "GET",
+      }),
+      providesTags: ["SUBSCRIPTIONS"],
+    }),
+
     // ── UPDATE ─────────────────────────────────────────────────────────────
 
     updateSubscription: builder.mutation<
@@ -165,6 +173,8 @@ export const subscriptionApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["SUBSCRIPTIONS"],
     }),
+
+
 
     // ── SOFT DELETE (move to trash) ────────────────────────────────────────
 
@@ -200,6 +210,7 @@ export const {
   useGetAgentLeaderTrashSubscriptionsQuery,
   useGetMySubscriptionsQuery,
   useGetSingleSubscriptionQuery,
+  useGetCustomerSubscriptionsQuery,
   useUpdateSubscriptionMutation,
   useSoftDeleteSubscriptionMutation,
   useRestoreSubscriptionMutation,

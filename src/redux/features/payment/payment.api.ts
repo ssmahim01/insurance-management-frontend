@@ -23,6 +23,14 @@ export interface IPayment {
     amount: number;
     status: PaymentStatus;
     isDeleted: boolean;
+    refundData?: {
+        status?: string;
+        refund_ref_id?: string;
+        errorReason?: string;
+        [key: string]: any;
+    };
+    refundRefId?: string;
+    refundedAt?: string;
     createdAt?: string;
     updatedAt?: string;
 }
@@ -90,7 +98,19 @@ export const paymentApi = baseApi.injectEndpoints({
             providesTags: ["PAYMENTS"],
         }),
 
-        updatePayment: builder.mutation<ISinglePaymentResponse, { id: string; data: Partial<Pick<IPayment, "status">> }>({
+        // updatePayment: builder.mutation<ISinglePaymentResponse, { id: string; data: Partial<Pick<IPayment, "status">> }>({
+        //     query: ({ id, data }) => ({
+        //         url: `/payment/${id}`,
+        //         method: "PATCH",
+        //         data,
+        //     }),
+        //     invalidatesTags: ["PAYMENTS"],
+        // }),
+
+        updatePayment: builder.mutation<
+            ISinglePaymentResponse,
+            { id: string; data: { status?: PaymentStatus; refundRemarks?: string } }
+        >({
             query: ({ id, data }) => ({
                 url: `/payment/${id}`,
                 method: "PATCH",
@@ -98,7 +118,6 @@ export const paymentApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ["PAYMENTS"],
         }),
-
         softDeletePayment: builder.mutation<ISinglePaymentResponse, string>({
             query: (id) => ({
                 url: `/payment/soft-delete/${id}`,
