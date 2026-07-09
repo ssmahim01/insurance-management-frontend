@@ -83,6 +83,19 @@ const formatDate = (iso?: string) => {
 const formatAmount = (amount: number) =>
   new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT" }).format(amount ?? 0);
 
+const getCustomerInfo = (payment: IPayment): { name: string; phone: string } => {
+  const sub = payment.subscription;
+  if (!sub || typeof sub === "string") return { name: "—", phone: "—" };
+
+  const customer = (sub as any).customer;
+  if (!customer || typeof customer === "string") return { name: "—", phone: "—" };
+
+  return {
+    name: customer.name ?? "—",
+    phone: customer.phone ?? "—",
+  };
+};
+
 const STATUS_STYLES: Record<string, string> = {
   UNPAID:
     "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400",
@@ -130,7 +143,7 @@ function PaymentRowSkeleton() {
           </div>
         </div>
       </TableCell>
-      {Array.from({ length: 3 }).map((_, i) => (
+      {Array.from({ length: 4 }).map((_, i) => (
         <TableCell key={i}>
           <Skeleton className="h-4 w-20" />
         </TableCell>
@@ -359,11 +372,7 @@ export default function PaymentManagement() {
         action={
           <div className="flex items-center gap-2">
             <Link
-              href={
-                user?.role === Role.ADMIN || user?.role === Role.SUPER_ADMIN
-                  ? "/admin/dashboard/payment/trash"
-                  : "/manager/dashboard/payment/trash"
-              }
+              href="/admin/dashboard/payments/trash"
             >
               <Button
                 variant="outline"
@@ -529,6 +538,7 @@ export default function PaymentManagement() {
             <TableHeader>
               <TableRow className="bg-slate-50 dark:bg-slate-800/50">
                 <SortableTh field="transactionId" label="Transaction" />
+                <TableHead className="whitespace-nowrap">Customer</TableHead>
                 <TableHead className="whitespace-nowrap">Subscription Plan</TableHead>
                 <SortableTh field="amount" label="Amount" />
                 <SortableTh field="createdAt" label="Date" />
@@ -544,7 +554,7 @@ export default function PaymentManagement() {
                 ))
               ) : sortedPayments.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6}>
+                  <TableCell colSpan={7}>
                     <div className="flex flex-col items-center justify-center py-16 text-slate-400">
                       <CreditCard className="w-12 h-12 mb-4 opacity-30" />
                       {searchTerm || hasActiveFilters ? (
@@ -568,6 +578,8 @@ export default function PaymentManagement() {
                       ? undefined
                       : payment.subscription?.planType;
 
+                  const { name: customerName, phone: customerPhone } = getCustomerInfo(payment);
+
                   return (
                     <TableRow
                       key={payment._id}
@@ -581,6 +593,18 @@ export default function PaymentManagement() {
                           </div>
                           <p className="font-medium text-slate-900 dark:text-white font-mono text-sm truncate max-w-40">
                             {payment.transactionId}
+                          </p>
+                        </div>
+                      </TableCell>
+
+                      {/* Customer */}
+                      <TableCell>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-slate-900 dark:text-white truncate max-w-32">
+                            {customerName}
+                          </p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate max-w-32">
+                            {customerPhone}
                           </p>
                         </div>
                       </TableCell>

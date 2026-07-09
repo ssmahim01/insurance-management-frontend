@@ -227,9 +227,6 @@ export default function PartnerManagement() {
     ...(endDate && { endDate }),
   });
 
-  console.log("Partner response ", data)
-
-
   const [softDeletePartner, { isLoading: isDeleting }] = useSoftDeletePartnerMutation();
 
   // ── derived ──
@@ -449,7 +446,7 @@ export default function PartnerManagement() {
               <TableRow className="bg-slate-50 dark:bg-slate-800/50">
                 <SortableTh field="name" label="Partner" />
                 <SortableTh field="phone" label="Phone" />
-                <TableHead className="whitespace-nowrap">Email</TableHead>
+                {/* <TableHead className="whitespace-nowrap">Email</TableHead> */}
                 <TableHead className="whitespace-nowrap">Website</TableHead>
                 <SortableTh field="createdAt" label="Added" />
                 <SortableTh field="isActive" label="Status" />
@@ -520,9 +517,9 @@ export default function PartnerManagement() {
                     </TableCell>
 
                     {/* Email */}
-                    <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
+                    {/* <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
                       {partner.email ?? "—"}
-                    </TableCell>
+                    </TableCell> */}
 
                     {/* Website */}
                     <TableCell>

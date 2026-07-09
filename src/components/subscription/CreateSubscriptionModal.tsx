@@ -362,15 +362,6 @@ export function CreateSubscriptionModal({
     }
   };
 
-  // const goNext = async () => {
-  //     const valid = await form.trigger(STEP1_FIELDS);
-  //     if (!valid) {
-  //         toast.error("Please complete customer info before continuing");
-  //         return;
-  //     }
-  //     setDirection("forward");
-  //     setStep(2);
-  // };
 
   const goNext = async () => {
     const values = form.getValues();
@@ -548,7 +539,7 @@ export function CreateSubscriptionModal({
     >
       <DialogTrigger>
         <Button className="bg-indigo-700 hover:bg-indigo-800 text-white gap-2 hover:cursor-pointer hover:scale-105 transition-transform duration-200 ease-in-out">
-          <Plus className="w-4 h-4" /> New Subscription
+          <Plus className="w-4 h-4" /> New Subscription / Customer
         </Button>
       </DialogTrigger>
 

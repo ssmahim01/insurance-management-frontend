@@ -8,6 +8,12 @@ import {
   Calendar,
   ShieldCheck,
   FileText,
+  User,
+  Phone,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  Undo2,
 } from "lucide-react";
 
 import {
@@ -22,31 +28,50 @@ import { Separator } from "@/components/ui/separator";
 
 import { IPayment } from "@/redux/features/payment/payment.api";
 
-interface PaymentDetailsModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  item: IPayment;
-}
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function Row({
+function Field({
   icon: Icon,
   label,
   value,
+  mono = false,
 }: {
   icon: React.ElementType;
   label: string;
   value?: string | number | null;
+  mono?: boolean;
 }) {
+  const isEmpty = value === undefined || value === null || value === "";
   return (
-    <div className="flex justify-between items-center py-2 border-b border-border last:border-0">
-      <span className="text-sm text-muted-foreground flex items-center gap-1.5">
-        <Icon className="w-3.5 h-3.5" />
-        {label}
-      </span>
-      <span className="text-sm font-medium text-foreground text-right">
-        {value ?? "—"}
-      </span>
+    <div className="flex items-start gap-3">
+      <div className="mt-0.5 w-8 h-8 rounded-md bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+        <Icon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[10px] font-bold tracking-widest uppercase text-slate-400">
+          {label}
+        </p>
+        {isEmpty ? (
+          <p className="text-sm text-slate-400 italic">Not provided</p>
+        ) : (
+          <p
+            className={`text-sm text-slate-800 dark:text-slate-200 wrap-break-word ${
+              mono ? "font-mono" : ""
+            }`}
+          >
+            {value}
+          </p>
+        )}
+      </div>
     </div>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[10px] font-bold tracking-widest uppercase text-slate-400 mb-3">
+      {children}
+    </p>
   );
 }
 
@@ -79,87 +104,136 @@ const STATUS_STYLES: Record<string, string> = {
     "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
 };
 
-const STATUS_DOT: Record<string, string> = {
-  UNPAID: "bg-amber-500",
-  PAID: "bg-emerald-500",
-  COMPLETED: "bg-emerald-500",
-  FAILED: "bg-red-500",
-  CANCELLED: "bg-slate-400",
-  REFUNDED: "bg-blue-500",
+const STATUS_ICON: Record<string, React.ElementType> = {
+  UNPAID: Clock,
+  PAID: CheckCircle2,
+  COMPLETED: CheckCircle2,
+  FAILED: XCircle,
+  CANCELLED: XCircle,
+  REFUNDED: Undo2,
 };
 
 function StatusBadge({ status }: { status: string }) {
+  const Icon = STATUS_ICON[status] ?? Clock;
   return (
     <Badge variant="outline" className={STATUS_STYLES[status] ?? STATUS_STYLES.UNPAID}>
-      <span className={`h-1.5 w-1.5 rounded-full mr-1.5 inline-block ${STATUS_DOT[status] ?? STATUS_DOT.UNPAID}`} />
+      <Icon className="w-3 h-3 mr-1" />
       {status}
     </Badge>
   );
 }
+
+// ─── Props ────────────────────────────────────────────────────────────────────
+
+interface PaymentDetailsModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  item: IPayment;
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export function PaymentDetailsModal({
   open,
   onOpenChange,
   item,
 }: PaymentDetailsModalProps) {
+  if (!item) return null;
+
   const subscription =
     typeof item.subscription === "string" ? undefined : item.subscription;
 
+  const customer =
+    subscription && typeof (subscription as any).customer !== "string"
+      ? (subscription as any).customer
+      : undefined;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] scrollbar-none overflow-y-auto p-6">
-        <DialogHeader className="flex flex-col items-center gap-2 pb-2">
-          <div className="w-12 h-12 rounded-xl from-violet-500 to-purple-600 flex items-center justify-center shadow-md mb-1">
-            <CreditCard className="w-6 h-6 text-white" />
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] scrollbar-none overflow-y-auto p-0">
+
+        {/* ── Header ── */}
+        <div className="relative bg-linear-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 px-6 pt-8 pb-6 rounded-t-lg">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Payment Details</DialogTitle>
+            <DialogDescription>
+              Transaction and subscription information for {item.transactionId}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4">
+            {/* Icon Avatar */}
+            <div className="w-20 h-20 rounded-xl bg-linear-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white shadow-md border-4 border-white dark:border-slate-800 shrink-0">
+              <CreditCard className="w-9 h-9" />
+            </div>
+
+            {/* Transaction ID + badges */}
+            <div className="text-center sm:text-left flex-1 min-w-0">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white font-mono truncate">
+                {item.transactionId}
+              </h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                {formatAmount(item.amount)}
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2 justify-center sm:justify-start">
+                <StatusBadge status={item.status} />
+              </div>
+            </div>
           </div>
-          <DialogTitle className="text-xl font-bold tracking-widest uppercase text-center">
-            Payment Details
-          </DialogTitle>
-          <DialogDescription className="text-[#96999A] text-sm tracking-wide">
-            Transaction and subscription information
-          </DialogDescription>
-        </DialogHeader>
-
-        <Separator />
-
-        <div>
-          <p className="text-xs font-bold tracking-widest uppercase text-slate-400 mb-3">
-            Transaction
-          </p>
-          <Row icon={Hash} label="Transaction ID" value={item.transactionId} />
-          <Row icon={Wallet} label="Amount" value={formatAmount(item.amount)} />
-          <Row icon={Calendar} label="Date" value={formatDate(item.createdAt)} />
         </div>
 
-        <Separator />
+        {/* ── Body ── */}
+        <div className="px-6 py-5 space-y-6">
 
-        <div>
-          <p className="text-xs font-bold tracking-widest uppercase text-slate-400 mb-3">
-            Subscription
-          </p>
-          <Row icon={FileText} label="Plan" value={subscription?.planType} />
-          <Row
-            icon={Calendar}
-            label="Duration"
-            value={
-              subscription?.durationInMonths
-                ? `${subscription.durationInMonths} month(s)`
-                : "Lifetime"
-            }
-          />
-          <Row
-            icon={Wallet}
-            label="Plan Price"
-            value={subscription?.price !== undefined ? formatAmount(subscription.price) : undefined}
-          />
-          <Row icon={ShieldCheck} label="Subscription Status" value={subscription?.status} />
-        </div>
+          {/* Customer */}
+          {customer && (
+            <>
+              <div>
+                <SectionTitle>Customer</SectionTitle>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field icon={User}  label="Name"  value={customer.name} />
+                  <Field icon={Phone} label="Phone" value={customer.phone} mono />
+                </div>
+              </div>
+              <Separator />
+            </>
+          )}
 
-        <Separator />
+          {/* Transaction */}
+          <div>
+            <SectionTitle>Transaction</SectionTitle>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field icon={Hash}     label="Transaction ID" value={item.transactionId} mono />
+              <Field icon={Wallet}   label="Amount"         value={formatAmount(item.amount)} />
+              <Field icon={Calendar} label="Date"           value={formatDate(item.createdAt)} />
+            </div>
+          </div>
 
-        <div className="flex justify-between items-center py-2">
-          <span className="text-sm text-muted-foreground">Payment Status</span>
-          <StatusBadge status={item.status} />
+          <Separator />
+
+          {/* Subscription */}
+          <div>
+            <SectionTitle>Subscription</SectionTitle>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field icon={FileText} label="Plan" value={subscription?.planType} />
+              <Field
+                icon={Calendar}
+                label="Duration"
+                value={
+                  subscription?.durationInMonths
+                    ? `${subscription.durationInMonths} month(s)`
+                    : "Lifetime"
+                }
+              />
+              <Field
+                icon={Wallet}
+                label="Plan Price"
+                value={subscription?.price !== undefined ? formatAmount(subscription.price) : undefined}
+              />
+              <Field icon={ShieldCheck} label="Subscription Status" value={subscription?.status} />
+            </div>
+          </div>
+
         </div>
       </DialogContent>
     </Dialog>
