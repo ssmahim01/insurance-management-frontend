@@ -20,7 +20,7 @@ export default function DashboardPage() {
       />
 
       {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatsCard
           title="Total Partners"
           value="24"
@@ -45,7 +45,7 @@ export default function DashboardPage() {
           icon={<Activity className="w-5 h-5 text-yellow-500" />}
           trend={{ value: 5, isPositive: false }}
         />
-      </div>
+      </div> */}
 
       {/* Welcome Message */}
       <div className="rounded-lg border border-border bg-card p-8 text-center">

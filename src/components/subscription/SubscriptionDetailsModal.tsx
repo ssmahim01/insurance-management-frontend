@@ -50,7 +50,7 @@ export function SubscriptionDetailsModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-10/12 overflow-y-auto">
+      <DialogContent className="max-w-2xl w-full scrollbar-none max-h-10/12 overflow-y-auto">
         <DialogHeader className="text-center">
           <DialogTitle className="uppercase tracking-widest text-sm">
             Subscription Details
