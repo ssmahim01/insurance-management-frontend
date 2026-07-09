@@ -246,11 +246,15 @@ const STEP1_FIELDS: (keyof FormValues)[] = [
   "thana",
 ];
 
+interface CreateSubscriptionModalProps {
+    onSuccess?: () => void;
+    isCustomer?: boolean;
+}
+
 export function CreateSubscriptionModal({
   onSuccess,
-}: {
-  onSuccess?: () => void;
-}) {
+  isCustomer
+}: CreateSubscriptionModalProps) {
   const [open, setOpen] = useState(false);
   const [createSubscription, { isLoading }] = useCreateSubscriptionMutation();
 
@@ -485,39 +489,64 @@ export function CreateSubscriptionModal({
       }),
     };
 
-    const payload =
-      values.mode === "existing"
-        ? { ...basePayload, customer: values.customerId }
-        : {
-            ...basePayload,
-            customerPayload: {
-              name: values.name!.trim(),
-              phone: values.phone!.trim(),
-              ...(values.email?.trim() && { email: values.email.trim() }),
-              role: "CUSTOMER" as const,
-              nid: values.nid!.trim(),
-              dateOfBirth: values.dateOfBirth,
-              gender: values.gender,
-              address: {
-                division: values.division!.trim(),
-                district: values.district!.trim(),
-                thana: values.thana!.trim(),
-                ...(values.union?.trim() && { union: values.union.trim() }),
-              },
-              ...(values.nomineeName?.trim() && {
-                nominee: {
-                  name: values.nomineeName.trim(),
-                  ...(values.nomineeAge && { age: Number(values.nomineeAge) }),
-                  ...(values.nomineeRelationship?.trim() && {
-                    relationship: values.nomineeRelationship.trim(),
-                  }),
-                  ...(values.nomineePhone?.trim() && {
-                    phone: values.nomineePhone.trim(),
-                  }),
-                },
-              }),
-            },
-          };
+  let payload;
+
+  // Customer Dashboard
+  if (isCustomer) {
+    // Backend should automatically use req.user.userId
+    payload = basePayload;
+  }
+
+  // Staff -> Existing Customer
+  else if (values.mode === "existing") {
+    payload = {
+      ...basePayload,
+      customer: values.customerId,
+    };
+  }
+
+  // Staff -> New Customer
+  else {
+    payload = {
+      ...basePayload,
+      customerPayload: {
+        name: values.name!.trim(),
+        phone: values.phone!.trim(),
+        ...(values.email?.trim() && {
+          email: values.email.trim(),
+        }),
+
+        role: "CUSTOMER" as const,
+        nid: values.nid!.trim(),
+        dateOfBirth: values.dateOfBirth,
+        gender: values.gender,
+
+        address: {
+          division: values.division!.trim(),
+          district: values.district!.trim(),
+          thana: values.thana!.trim(),
+          ...(values.union?.trim() && {
+            union: values.union.trim(),
+          }),
+        },
+
+        ...(values.nomineeName?.trim() && {
+          nominee: {
+            name: values.nomineeName.trim(),
+            ...(values.nomineeAge && {
+              age: Number(values.nomineeAge),
+            }),
+            ...(values.nomineeRelationship?.trim() && {
+              relationship: values.nomineeRelationship.trim(),
+            }),
+            ...(values.nomineePhone?.trim() && {
+              phone: values.nomineePhone.trim(),
+            }),
+          },
+        }),
+      },
+    };
+  }
 
     try {
       const res = await createSubscription(payload as any).unwrap();
@@ -567,7 +596,7 @@ export function CreateSubscriptionModal({
             className="space-y-5 pr-2"
           >
             {/* ── Mode Toggle (New Customer first) ── */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className={` grid ${!isCustomer ? "grid-cols-2": "grid-cols-1"} gap-2`}>
               <button
                 type="button"
                 onClick={() => handleModeSwitch("new")}
@@ -579,7 +608,8 @@ export function CreateSubscriptionModal({
               >
                 <UserPlus className="w-4 h-4" /> New Customer
               </button>
-              <button
+             {!isCustomer && (
+               <button
                 type="button"
                 onClick={() => handleModeSwitch("existing")}
                 className={`flex items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-all duration-200 ${
@@ -590,6 +620,7 @@ export function CreateSubscriptionModal({
               >
                 <UserCheck className="w-4 h-4" /> Existing Customer
               </button>
+             )}
             </div>
 
             {/* ── Wizard Step Indicator (New Customer only) ── */}
@@ -644,7 +675,7 @@ export function CreateSubscriptionModal({
             )}
 
             {/* ══════════════════ EXISTING CUSTOMER (single step) ══════════════════ */}
-            {mode === "existing" && (
+            {mode === "existing" && !isCustomer && (
               <div className="space-y-5 animate-in fade-in duration-300">
                 <div className="space-y-2">
                   <p className="text-[10px] font-bold tracking-widest uppercase text-slate-400">

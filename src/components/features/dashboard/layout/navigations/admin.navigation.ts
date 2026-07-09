@@ -6,7 +6,6 @@ import {
   LayoutDashboard,
   MessageSquare,
   Package,
-  Settings,
   ShieldCheck,
   User,
   Users,
