@@ -47,13 +47,13 @@ import {
 
 import { PageHeader } from "../shared/PageHeader";
 import { Pagination } from "../pagination/Pagination";
-// import { NotificationDetailsModal } from "./NotificationDetailsModal";
 
 import {
   useGetAllNotificationsQuery,
   useSoftDeleteNotificationMutation,
   useMarkAsReadMutation,
   INotification,
+  NotificationType,
 } from "@/redux/features/notification/notification.api";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
@@ -82,6 +82,33 @@ const getUserName = (user: INotification["user"]) =>
 const getUserPhone = (user: INotification["user"]) =>
   typeof user === "string" ? undefined : user?.phone;
 
+const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
+  [NotificationType.SUBSCRIPTION_CREATED]: "Subscription Created",
+  [NotificationType.PAYMENT_SUCCESS]: "Payment Success",
+  [NotificationType.PAYMENT_FAILED]: "Payment Failed",
+  [NotificationType.SUBSCRIPTION_EXPIRING]: "Subscription Expiring",
+  [NotificationType.SUBSCRIPTION_EXPIRED]: "Subscription Expired",
+  [NotificationType.GENERAL]: "General",
+  [NotificationType.CLAIM]: "Claim",
+};
+
+const NOTIFICATION_TYPE_COLORS: Record<NotificationType, string> = {
+  [NotificationType.SUBSCRIPTION_CREATED]:
+    "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
+  [NotificationType.PAYMENT_SUCCESS]:
+    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400",
+  [NotificationType.PAYMENT_FAILED]:
+    "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400",
+  [NotificationType.SUBSCRIPTION_EXPIRING]:
+    "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400",
+  [NotificationType.SUBSCRIPTION_EXPIRED]:
+    "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-800 dark:bg-orange-900/20 dark:text-orange-400",
+  [NotificationType.GENERAL]:
+    "border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
+    [NotificationType.CLAIM]:
+    "border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-700 dark:bg-blue-800 dark:text-blue-400",
+};
+
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function NotificationRowSkeleton() {
@@ -96,7 +123,7 @@ function NotificationRowSkeleton() {
           </div>
         </div>
       </TableCell>
-      {Array.from({ length: 4 }).map((_, i) => (
+      {Array.from({ length: 5 }).map((_, i) => (
         <TableCell key={i}>
           <Skeleton className="h-4 w-20" />
         </TableCell>
@@ -200,6 +227,7 @@ export default function NotificationManagement() {
   // ── filters ──
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "true" | "false">("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | NotificationType>("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
@@ -217,12 +245,13 @@ export default function NotificationManagement() {
 
   const { user } = useUser();
 
-  useEffect(() => { setPage(1); }, [searchTerm, statusFilter]);
+  useEffect(() => { setPage(1); }, [searchTerm, statusFilter, typeFilter]);
 
   // ── API ──
   const { data, isLoading, refetch } = useGetAllNotificationsQuery({
     searchTerm: searchTerm || undefined,
     isRead: statusFilter !== "all" ? statusFilter : undefined,
+    type: typeFilter !== "all" ? typeFilter : undefined,
     page,
     limit,
     ...(startDate && { startDate }),
@@ -238,7 +267,7 @@ export default function NotificationManagement() {
   const meta = data?.meta;
   const totalPage = meta?.totalPage ?? 1;
 
-  const hasActiveFilters = statusFilter !== "all";
+  const hasActiveFilters = statusFilter !== "all" || typeFilter !== "all";
   const hasDateFilter = !!(startDate || endDate);
 
   // ── client sort ──
@@ -261,7 +290,7 @@ export default function NotificationManagement() {
     setSortField(null); setSortDir(null);
   };
 
-  const clearFilters = () => { setStatusFilter("all"); };
+  const clearFilters = () => { setStatusFilter("all"); setTypeFilter("all"); };
   const clearDateFilter = () => { setStartDate(""); setEndDate(""); };
 
   const openDetailsDialog = (n: INotification) => { setViewingNotification(n); setIsDetailsOpen(true); };
@@ -430,6 +459,25 @@ export default function NotificationManagement() {
           </SelectContent>
         </Select>
 
+        <Select
+          value={typeFilter as any}
+          onValueChange={(v) => setTypeFilter(v as "all" | NotificationType)}
+        >
+          <SelectTrigger className="w-48 h-9 text-sm">
+            <span>
+              {typeFilter === "all" ? "All Types" : NOTIFICATION_TYPE_LABELS[typeFilter]}
+            </span>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Types</SelectItem>
+            {Object.values(NotificationType).map((t) => (
+              <SelectItem key={t} value={t}>
+                {NOTIFICATION_TYPE_LABELS[t]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
         {hasActiveFilters && (
           <Button
             variant="outline"
@@ -450,6 +498,7 @@ export default function NotificationManagement() {
             <TableHeader>
               <TableRow className="bg-slate-50 dark:bg-slate-800/50">
                 <SortableTh field="title" label="Notification" />
+                <TableHead className="whitespace-nowrap">Type</TableHead>
                 <TableHead className="whitespace-nowrap">User</TableHead>
                 <TableHead className="whitespace-nowrap">Phone</TableHead>
                 <SortableTh field="createdAt" label="Sent" />
@@ -465,7 +514,7 @@ export default function NotificationManagement() {
                 ))
               ) : sortedNotifications.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6}>
+                  <TableCell colSpan={7}>
                     <div className="flex flex-col items-center justify-center py-16 text-slate-400">
                       <Bell className="w-12 h-12 mb-4 opacity-30" />
                       {searchTerm || hasActiveFilters ? (
@@ -503,6 +552,20 @@ export default function NotificationManagement() {
                           </p>
                         </div>
                       </div>
+                    </TableCell>
+
+                    {/* Type */}
+                    <TableCell>
+                      {notification.type ? (
+                        <Badge
+                          variant="outline"
+                          className={`whitespace-nowrap ${NOTIFICATION_TYPE_COLORS[notification.type]}`}
+                        >
+                          {NOTIFICATION_TYPE_LABELS[notification.type]}
+                        </Badge>
+                      ) : (
+                        "—"
+                      )}
                     </TableCell>
 
                     {/* User */}

@@ -1,11 +1,22 @@
 // notification.api.ts
 import { baseApi } from "../baseApi";
 
+export enum NotificationType {
+  SUBSCRIPTION_CREATED = "SUBSCRIPTION_CREATED",
+  PAYMENT_SUCCESS = "PAYMENT_SUCCESS",
+  PAYMENT_FAILED = "PAYMENT_FAILED",
+  SUBSCRIPTION_EXPIRING = "SUBSCRIPTION_EXPIRING",
+  SUBSCRIPTION_EXPIRED = "SUBSCRIPTION_EXPIRED",
+  GENERAL = "GENERAL",
+  CLAIM = "CLAIM",
+}
+
 export interface INotification {
   _id: string;
   user: string | { _id: string; name: string; phone: string; role: string };
   title: string;
   message: string;
+  type?: NotificationType;
   isRead: boolean;
   isDeleted: boolean;
   createdAt?: string;
@@ -34,6 +45,7 @@ interface ISingleNotificationResponse {
 interface GetNotificationsParams {
   searchTerm?: string;
   isRead?:     string;
+  type?:       string;
   userId?:     string;
   phone?:      string;
   page?:       number;
