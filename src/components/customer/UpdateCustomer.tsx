@@ -1,4 +1,5 @@
-
+/* eslint-disable react-hooks/incompatible-library */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // "use client";
 
 // import { useEffect, useState } from "react";
@@ -577,7 +578,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Users, Upload, X, Eye, EyeOff } from "lucide-react";
+import { Users, Upload, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -599,58 +600,39 @@ import {
 import { useUpdateUserMutation } from "@/redux/features/user/user.api";
 import { IsActive, IUser } from "@/types/user.types";
 
-import { divisions, getDistrictsByDivision, getUpazilasByDistrict } from "@/lib/bd-address";
+import {
+  divisions,
+  getDistrictsByDivision,
+  getUpazilasByDistrict,
+} from "@/lib/bd-address";
+import Image from "next/image";
 
-// ─── Schema ───────────────────────────────────────────────────────────────────
-
-const updateCustomerSchema = z
-  .object({
-    name: z.string().min(2, "Name must be at least 2 characters").max(100),
-    phone: z.string().min(11, "Enter a valid phone number").max(15),
-    email: z.string().email("Enter a valid email address").optional().or(z.literal("")),
-    nid: z.string().optional().or(z.literal("")),
-    dateOfBirth: z.string().optional().or(z.literal("")),
-    gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(),
-    isActive: z.nativeEnum(IsActive),
-    // Nominee
-    nomineeName: z.string().optional().or(z.literal("")),
-    nomineeAge: z.preprocess(
-      (val) => (val !== "" && val !== undefined ? Number(val) : undefined),
-      z.number().min(1).optional(),
-    ),
-    nomineeRelationship: z.string().optional().or(z.literal("")),
-    nomineePhone: z.string().optional().or(z.literal("")),
-    // Address
-    division: z.string().optional(),
-    district: z.string().optional(),
-    thana: z.string().optional(),
-    union: z.string().optional(),
-    // ── Password change (optional) ──
-    newPassword: z
-      .string()
-      .min(6, "Password must be at least 6 characters")
-      .optional()
-      .or(z.literal("")),
-    confirmNewPassword: z.string().optional().or(z.literal("")),
-  })
-  .refine(
-    (d) => {
-      if (d.newPassword && d.newPassword.length > 0) {
-        return d.newPassword === d.confirmNewPassword;
-      }
-      return true;
-    },
-    { message: "Passwords do not match", path: ["confirmNewPassword"] },
-  )
-  .refine(
-    (d) => {
-      if (d.confirmNewPassword && d.confirmNewPassword.length > 0) {
-        return d.newPassword && d.newPassword.length > 0;
-      }
-      return true;
-    },
-    { message: "Please enter a new password first", path: ["newPassword"] },
-  );
+const updateCustomerSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters").max(100),
+  phone: z.string().min(11, "Enter a valid phone number").max(15),
+  email: z
+    .string()
+    .email("Enter a valid email address")
+    .optional()
+    .or(z.literal("")),
+  nid: z.string().optional().or(z.literal("")),
+  dateOfBirth: z.string().optional().or(z.literal("")),
+  gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(),
+  isActive: z.nativeEnum(IsActive),
+  // Nominee
+  nomineeName: z.string().optional().or(z.literal("")),
+  nomineeAge: z.preprocess(
+    (val) => (val !== "" && val !== undefined ? Number(val) : undefined),
+    z.number().min(1).optional(),
+  ),
+  nomineeRelationship: z.string().optional().or(z.literal("")),
+  nomineePhone: z.string().optional().or(z.literal("")),
+  // Address
+  division: z.string().optional(),
+  district: z.string().optional(),
+  thana: z.string().optional(),
+  union: z.string().optional(),
+});
 
 type UpdateCustomerFormValues = z.infer<typeof updateCustomerSchema>;
 
@@ -661,8 +643,6 @@ interface UpdateCustomerModalProps {
   onSuccess?: () => void;
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export function UpdateCustomerModal({
   open,
   onOpenChange,
@@ -671,17 +651,19 @@ export function UpdateCustomerModal({
 }: UpdateCustomerModalProps) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // ── division / district / thana cascading selection (ids drive the Selects,
-  // the actual name strings are what get saved into the form / payload) ──
   const [divisionId, setDivisionId] = useState("");
   const [districtId, setDistrictId] = useState("");
   const [thanaId, setThanaId] = useState("");
 
-  const availableDistricts = useMemo(() => getDistrictsByDivision(divisionId), [divisionId]);
-  const availableUpazilas = useMemo(() => getUpazilasByDistrict(districtId), [districtId]);
+  const availableDistricts = useMemo(
+    () => getDistrictsByDivision(divisionId),
+    [divisionId],
+  );
+  const availableUpazilas = useMemo(
+    () => getUpazilasByDistrict(districtId),
+    [districtId],
+  );
 
   const [updateUser, { isLoading }] = useUpdateUserMutation();
 
@@ -718,25 +700,25 @@ export function UpdateCustomerModal({
         district: item.address?.district ?? "",
         thana: item.address?.thana ?? "",
         union: item.address?.union ?? "",
-        newPassword: "",
-        confirmNewPassword: "",
       });
       setImagePreview(item.picture ?? null);
       setImageFile(null);
-      setShowNewPassword(false);
-      setShowConfirmPassword(false);
 
-      // ── resolve existing address names back into ids so the cascading
-      // Selects show the current value automatically ──
-      const divisionMatch = divisions.find((d) => d.name === item.address?.division);
+      const divisionMatch = divisions.find(
+        (d) => d.name === item.address?.division,
+      );
       const initialDivisionId = divisionMatch?.id ?? "";
 
       const districtsForDivision = getDistrictsByDivision(initialDivisionId);
-      const districtMatch = districtsForDivision.find((d) => d.name === item.address?.district);
+      const districtMatch = districtsForDivision.find(
+        (d) => d.name === item.address?.district,
+      );
       const initialDistrictId = districtMatch?.id ?? "";
 
       const upazilasForDistrict = getUpazilasByDistrict(initialDistrictId);
-      const thanaMatch = upazilasForDistrict.find((u) => u.name === item.address?.thana);
+      const thanaMatch = upazilasForDistrict.find(
+        (u) => u.name === item.address?.thana,
+      );
       const initialThanaId = thanaMatch?.id ?? "";
 
       setDivisionId(initialDivisionId);
@@ -761,9 +743,6 @@ export function UpdateCustomerModal({
     setImagePreview(null);
   };
 
-  // ── cascading address handlers ──
-  // NOTE: shadcn's Select onValueChange can fire with `null` (e.g. on clear),
-  // so these accept `string | null` and normalize to "".
   const handleDivisionChange = (id: string | null) => {
     const value = id ?? "";
     const division = divisions.find((d) => d.id === value);
@@ -823,9 +802,6 @@ export function UpdateCustomerModal({
           ...(data.nomineeAge !== undefined && { age: data.nomineeAge }),
         },
       };
-      if (data.newPassword && data.newPassword.trim().length > 0) {
-        payload.password = data.newPassword;
-      }
       formData.append("data", JSON.stringify(payload));
       if (imageFile) formData.append("picture", imageFile);
 
@@ -846,7 +822,9 @@ export function UpdateCustomerModal({
   };
 
   const GENDER_LABELS: Record<string, string> = {
-    MALE: "Male", FEMALE: "Female", OTHER: "Other",
+    MALE: "Male",
+    FEMALE: "Female",
+    OTHER: "Other",
   };
 
   return (
@@ -873,51 +851,93 @@ export function UpdateCustomerModal({
         <Separator />
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 pt-1">
-
           {/* ── Personal Information ── */}
           <div>
             <p className="text-xs font-bold tracking-widest uppercase text-slate-400 mb-3">
               Personal Information
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
               <div className="space-y-1.5">
-                <Label htmlFor="uc-name" className="text-xs font-semibold tracking-widest uppercase">
+                <Label
+                  htmlFor="uc-name"
+                  className="text-xs font-semibold tracking-widest uppercase"
+                >
                   Full Name <span className="text-red-500">*</span>
                 </Label>
-                <Input id="uc-name" placeholder="e.g. Md. Karim Mia" {...register("name")} />
-                {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
+                <Input
+                  id="uc-name"
+                  placeholder="e.g. Md. Karim Mia"
+                  {...register("name")}
+                />
+                {errors.name && (
+                  <p className="text-xs text-red-400">{errors.name.message}</p>
+                )}
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="uc-phone" className="text-xs font-semibold tracking-widest uppercase">
+                <Label
+                  htmlFor="uc-phone"
+                  className="text-xs font-semibold tracking-widest uppercase"
+                >
                   Phone Number <span className="text-red-500">*</span>
                 </Label>
-                <Input id="uc-phone" placeholder="01XXXXXXXXX" {...register("phone")} />
-                {errors.phone && <p className="text-xs text-red-400">{errors.phone.message}</p>}
+                <Input
+                  id="uc-phone"
+                  placeholder="01XXXXXXXXX"
+                  {...register("phone")}
+                />
+                {errors.phone && (
+                  <p className="text-xs text-red-400">{errors.phone.message}</p>
+                )}
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="uc-email" className="text-xs font-semibold tracking-widest uppercase">
+                <Label
+                  htmlFor="uc-email"
+                  className="text-xs font-semibold tracking-widest uppercase"
+                >
                   Email{" "}
-                  <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+                  <span className="text-[#96999A] normal-case font-normal">
+                    (optional)
+                  </span>
                 </Label>
-                <Input id="uc-email" type="email" placeholder="example@email.com" {...register("email")} />
-                {errors.email && <p className="text-xs text-red-400">{errors.email.message}</p>}
+                <Input
+                  id="uc-email"
+                  type="email"
+                  placeholder="example@email.com"
+                  {...register("email")}
+                />
+                {errors.email && (
+                  <p className="text-xs text-red-400">{errors.email.message}</p>
+                )}
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="uc-nid" className="text-xs font-semibold tracking-widest uppercase">
+                <Label
+                  htmlFor="uc-nid"
+                  className="text-xs font-semibold tracking-widest uppercase"
+                >
                   NID Number{" "}
-                  <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+                  <span className="text-[#96999A] normal-case font-normal">
+                    (optional)
+                  </span>
                 </Label>
-                <Input id="uc-nid" placeholder="e.g. 1234567890" {...register("nid")} />
+                <Input
+                  id="uc-nid"
+                  placeholder="e.g. 1234567890"
+                  {...register("nid")}
+                />
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="uc-dob" className="text-xs font-semibold tracking-widest uppercase">
+                <Label
+                  htmlFor="uc-dob"
+                  className="text-xs font-semibold tracking-widest uppercase"
+                >
                   Date of Birth{" "}
-                  <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+                  <span className="text-[#96999A] normal-case font-normal">
+                    (optional)
+                  </span>
                 </Label>
                 <Input id="uc-dob" type="date" {...register("dateOfBirth")} />
               </div>
@@ -925,17 +945,23 @@ export function UpdateCustomerModal({
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold tracking-widest uppercase">
                   Gender{" "}
-                  <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+                  <span className="text-[#96999A] normal-case font-normal">
+                    (optional)
+                  </span>
                 </Label>
                 <Select
                   value={selectedGender ?? ""}
                   onValueChange={(v) =>
-                    setValue("gender", v as "MALE" | "FEMALE" | "OTHER", { shouldValidate: true })
+                    setValue("gender", v as "MALE" | "FEMALE" | "OTHER", {
+                      shouldValidate: true,
+                    })
                   }
                 >
                   <SelectTrigger className="w-full">
                     <span className="text-sm">
-                      {selectedGender ? GENDER_LABELS[selectedGender] : "Select gender"}
+                      {selectedGender
+                        ? GENDER_LABELS[selectedGender]
+                        : "Select gender"}
                     </span>
                   </SelectTrigger>
                   <SelectContent>
@@ -945,7 +971,6 @@ export function UpdateCustomerModal({
                   </SelectContent>
                 </Select>
               </div>
-
             </div>
           </div>
 
@@ -969,25 +994,35 @@ export function UpdateCustomerModal({
                 <SelectTrigger className="w-full">
                   {selectedStatus ? (
                     <span className="flex items-center gap-2 text-sm">
-                      <span className={`h-2 w-2 rounded-full inline-block ${STATUS_META[selectedStatus]?.dot}`} />
+                      <span
+                        className={`h-2 w-2 rounded-full inline-block ${STATUS_META[selectedStatus]?.dot}`}
+                      />
                       {STATUS_META[selectedStatus]?.label}
                     </span>
                   ) : (
-                    <span className="text-sm text-slate-400">Select status</span>
+                    <span className="text-sm text-slate-400">
+                      Select status
+                    </span>
                   )}
                 </SelectTrigger>
                 <SelectContent>
                   {Object.values(IsActive).map((s) => (
                     <SelectItem key={s} value={s}>
                       <span className="flex items-center gap-2">
-                        <span className={`h-2 w-2 rounded-full inline-block ${STATUS_META[s].dot}`} />
+                        <span
+                          className={`h-2 w-2 rounded-full inline-block ${STATUS_META[s].dot}`}
+                        />
                         {STATUS_META[s].label}
                       </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {errors.isActive && <p className="text-xs text-red-400">{errors.isActive.message}</p>}
+              {errors.isActive && (
+                <p className="text-xs text-red-400">
+                  {errors.isActive.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -997,39 +1032,73 @@ export function UpdateCustomerModal({
           <div>
             <p className="text-xs font-bold tracking-widest uppercase text-slate-400 mb-3">
               Nominee Information{" "}
-              <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+              <span className="text-[#96999A] normal-case font-normal">
+                (optional)
+              </span>
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
               <div className="space-y-1.5">
-                <Label htmlFor="uc-nominee-name" className="text-xs font-semibold tracking-widest uppercase">
+                <Label
+                  htmlFor="uc-nominee-name"
+                  className="text-xs font-semibold tracking-widest uppercase"
+                >
                   Nominee Name
                 </Label>
-                <Input id="uc-nominee-name" placeholder="e.g. Fatema Begum" {...register("nomineeName")} />
+                <Input
+                  id="uc-nominee-name"
+                  placeholder="e.g. Fatema Begum"
+                  {...register("nomineeName")}
+                />
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="uc-nominee-relationship" className="text-xs font-semibold tracking-widest uppercase">
+                <Label
+                  htmlFor="uc-nominee-relationship"
+                  className="text-xs font-semibold tracking-widest uppercase"
+                >
                   Relationship
                 </Label>
-                <Input id="uc-nominee-relationship" placeholder="e.g. Wife, Son, Father" {...register("nomineeRelationship")} />
+                <Input
+                  id="uc-nominee-relationship"
+                  placeholder="e.g. Wife, Son, Father"
+                  {...register("nomineeRelationship")}
+                />
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="uc-nominee-phone" className="text-xs font-semibold tracking-widest uppercase">
+                <Label
+                  htmlFor="uc-nominee-phone"
+                  className="text-xs font-semibold tracking-widest uppercase"
+                >
                   Nominee Phone
                 </Label>
-                <Input id="uc-nominee-phone" placeholder="01XXXXXXXXX" {...register("nomineePhone")} />
+                <Input
+                  id="uc-nominee-phone"
+                  placeholder="01XXXXXXXXX"
+                  {...register("nomineePhone")}
+                />
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="uc-nominee-age" className="text-xs font-semibold tracking-widest uppercase">
+                <Label
+                  htmlFor="uc-nominee-age"
+                  className="text-xs font-semibold tracking-widest uppercase"
+                >
                   Nominee Age
                 </Label>
-                <Input id="uc-nominee-age" type="number" min={1} placeholder="e.g. 35" {...register("nomineeAge")} />
-                {errors.nomineeAge && <p className="text-xs text-red-400">{errors.nomineeAge.message}</p>}
+                <Input
+                  id="uc-nominee-age"
+                  type="number"
+                  min={1}
+                  placeholder="e.g. 35"
+                  {...register("nomineeAge")}
+                />
+                {errors.nomineeAge && (
+                  <p className="text-xs text-red-400">
+                    {errors.nomineeAge.message}
+                  </p>
+                )}
               </div>
-
             </div>
           </div>
 
@@ -1039,10 +1108,11 @@ export function UpdateCustomerModal({
           <div>
             <p className="text-xs font-bold tracking-widest uppercase text-slate-400 mb-3">
               Address{" "}
-              <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+              <span className="text-[#96999A] normal-case font-normal">
+                (optional)
+              </span>
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
               {/* Division */}
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold tracking-widest uppercase">
@@ -1051,12 +1121,16 @@ export function UpdateCustomerModal({
                 <Select value={divisionId} onValueChange={handleDivisionChange}>
                   <SelectTrigger className="w-full">
                     <span className="text-sm">
-                      {divisionId ? divisions.find((d) => d.id === divisionId)?.name : "Select Division"}
+                      {divisionId
+                        ? divisions.find((d) => d.id === divisionId)?.name
+                        : "Select Division"}
                     </span>
                   </SelectTrigger>
                   <SelectContent>
                     {divisions.map((d) => (
-                      <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                      <SelectItem key={d.id} value={d.id}>
+                        {d.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -1067,15 +1141,24 @@ export function UpdateCustomerModal({
                 <Label className="text-xs font-semibold tracking-widest uppercase">
                   District
                 </Label>
-                <Select value={districtId} onValueChange={handleDistrictChange} disabled={!divisionId}>
+                <Select
+                  value={districtId}
+                  onValueChange={handleDistrictChange}
+                  disabled={!divisionId}
+                >
                   <SelectTrigger className="w-full">
                     <span className="text-sm">
-                      {districtId ? availableDistricts.find((d) => d.id === districtId)?.name : "Select District"}
+                      {districtId
+                        ? availableDistricts.find((d) => d.id === districtId)
+                            ?.name
+                        : "Select District"}
                     </span>
                   </SelectTrigger>
                   <SelectContent>
                     {availableDistricts.map((d) => (
-                      <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                      <SelectItem key={d.id} value={d.id}>
+                        {d.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -1086,25 +1169,40 @@ export function UpdateCustomerModal({
                 <Label className="text-xs font-semibold tracking-widest uppercase">
                   Thana
                 </Label>
-                <Select value={thanaId} onValueChange={handleThanaChange} disabled={!districtId}>
+                <Select
+                  value={thanaId}
+                  onValueChange={handleThanaChange}
+                  disabled={!districtId}
+                >
                   <SelectTrigger className="w-full">
                     <span className="text-sm">
-                      {thanaId ? availableUpazilas.find((u) => u.id === thanaId)?.name : "Select Thana"}
+                      {thanaId
+                        ? availableUpazilas.find((u) => u.id === thanaId)?.name
+                        : "Select Thana"}
                     </span>
                   </SelectTrigger>
                   <SelectContent>
                     {availableUpazilas.map((u) => (
-                      <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="uc-union" className="text-xs font-semibold tracking-widest uppercase">
+                <Label
+                  htmlFor="uc-union"
+                  className="text-xs font-semibold tracking-widest uppercase"
+                >
                   Union / Ward
                 </Label>
-                <Input id="uc-union" placeholder="e.g. Ward-10" {...register("union")} />
+                <Input
+                  id="uc-union"
+                  placeholder="e.g. Ward-10"
+                  {...register("union")}
+                />
               </div>
             </div>
           </div>
@@ -1115,26 +1213,44 @@ export function UpdateCustomerModal({
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold tracking-widest uppercase">
               Profile Picture{" "}
-              <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+              <span className="text-[#96999A] normal-case font-normal">
+                (optional)
+              </span>
             </Label>
             {imagePreview ? (
               <div className="relative flex items-center gap-3 rounded-md border border-slate-200 dark:border-slate-700 p-2">
-                <img
+                <Image
+                  width={200}
+                  height={200}
                   src={imagePreview}
+                  priority
+                  quality={90}
                   alt="Preview"
                   className="h-14 w-14 rounded-full object-cover shrink-0 border-2 border-slate-200 dark:border-slate-700"
                 />
                 <div className="flex-1 min-w-0">
                   {imageFile ? (
                     <>
-                      <p className="text-xs text-slate-500 truncate">{imageFile.name}</p>
-                      <p className="text-xs text-slate-400">{(imageFile.size / 1024).toFixed(1)} KB</p>
+                      <p className="text-xs text-slate-500 truncate">
+                        {imageFile.name}
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        {(imageFile.size / 1024).toFixed(1)} KB
+                      </p>
                     </>
                   ) : (
-                    <p className="text-xs text-slate-400">Current profile photo</p>
+                    <p className="text-xs text-slate-400">
+                      Current profile photo
+                    </p>
                   )}
                 </div>
-                <Button variant="destructive" type="button" size="sm" onClick={clearImage} className="shrink-0">
+                <Button
+                  variant="destructive"
+                  type="button"
+                  size="sm"
+                  onClick={clearImage}
+                  className="shrink-0"
+                >
                   <X className="h-4 w-4" />
                 </Button>
               </div>
@@ -1145,8 +1261,12 @@ export function UpdateCustomerModal({
               >
                 <Upload className="h-6 w-6 text-slate-400" />
                 <div className="text-center">
-                  <p className="text-sm text-slate-500">Click to upload a new photo</p>
-                  <p className="text-xs text-slate-400">PNG, JPG, WEBP — max 2MB</p>
+                  <p className="text-sm text-slate-500">
+                    Click to upload a new photo
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    PNG, JPG, WEBP — max 2MB
+                  </p>
                 </div>
                 <input
                   id="update-customer-image"
@@ -1159,78 +1279,11 @@ export function UpdateCustomerModal({
             )}
           </div>
 
-          <Separator />
-
-          {/* ── Change Password ── */}
-          <div>
-            <p className="text-xs font-bold tracking-widest uppercase text-slate-400 mb-1">
-              Change Password
-            </p>
-            <p className="text-xs text-slate-400 mb-3">
-              Leave blank to keep the current password
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-              <div className="space-y-1.5">
-                <Label htmlFor="uc-new-password" className="text-xs font-semibold tracking-widest uppercase">
-                  New Password
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="uc-new-password"
-                    type={showNewPassword ? "text" : "password"}
-                    placeholder="At least 6 characters"
-                    className="pr-10"
-                    {...register("newPassword")}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowNewPassword((p) => !p)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                    tabIndex={-1}
-                  >
-                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-                {errors.newPassword && (
-                  <p className="text-xs text-red-400">{errors.newPassword.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="uc-confirm-password" className="text-xs font-semibold tracking-widest uppercase">
-                  Confirm New Password
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="uc-confirm-password"
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Re-enter new password"
-                    className="pr-10"
-                    {...register("confirmNewPassword")}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword((p) => !p)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                    tabIndex={-1}
-                  >
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-                {errors.confirmNewPassword && (
-                  <p className="text-xs text-red-400">{errors.confirmNewPassword.message}</p>
-                )}
-              </div>
-
-            </div>
-          </div>
-
           {/* ── Submit ── */}
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60"
+            className="group hover:cursor-pointer border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white duration-300 w-full mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60"
           >
             {isLoading ? (
               <span className="flex items-center gap-2">

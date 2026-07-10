@@ -18,6 +18,7 @@ import {
   ShieldAlert,
   UserCog,
   Crown,
+  KeyRound,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -61,6 +62,7 @@ import { PageHeader } from "../shared/PageHeader";
 import { Pagination } from "../pagination/Pagination";
 import { CustomerDetailsModal } from "./CustomerDetailsModal";
 import { UpdateCustomerModal } from "./UpdateCustomer";
+import { ChangeUserPasswordModal } from "./ChangeUserPasswordModal";
 import { IsActive, IUser } from "@/types/user.types";
 import { CustomerSubscriptionsModal } from "./CustomerSubscriptionDetailsModal";
 import { CreateSubscriptionModal } from "../subscription/CreateSubscriptionModal";
@@ -260,9 +262,7 @@ export default function CustomerManagement() {
   const [selectedAgentId, setSelectedAgentId] = useState("");
   const [selectedLeaderId, setSelectedLeaderId] = useState("");
   const [statusFilter, setStatusFilter] = useState<IsActive | "all">("all");
-  const [genderFilter, setGenderFilter] = useState<
-    "MALE" | "FEMALE" | "OTHER" | "all"
-  >("all");
+  const [genderFilter, setGenderFilter] = useState<"MALE" | "FEMALE" | "OTHER" | "all">("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
@@ -282,6 +282,8 @@ export default function CustomerManagement() {
   const [subscriptionsCustomer, setSubscriptionsCustomer] =
     useState<IUser | null>(null);
   const [isSubscriptionsOpen, setIsSubscriptionsOpen] = useState(false);
+  const [passwordCustomer, setPasswordCustomer] = useState<IUser | null>(null);
+  const [isPasswordOpen, setIsPasswordOpen] = useState(false);
 
   // ── reset page on filter change ──
   useEffect(() => {
@@ -423,6 +425,10 @@ export default function CustomerManagement() {
     setSubscriptionsCustomer(c);
     setIsSubscriptionsOpen(true);
   };
+  const openPasswordDialog = (c: IUser) => {
+    setPasswordCustomer(c);
+    setIsPasswordOpen(true);
+  };
 
   const handleDelete = async () => {
     if (!deletingCustomer?._id) return;
@@ -463,17 +469,6 @@ export default function CustomerManagement() {
     return a.name ?? "—";
   };
 
-  // ── agent/leader select label ──
-  // const agentFilterLabel = () => {
-  //     if (filterMode === "by_agent" && selectedAgentId) {
-  //         return (agentsData?.data ?? []).find((a: IUser) => String(a._id) === selectedAgentId)?.name || "Agent";
-  //     }
-  //     if (filterMode === "by_leader" && selectedLeaderId) {
-  //         return (leadersData?.data ?? []).find((l: IUser) => String(l._id) === selectedLeaderId)?.name || "Leader";
-  //     }
-  //     return "All";
-  // };
-
   return (
     <div className="space-y-6">
       <PageHeader
@@ -483,7 +478,6 @@ export default function CustomerManagement() {
           { label: "Dashboard", href: "/dashboard" },
           { label: "Customer Management" },
         ]}
-        // action={<CreateSubscriptionModal onSuccess={refetch} />}
         action={
           <div className="flex items-center gap-2">
             <Link href="/admin/dashboard/customers/trash">
@@ -870,6 +864,15 @@ export default function CustomerManagement() {
                             variant="outline"
                             size="icon"
                             className="h-8 w-8"
+                            title="Change password"
+                            onClick={() => openPasswordDialog(customer)}
+                          >
+                            <KeyRound className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-8 w-8"
                             title="Edit customer"
                             onClick={() => openEditDialog(customer)}
                           >
@@ -940,6 +943,14 @@ export default function CustomerManagement() {
           open={isSubscriptionsOpen}
           onOpenChange={setIsSubscriptionsOpen}
           customer={subscriptionsCustomer}
+        />
+      )}
+      {passwordCustomer && (
+        <ChangeUserPasswordModal
+          open={isPasswordOpen}
+          onOpenChange={setIsPasswordOpen}
+          userId={String(passwordCustomer._id)}
+          userName={passwordCustomer.name}
         />
       )}
 
