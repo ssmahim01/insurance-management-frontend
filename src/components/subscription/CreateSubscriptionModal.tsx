@@ -1026,7 +1026,7 @@ export function CreateSubscriptionModal({
                       <Button
                         type="submit"
                         variant="outline"
-                        className="flex-1 group hover:cursor-pointer border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white duration-300 w-full mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60"
+                        className="flex-1 group dark:text-white dark:hover:bg-indigo-500 hover:cursor-pointer border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white duration-300 w-full mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60"
                         disabled={isLoading}
                       >
                         {isLoading ? (

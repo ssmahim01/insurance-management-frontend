@@ -17,7 +17,6 @@ import {
   UserX,
   ShieldAlert,
   UserCog,
-  Crown,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -49,27 +48,23 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  useGetAllCustomersQuery,
-  useGetAgentCustomersQuery,
-  useGetAgentLeaderCustomersQuery,
+  useGetMyLeaderCustomersQuery,
   useDeleteUserMutation,
-  useGetAllAgentsQuery,
-  useGetAllAgentLeadersQuery,
+  useGetMyLeaderBothCustomersQuery,
 } from "@/redux/features/user/user.api";
 
-import { PageHeader } from "../shared/PageHeader";
-import { Pagination } from "../pagination/Pagination";
-import { CustomerDetailsModal } from "./CustomerDetailsModal";
-import { UpdateCustomerModal } from "./UpdateCustomer";
+import { PageHeader } from "../../shared/PageHeader";
+import { Pagination } from "../../pagination/Pagination";
+import { CustomerDetailsModal } from "../../customer/CustomerDetailsModal";
+import { UpdateCustomerModal } from "../../customer/UpdateCustomer";
 import { IsActive, IUser } from "@/types/user.types";
-import { CustomerSubscriptionsModal } from "./CustomerSubscriptionDetailsModal";
-import { CreateSubscriptionModal } from "../subscription/CreateSubscriptionModal";
+import { CustomerSubscriptionsModal } from "../../customer/CustomerSubscriptionDetailsModal";
+import { CreateSubscriptionModal } from "../../subscription/CreateSubscriptionModal";
 import Link from "next/link";
 import Image from "next/image";
 
 type SortField = "name" | "phone" | "isActive" | "createdAt" | "gender";
 type SortDir = "asc" | "desc" | null;
-type FilterMode = "all" | "by_agent" | "by_leader";
 
 const STATUS_LABELS: Record<IsActive, string> = {
   [IsActive.ACTIVE]: "Active",
@@ -239,7 +234,7 @@ function SortableTh({
   label: string;
   sortField: SortField | null;
   sortDir: SortDir;
-  handleSort: (f: SortField) => void;
+  handleSort: (field: SortField) => void;
 }) {
   return (
     <TableHead
@@ -254,11 +249,8 @@ function SortableTh({
   );
 }
 
-export default function CustomerManagement() {
+export default function AgentLeaderCustomerManagement() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterMode, setFilterMode] = useState<FilterMode>("all");
-  const [selectedAgentId, setSelectedAgentId] = useState("");
-  const [selectedLeaderId, setSelectedLeaderId] = useState("");
   const [statusFilter, setStatusFilter] = useState<IsActive | "all">("all");
   const [genderFilter, setGenderFilter] = useState<
     "MALE" | "FEMALE" | "OTHER" | "all"
@@ -288,16 +280,9 @@ export default function CustomerManagement() {
     setTimeout(() => {
       setPage(1);
     }, 100);
-  }, [
-    searchTerm,
-    filterMode,
-    selectedAgentId,
-    selectedLeaderId,
-    statusFilter,
-    genderFilter,
-  ]);
+  }, [searchTerm, statusFilter, genderFilter]);
 
-  // ── shared query params ──
+  // ── query params ──
   const baseParams = {
     searchTerm: searchTerm || undefined,
     isActive: statusFilter !== "all" ? (statusFilter as IsActive) : undefined,
@@ -308,35 +293,8 @@ export default function CustomerManagement() {
     ...(endDate && { endDate }),
   };
 
-  // ── 3 different API calls depending on filter mode ──
-  const allCustomersResult = useGetAllCustomersQuery(baseParams, {
-    skip: filterMode !== "all",
-  });
-
-  const agentCustomersResult = useGetAgentCustomersQuery(
-    { agentId: selectedAgentId, params: baseParams },
-    { skip: filterMode !== "by_agent" || !selectedAgentId },
-  );
-
-  const leaderCustomersResult = useGetAgentLeaderCustomersQuery(
-    { agentLeaderId: selectedLeaderId, params: baseParams },
-    { skip: filterMode !== "by_leader" || !selectedLeaderId },
-  );
-
-  // ── pick active result ──
-  const activeResult =
-    filterMode === "by_agent"
-      ? agentCustomersResult
-      : filterMode === "by_leader"
-        ? leaderCustomersResult
-        : allCustomersResult;
-
-  const { data, isLoading, refetch } = activeResult;
+  const { data, isLoading, refetch } = useGetMyLeaderBothCustomersQuery(baseParams);
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
-
-  // ── dropdown data ──
-  const { data: agentsData } = useGetAllAgentsQuery({ limit: 200 });
-  const { data: leadersData } = useGetAllAgentLeadersQuery({ limit: 100 });
 
   // ── derived data ──
   const customers: IUser[] = useMemo(() => data?.data ?? [], [data]);
@@ -344,11 +302,10 @@ export default function CustomerManagement() {
   const meta = data?.meta;
   const totalPage = meta?.totalPage ?? 1;
 
-  const hasActiveFilters =
-    filterMode !== "all" || statusFilter !== "all" || genderFilter !== "all";
+  const hasActiveFilters = statusFilter !== "all" || genderFilter !== "all";
   const hasDateFilter = !!(startDate || endDate);
 
-  // ── client-side sort only (no more client-side filter) ──
+  // ── client-side sort ──
   const sortedCustomers = useMemo(() => {
     if (!sortField || !sortDir) return customers;
     return [...customers].sort((a, b) => {
@@ -396,9 +353,6 @@ export default function CustomerManagement() {
   };
 
   const clearFilters = () => {
-    setFilterMode("all");
-    setSelectedAgentId("");
-    setSelectedLeaderId("");
     setStatusFilter("all");
     setGenderFilter("all");
   };
@@ -437,24 +391,23 @@ export default function CustomerManagement() {
     }
   };
 
-  // ── sortable th ──
-  const SortableTh = ({
-    field,
-    label,
-  }: {
-    field: SortField;
-    label: string;
-  }) => (
-    <TableHead
-      className="cursor-pointer select-none whitespace-nowrap"
-      onClick={() => handleSort(field)}
-    >
-      <span className="inline-flex items-center hover:text-slate-900 dark:hover:text-white transition-colors">
-        {label}
-        <SortIcon field={field} sortField={sortField} sortDir={sortDir} />
-      </span>
-    </TableHead>
-  );
+  //   const SortableTh = ({
+  //     field,
+  //     label,
+  //   }: {
+  //     field: SortField;
+  //     label: string;
+  //   }) => (
+  //     <TableHead
+  //       className="cursor-pointer select-none whitespace-nowrap"
+  //       onClick={() => handleSort(field)}
+  //     >
+  //       <span className="inline-flex items-center hover:text-slate-900 dark:hover:text-white transition-colors">
+  //         {label}
+  //         <SortIcon field={field} sortField={sortField} sortDir={sortDir} />
+  //       </span>
+  //     </TableHead>
+  //   );
 
   const getAgentName = (c: IUser): string => {
     const a = c.createdBy;
@@ -463,30 +416,18 @@ export default function CustomerManagement() {
     return a.name ?? "—";
   };
 
-  // ── agent/leader select label ──
-  // const agentFilterLabel = () => {
-  //     if (filterMode === "by_agent" && selectedAgentId) {
-  //         return (agentsData?.data ?? []).find((a: IUser) => String(a._id) === selectedAgentId)?.name || "Agent";
-  //     }
-  //     if (filterMode === "by_leader" && selectedLeaderId) {
-  //         return (leadersData?.data ?? []).find((l: IUser) => String(l._id) === selectedLeaderId)?.name || "Leader";
-  //     }
-  //     return "All";
-  // };
-
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Customer Management"
-        description="Manage all customers and monitor their activity"
+        title="My Agent Customers"
+        description="Manage customers created by your agents"
         breadcrumbs={[
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Customer Management" },
+          { label: "Dashboard", href: "/agent-leader/dashboard" },
+          { label: "My Agent Customers" },
         ]}
-        // action={<CreateSubscriptionModal onSuccess={refetch} />}
         action={
           <div className="flex items-center gap-2">
-            <Link href="/admin/dashboard/customers/trash">
+            <Link href="/agent-leader/dashboard/customers/trash">
               <Button
                 variant="outline"
                 className="hover:cursor-pointer flex items-center"
@@ -496,7 +437,7 @@ export default function CustomerManagement() {
               </Button>
             </Link>
 
-            <CreateSubscriptionModal onSuccess={refetch} />
+            {/* <CreateSubscriptionModal onSuccess={refetch} /> */}
           </div>
         }
       />
@@ -547,7 +488,7 @@ export default function CustomerManagement() {
             <StatCard
               label="Total Customers"
               value={stats?.total ?? 0}
-              sub="registered in the system"
+              sub="registered under your agents"
               icon={Users}
               color="blue"
             />
@@ -578,7 +519,6 @@ export default function CustomerManagement() {
 
       {/* ── Search & Filters ── */}
       <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
-        {/* Search */}
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
@@ -588,74 +528,6 @@ export default function CustomerManagement() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-
-        {/* Agent Leader filter */}
-        <Select
-          value={
-            filterMode === "by_leader"
-              ? selectedLeaderId || "__leader__"
-              : "__leader__"
-          }
-          onValueChange={(v) => {
-            if (v === "__leader__") return;
-            setFilterMode("by_leader");
-            setSelectedLeaderId(v as any);
-            setSelectedAgentId("");
-          }}
-        >
-          <SelectTrigger className="w-52 h-9 text-sm">
-            <span className="flex items-center gap-2">
-              <Crown className="w-4 h-4 text-slate-400 shrink-0" />
-              {filterMode === "by_leader" && selectedLeaderId
-                ? (leadersData?.data ?? []).find(
-                    (l: IUser) => String(l._id) === selectedLeaderId,
-                  )?.name || "Leader"
-                : "All Leaders"}
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="__leader__">All Leaders</SelectItem>
-            {(leadersData?.data ?? []).map((leader: IUser) => (
-              <SelectItem key={String(leader._id)} value={String(leader._id)}>
-                {leader.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Agent filter */}
-        <Select
-          value={
-            filterMode === "by_agent"
-              ? selectedAgentId || "__agent__"
-              : "__agent__"
-          }
-          onValueChange={(v) => {
-            if (v === "__agent__") return;
-            setFilterMode("by_agent");
-            setSelectedAgentId(v as any);
-            setSelectedLeaderId("");
-          }}
-        >
-          <SelectTrigger className="w-48 h-9 text-sm">
-            <span className="flex items-center gap-2">
-              <UserCog className="w-4 h-4 text-slate-400 shrink-0" />
-              {filterMode === "by_agent" && selectedAgentId
-                ? (agentsData?.data ?? []).find(
-                    (a: IUser) => String(a._id) === selectedAgentId,
-                  )?.name || "Agent"
-                : "All Agents"}
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="__agent__">All Agents</SelectItem>
-            {(agentsData?.data ?? []).map((agent: IUser) => (
-              <SelectItem key={String(agent._id)} value={String(agent._id)}>
-                {agent.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
 
         {/* Gender filter */}
         <Select
@@ -716,14 +588,52 @@ export default function CustomerManagement() {
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50 dark:bg-slate-800/50">
-                <SortableTh field="name" label="Customer" />
-                <SortableTh field="phone" label="Phone" />
-                <SortableTh field="gender" label="Gender" />
+                <SortableTh
+                  field="name"
+                  label="Customer"
+                  sortField={sortField}
+                  sortDir={sortDir}
+                  handleSort={handleSort}
+                />
+
+                <SortableTh
+                  field="phone"
+                  label="Phone"
+                  sortField={sortField}
+                  sortDir={sortDir}
+                  handleSort={handleSort}
+                />
+
+                <SortableTh
+                  field="gender"
+                  label="Gender"
+                  sortField={sortField}
+                  sortDir={sortDir}
+                  handleSort={handleSort}
+                />
+
                 <TableHead className="whitespace-nowrap">NID</TableHead>
+
                 <TableHead className="whitespace-nowrap">Created By</TableHead>
-                <SortableTh field="createdAt" label="Joined" />
+
+                <SortableTh
+                  field="createdAt"
+                  label="Joined"
+                  sortField={sortField}
+                  sortDir={sortDir}
+                  handleSort={handleSort}
+                />
+
                 <TableHead className="whitespace-nowrap">Last Login</TableHead>
-                <SortableTh field="isActive" label="Status" />
+
+                <SortableTh
+                  field="isActive"
+                  label="Status"
+                  sortField={sortField}
+                  sortDir={sortDir}
+                  handleSort={handleSort}
+                />
+
                 <TableHead className="text-right whitespace-nowrap">
                   Actions
                 </TableHead>
@@ -752,10 +662,7 @@ export default function CustomerManagement() {
                       ) : (
                         <>
                           <p className="text-base font-medium">
-                            No customers added yet
-                          </p>
-                          <p className="text-sm mt-1">
-                            Click the Add Customer button to get started
+                            No customers found under your agents.
                           </p>
                         </>
                       )}
@@ -770,7 +677,6 @@ export default function CustomerManagement() {
                       key={String(customer._id)}
                       className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
                     >
-                      {/* Customer name */}
                       <TableCell>
                         <div className="flex items-center gap-3">
                           {customer.picture ? (

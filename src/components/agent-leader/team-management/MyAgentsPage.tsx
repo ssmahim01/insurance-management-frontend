@@ -102,7 +102,7 @@ export function MyAgentsPage() {
 
   const handleViewDetails = useCallback(
     (agentId: string) => {
-      router.push(`/agent-leader/my-agents/${agentId}`);
+      router.push(`/agent-leader/dashboard/my-agents/${agentId}`);
     },
     [router],
   );
@@ -145,7 +145,7 @@ export function MyAgentsPage() {
         title="My Agents"
         description="Manage your assigned insurance agents, monitor their activity, customer growth and performance."
         breadcrumbs={[
-          { label: "Dashboard", href: "/agent-leader" },
+          { label: "Dashboard", href: "/agent-leader/dashboard" },
           { label: "Team Management" },
         ]}
       />
@@ -153,7 +153,7 @@ export function MyAgentsPage() {
       <div className="mb-6 flex flex-wrap items-center justify-end gap-3">
         <Button
           variant="outline"
-          onClick={() => router.push("/agent-leader/my-agents/trash")}
+          onClick={() => router.push("/agent-leader/dashboard/my-agents/trash")}
           className="group hover:cursor-pointer border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all duration-300"
         >
           <Trash2 className="mr-2 h-4 w-4 group-hover:rotate-6 transition-transform duration-300" />

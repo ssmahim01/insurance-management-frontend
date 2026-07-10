@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { AgentSubscriptions } from "@/components/agent/AgentSubscriptions";
+import AgentCustomerManagement from "@/components/agent/AgentCustomers/AgentCustomerManagement";
 
 export const metadata: Metadata = {
   title: "My Subscriptions",
@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <AgentSubscriptions />;
+  return <AgentCustomerManagement />;
 }

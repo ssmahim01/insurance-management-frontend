@@ -211,6 +211,30 @@ export const userApi = baseApi.injectEndpoints({
       providesTags: ["USERS"],
     }),
 
+    getMyLeaderBothCustomers: builder.query<
+  IUserListResponse,
+  GetUsersParams | undefined
+>({
+  query: (params) => ({
+    url: "/user/my-team-customers",
+    method: "GET",
+    params,
+  }),
+  providesTags: ["USERS"],
+}),
+
+getMyTrashCustomers: builder.query<
+  IUserListResponse,
+  GetUsersParams | undefined
+>({
+  query: (params) => ({
+    url: "/user/my-trash-customers",
+    method: "GET",
+    params,
+  }),
+  providesTags: ["USERS"],
+}),
+
     // ── AGENT — own resources ────────────────────────────────────────────────
 
     // Agent — get own customers
@@ -328,6 +352,8 @@ export const {
   useGetMyAgentsQuery,
   useGetMyTrashAgentsQuery,
   useGetMyLeaderCustomersQuery,
+   useGetMyLeaderBothCustomersQuery,
+  useGetMyTrashCustomersQuery,
   useGetAgentCustomersByLeaderQuery,
   // Agent — own resources
   useGetMyCustomersQuery,

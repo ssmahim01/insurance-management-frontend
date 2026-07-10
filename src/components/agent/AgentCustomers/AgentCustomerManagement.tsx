@@ -4,7 +4,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import {
   Edit2,
-  Trash2,
   Search,
   Eye,
   PackageCheck,
@@ -16,20 +15,8 @@ import {
   UserCheck,
   UserX,
   ShieldAlert,
-  UserCog,
-  Crown,
 } from "lucide-react";
-import { toast } from "sonner";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -48,28 +35,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  useGetAllCustomersQuery,
-  useGetAgentCustomersQuery,
-  useGetAgentLeaderCustomersQuery,
-  useDeleteUserMutation,
-  useGetAllAgentsQuery,
-  useGetAllAgentLeadersQuery,
-} from "@/redux/features/user/user.api";
+import { useGetMyCustomersQuery } from "@/redux/features/user/user.api";
 
-import { PageHeader } from "../shared/PageHeader";
-import { Pagination } from "../pagination/Pagination";
-import { CustomerDetailsModal } from "./CustomerDetailsModal";
-import { UpdateCustomerModal } from "./UpdateCustomer";
+import { PageHeader } from "../../shared/PageHeader";
+import { Pagination } from "../../pagination/Pagination";
+import { CustomerDetailsModal } from "../../customer/CustomerDetailsModal";
+import { UpdateCustomerModal } from "../../customer/UpdateCustomer";
 import { IsActive, IUser } from "@/types/user.types";
-import { CustomerSubscriptionsModal } from "./CustomerSubscriptionDetailsModal";
-import { CreateSubscriptionModal } from "../subscription/CreateSubscriptionModal";
-import Link from "next/link";
+import { CustomerSubscriptionsModal } from "../../customer/CustomerSubscriptionDetailsModal";
+import { CreateSubscriptionModal } from "../../subscription/CreateSubscriptionModal";
 import Image from "next/image";
 
 type SortField = "name" | "phone" | "isActive" | "createdAt" | "gender";
 type SortDir = "asc" | "desc" | null;
-type FilterMode = "all" | "by_agent" | "by_leader";
 
 const STATUS_LABELS: Record<IsActive, string> = {
   [IsActive.ACTIVE]: "Active",
@@ -123,7 +101,7 @@ function CustomerRowSkeleton() {
           </div>
         </div>
       </TableCell>
-      {Array.from({ length: 6 }).map((_, i) => (
+      {Array.from({ length: 5 }).map((_, i) => (
         <TableCell key={i}>
           <Skeleton className="h-4 w-20" />
         </TableCell>
@@ -228,76 +206,32 @@ function SortIcon({
   );
 }
 
-function SortableTh({
-  field,
-  label,
-  sortField,
-  sortDir,
-  handleSort,
-}: {
-  field: SortField;
-  label: string;
-  sortField: SortField | null;
-  sortDir: SortDir;
-  handleSort: (f: SortField) => void;
-}) {
-  return (
-    <TableHead
-      className="cursor-pointer select-none whitespace-nowrap"
-      onClick={() => handleSort(field)}
-    >
-      <span className="inline-flex items-center hover:text-slate-900 dark:hover:text-white transition-colors">
-        {label}
-        <SortIcon field={field} sortField={sortField} sortDir={sortDir} />
-      </span>
-    </TableHead>
-  );
-}
-
-export default function CustomerManagement() {
+export default function AgentCustomerManagement() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterMode, setFilterMode] = useState<FilterMode>("all");
-  const [selectedAgentId, setSelectedAgentId] = useState("");
-  const [selectedLeaderId, setSelectedLeaderId] = useState("");
   const [statusFilter, setStatusFilter] = useState<IsActive | "all">("all");
-  const [genderFilter, setGenderFilter] = useState<
-    "MALE" | "FEMALE" | "OTHER" | "all"
-  >("all");
+  const [genderFilter, setGenderFilter] = useState<"MALE" | "FEMALE" | "OTHER" | "all">("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  // ── sort ──
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>(null);
 
-  // ── modals ──
   const [editingCustomer, setEditingCustomer] = useState<IUser | null>(null);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [viewingCustomer, setViewingCustomer] = useState<IUser | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [deletingCustomer, setDeletingCustomer] = useState<IUser | null>(null);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [subscriptionsCustomer, setSubscriptionsCustomer] =
     useState<IUser | null>(null);
   const [isSubscriptionsOpen, setIsSubscriptionsOpen] = useState(false);
 
-  // ── reset page on filter change ──
   useEffect(() => {
     setTimeout(() => {
       setPage(1);
     }, 100);
-  }, [
-    searchTerm,
-    filterMode,
-    selectedAgentId,
-    selectedLeaderId,
-    statusFilter,
-    genderFilter,
-  ]);
+  }, [searchTerm, statusFilter, genderFilter]);
 
-  // ── shared query params ──
   const baseParams = {
     searchTerm: searchTerm || undefined,
     isActive: statusFilter !== "all" ? (statusFilter as IsActive) : undefined,
@@ -308,47 +242,16 @@ export default function CustomerManagement() {
     ...(endDate && { endDate }),
   };
 
-  // ── 3 different API calls depending on filter mode ──
-  const allCustomersResult = useGetAllCustomersQuery(baseParams, {
-    skip: filterMode !== "all",
-  });
+  const { data, isLoading, refetch } = useGetMyCustomersQuery(baseParams);
 
-  const agentCustomersResult = useGetAgentCustomersQuery(
-    { agentId: selectedAgentId, params: baseParams },
-    { skip: filterMode !== "by_agent" || !selectedAgentId },
-  );
-
-  const leaderCustomersResult = useGetAgentLeaderCustomersQuery(
-    { agentLeaderId: selectedLeaderId, params: baseParams },
-    { skip: filterMode !== "by_leader" || !selectedLeaderId },
-  );
-
-  // ── pick active result ──
-  const activeResult =
-    filterMode === "by_agent"
-      ? agentCustomersResult
-      : filterMode === "by_leader"
-        ? leaderCustomersResult
-        : allCustomersResult;
-
-  const { data, isLoading, refetch } = activeResult;
-  const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
-
-  // ── dropdown data ──
-  const { data: agentsData } = useGetAllAgentsQuery({ limit: 200 });
-  const { data: leadersData } = useGetAllAgentLeadersQuery({ limit: 100 });
-
-  // ── derived data ──
   const customers: IUser[] = useMemo(() => data?.data ?? [], [data]);
   const stats = data?.stats;
   const meta = data?.meta;
   const totalPage = meta?.totalPage ?? 1;
 
-  const hasActiveFilters =
-    filterMode !== "all" || statusFilter !== "all" || genderFilter !== "all";
+  const hasActiveFilters = statusFilter !== "all" || genderFilter !== "all";
   const hasDateFilter = !!(startDate || endDate);
 
-  // ── client-side sort only (no more client-side filter) ──
   const sortedCustomers = useMemo(() => {
     if (!sortField || !sortDir) return customers;
     return [...customers].sort((a, b) => {
@@ -380,7 +283,6 @@ export default function CustomerManagement() {
     });
   }, [customers, sortField, sortDir]);
 
-  // ── handlers ──
   const handleSort = (field: SortField) => {
     if (sortField !== field) {
       setSortField(field);
@@ -396,9 +298,6 @@ export default function CustomerManagement() {
   };
 
   const clearFilters = () => {
-    setFilterMode("all");
-    setSelectedAgentId("");
-    setSelectedLeaderId("");
     setStatusFilter("all");
     setGenderFilter("all");
   };
@@ -415,29 +314,11 @@ export default function CustomerManagement() {
     setViewingCustomer(c);
     setIsDetailsOpen(true);
   };
-  const openDeleteDialog = (c: IUser) => {
-    setDeletingCustomer(c);
-    setIsDeleteOpen(true);
-  };
   const openSubscriptionsDialog = (c: IUser) => {
     setSubscriptionsCustomer(c);
     setIsSubscriptionsOpen(true);
   };
 
-  const handleDelete = async () => {
-    if (!deletingCustomer?._id) return;
-    try {
-      await deleteUser(String(deletingCustomer._id)).unwrap();
-      toast.success("Customer deleted successfully");
-      setIsDeleteOpen(false);
-      setDeletingCustomer(null);
-      refetch();
-    } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to delete customer");
-    }
-  };
-
-  // ── sortable th ──
   const SortableTh = ({
     field,
     label,
@@ -456,49 +337,16 @@ export default function CustomerManagement() {
     </TableHead>
   );
 
-  const getAgentName = (c: IUser): string => {
-    const a = c.createdBy;
-    if (!a) return "—";
-    if (typeof a === "string") return a;
-    return a.name ?? "—";
-  };
-
-  // ── agent/leader select label ──
-  // const agentFilterLabel = () => {
-  //     if (filterMode === "by_agent" && selectedAgentId) {
-  //         return (agentsData?.data ?? []).find((a: IUser) => String(a._id) === selectedAgentId)?.name || "Agent";
-  //     }
-  //     if (filterMode === "by_leader" && selectedLeaderId) {
-  //         return (leadersData?.data ?? []).find((l: IUser) => String(l._id) === selectedLeaderId)?.name || "Leader";
-  //     }
-  //     return "All";
-  // };
-
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Customer Management"
-        description="Manage all customers and monitor their activity"
+        title="My Customers"
+        description="Manage customers you have created"
         breadcrumbs={[
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Customer Management" },
+          { label: "Dashboard", href: "/agent/dashboard" },
+          { label: "My Customers" },
         ]}
-        // action={<CreateSubscriptionModal onSuccess={refetch} />}
-        action={
-          <div className="flex items-center gap-2">
-            <Link href="/admin/dashboard/customers/trash">
-              <Button
-                variant="outline"
-                className="hover:cursor-pointer flex items-center"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                <span>Trash</span>
-              </Button>
-            </Link>
-
-            <CreateSubscriptionModal onSuccess={refetch} />
-          </div>
-        }
+        action={<CreateSubscriptionModal onSuccess={refetch} />}
       />
 
       {/* ── Stat Cards ── */}
@@ -547,7 +395,7 @@ export default function CustomerManagement() {
             <StatCard
               label="Total Customers"
               value={stats?.total ?? 0}
-              sub="registered in the system"
+              sub="created by you"
               icon={Users}
               color="blue"
             />
@@ -578,7 +426,6 @@ export default function CustomerManagement() {
 
       {/* ── Search & Filters ── */}
       <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
-        {/* Search */}
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
@@ -589,75 +436,6 @@ export default function CustomerManagement() {
           />
         </div>
 
-        {/* Agent Leader filter */}
-        <Select
-          value={
-            filterMode === "by_leader"
-              ? selectedLeaderId || "__leader__"
-              : "__leader__"
-          }
-          onValueChange={(v) => {
-            if (v === "__leader__") return;
-            setFilterMode("by_leader");
-            setSelectedLeaderId(v as any);
-            setSelectedAgentId("");
-          }}
-        >
-          <SelectTrigger className="w-52 h-9 text-sm">
-            <span className="flex items-center gap-2">
-              <Crown className="w-4 h-4 text-slate-400 shrink-0" />
-              {filterMode === "by_leader" && selectedLeaderId
-                ? (leadersData?.data ?? []).find(
-                    (l: IUser) => String(l._id) === selectedLeaderId,
-                  )?.name || "Leader"
-                : "All Leaders"}
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="__leader__">All Leaders</SelectItem>
-            {(leadersData?.data ?? []).map((leader: IUser) => (
-              <SelectItem key={String(leader._id)} value={String(leader._id)}>
-                {leader.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Agent filter */}
-        <Select
-          value={
-            filterMode === "by_agent"
-              ? selectedAgentId || "__agent__"
-              : "__agent__"
-          }
-          onValueChange={(v) => {
-            if (v === "__agent__") return;
-            setFilterMode("by_agent");
-            setSelectedAgentId(v as any);
-            setSelectedLeaderId("");
-          }}
-        >
-          <SelectTrigger className="w-48 h-9 text-sm">
-            <span className="flex items-center gap-2">
-              <UserCog className="w-4 h-4 text-slate-400 shrink-0" />
-              {filterMode === "by_agent" && selectedAgentId
-                ? (agentsData?.data ?? []).find(
-                    (a: IUser) => String(a._id) === selectedAgentId,
-                  )?.name || "Agent"
-                : "All Agents"}
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="__agent__">All Agents</SelectItem>
-            {(agentsData?.data ?? []).map((agent: IUser) => (
-              <SelectItem key={String(agent._id)} value={String(agent._id)}>
-                {agent.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Gender filter */}
         <Select
           value={genderFilter}
           onValueChange={(v) => setGenderFilter(v as typeof genderFilter)}
@@ -677,7 +455,6 @@ export default function CustomerManagement() {
           </SelectContent>
         </Select>
 
-        {/* Status filter */}
         <Select
           value={statusFilter as any}
           onValueChange={(v) => setStatusFilter(v as IsActive | "all")}
@@ -720,7 +497,6 @@ export default function CustomerManagement() {
                 <SortableTh field="phone" label="Phone" />
                 <SortableTh field="gender" label="Gender" />
                 <TableHead className="whitespace-nowrap">NID</TableHead>
-                <TableHead className="whitespace-nowrap">Created By</TableHead>
                 <SortableTh field="createdAt" label="Joined" />
                 <TableHead className="whitespace-nowrap">Last Login</TableHead>
                 <SortableTh field="isActive" label="Status" />
@@ -737,7 +513,7 @@ export default function CustomerManagement() {
                 ))
               ) : sortedCustomers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9}>
+                  <TableCell colSpan={8}>
                     <div className="flex flex-col items-center justify-center py-16 text-slate-400">
                       <Users className="w-12 h-12 mb-4 opacity-30" />
                       {searchTerm || hasActiveFilters ? (
@@ -750,14 +526,9 @@ export default function CustomerManagement() {
                           </p>
                         </>
                       ) : (
-                        <>
-                          <p className="text-base font-medium">
-                            No customers added yet
-                          </p>
-                          <p className="text-sm mt-1">
-                            Click the Add Customer button to get started
-                          </p>
-                        </>
+                        <p className="text-base font-medium">
+                          You haven&apos;t created any customers yet.
+                        </p>
                       )}
                     </div>
                   </TableCell>
@@ -770,7 +541,6 @@ export default function CustomerManagement() {
                       key={String(customer._id)}
                       className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
                     >
-                      {/* Customer name */}
                       <TableCell>
                         <div className="flex items-center gap-3">
                           {customer.picture ? (
@@ -813,12 +583,6 @@ export default function CustomerManagement() {
                             —
                           </span>
                         )}
-                      </TableCell>
-                      <TableCell>
-                        <span className="inline-flex items-center gap-1.5 text-sm text-slate-700 dark:text-slate-300">
-                          <UserCog className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          {getAgentName(customer)}
-                        </span>
                       </TableCell>
                       <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
                         {formatDate(customer.createdAt)}
@@ -875,15 +639,8 @@ export default function CustomerManagement() {
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </Button>
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            className="h-8 w-8"
-                            title="Delete customer"
-                            onClick={() => openDeleteDialog(customer)}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
+                          {/* No Delete action: backend's deleteUser route does
+                              not currently authorize Role.AGENT. */}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -942,29 +699,6 @@ export default function CustomerManagement() {
           customer={subscriptionsCustomer}
         />
       )}
-
-      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Customer</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete{" "}
-              <strong>{deletingCustomer?.name}</strong>? This action cannot be
-              undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="flex gap-2">
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
-            >
-              {isDeleting ? "Deleting..." : "Delete"}
-            </AlertDialogAction>
-          </div>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

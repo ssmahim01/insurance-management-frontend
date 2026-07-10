@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
@@ -6,20 +5,22 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import {
-  useGetMyTrashAgentsQuery,
+  useGetAllTrashUsersQuery,
   useRestoreUserMutation,
   usePermanentDeleteUserMutation,
+  useGetMyTrashCustomersQuery,
 } from "@/redux/features/user/user.api";
 import { ITrashFilters } from "@/types/agent-leader";
+import { IUser, Role } from "@/types/user.types";
 
 import { PageHeader } from "@/components/shared/PageHeader";
 import { TrashStatsCards } from "@/components/shared/trash/TrashStatsCards";
 import { TrashFilters } from "@/components/shared/trash/TrashFilters";
-import { TrashTable } from "./TrashTable";
 import { TrashPagination } from "@/components/shared/trash/TrashPagination";
 import { TrashEmptyState } from "@/components/shared/trash/TrashEmptyState";
 import { RestoreDialog } from "@/components/shared/trash/RestoreDialog";
 import { PermanentDeleteDialog } from "@/components/shared/trash/PermanentDeleteDialog";
+import { TrashTable } from "../agent-leader/trash/TrashTable";
 
 interface DialogState {
   isOpen: boolean;
@@ -29,7 +30,7 @@ interface DialogState {
 
 const EMPTY_DIALOG: DialogState = { isOpen: false, itemId: "", itemName: "" };
 
-export function TrashAgents() {
+export function AgentLeaderCustomerTrash() {
   const router = useRouter();
   const [page, setPage] = useState<number>(1);
   const [limit] = useState<number>(10);
@@ -45,6 +46,7 @@ export function TrashAgents() {
     () => ({
       page,
       limit,
+      role: Role.CUSTOMER,
       searchTerm: filters.searchTerm || undefined,
       sort:
         filters.sortBy === "newest"
@@ -60,10 +62,15 @@ export function TrashAgents() {
     [page, limit, filters],
   );
 
-  const { data, isLoading, error: errorData } = useGetMyTrashAgentsQuery(queryParams);
+  const { data, isLoading, isError } = useGetMyTrashCustomersQuery(queryParams);
   const [restoreUser, { isLoading: isRestoring }] = useRestoreUserMutation();
   const [permanentDeleteUser, { isLoading: isDeleting }] =
     usePermanentDeleteUserMutation();
+
+  const customers: IUser[] = useMemo(
+    () => (data?.data ?? []).filter((u) => u.role === Role.CUSTOMER),
+    [data?.data],
+  );
 
   const hasFilters = Boolean(
     filters.searchTerm || filters.startDate || filters.endDate,
@@ -90,14 +97,14 @@ export function TrashAgents() {
   const handleRestoreConfirm = useCallback(async () => {
     try {
       await restoreUser(restoreDialog.itemId).unwrap();
-      toast.success("Agent restored successfully.");
+      toast.success("Customer restored successfully.");
       setRestoreDialog(EMPTY_DIALOG);
     } catch (err) {
       const message =
         err && typeof err === "object" && "data" in err
           ? ((err as { data?: { message?: string } }).data?.message ??
-            "Failed to restore agent.")
-          : "Failed to restore agent.";
+            "Failed to restore customer.")
+          : "Failed to restore customer.";
       toast.error(message);
     }
   }, [restoreUser, restoreDialog.itemId]);
@@ -105,14 +112,14 @@ export function TrashAgents() {
   const handleDeleteConfirm = useCallback(async () => {
     try {
       await permanentDeleteUser(deleteDialog.itemId).unwrap();
-      toast.success("Agent permanently deleted.");
+      toast.success("Customer permanently deleted.");
       setDeleteDialog(EMPTY_DIALOG);
     } catch (err) {
       const message =
         err && typeof err === "object" && "data" in err
           ? ((err as { data?: { message?: string } }).data?.message ??
-            "Failed to delete agent.")
-          : "Failed to delete agent.";
+            "Failed to delete customer.")
+          : "Failed to delete customer.";
       toast.error(message);
     }
   }, [permanentDeleteUser, deleteDialog.itemId]);
@@ -120,17 +127,20 @@ export function TrashAgents() {
   return (
     <div>
       <PageHeader
-        title="Trash"
-        description="Restore or permanently remove deleted agents."
+        title="Customer Trash"
+        description="Restore or permanently remove deleted customers."
         breadcrumbs={[
-          { label: "Dashboard", href: "/agent-leader/dashboard/" },
-          { label: "My Agents", href: "/agent-leader/dashboard/my-agents" },
+          { label: "Dashboard", href: "/agent-leader/dashboard" },
+          {
+            label: "Customer Management",
+            href: "/agent-leader/dashboard/customers",
+          },
           { label: "Trash" },
         ]}
       />
 
       <TrashStatsCards
-        items={data?.data}
+        items={customers}
         totalCount={data?.meta.total}
         isLoading={isLoading}
       />
@@ -141,22 +151,26 @@ export function TrashAgents() {
         onReset={handleResetFilters}
       />
 
-      {data?.data && data.data.length > 0 ? (
+      {isError ? (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive">
+          <p>Failed to load trash. Please try again.</p>
+        </div>
+      ) : customers.length > 0 ? (
         <>
           <TrashTable
-            items={data.data}
+            items={customers}
             isLoading={isLoading}
             onRestore={(id) => {
-              const item = data.data.find((a) => a._id === id);
+              const item = customers.find((c) => c._id === id);
               if (item) handleRestoreClick(id, item.name);
             }}
             onPermanentDelete={(id) => {
-              const item = data.data.find((a) => a._id === id);
+              const item = customers.find((c) => c._id === id);
               if (item) handleDeleteClick(id, item.name);
             }}
           />
           <TrashPagination
-            meta={data.meta}
+            meta={data?.meta}
             currentPage={page}
             onPageChange={setPage}
             isLoading={isLoading}
@@ -166,24 +180,18 @@ export function TrashAgents() {
         !isLoading && (
           <TrashEmptyState
             hasFilters={hasFilters}
-            title="No deleted agents found"
+            title="No deleted customers found"
             onClearFilters={hasFilters ? handleResetFilters : undefined}
-            onGoBack={() => router.push("/agent-leader/dashboard/my-agents")}
+            onGoBack={() => router.push("/agent-leader/dashboard/customers")}
           />
         )
       )}
 
-      {/* {errorData && (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive">
-          <p>Failed to load trash. Please try again.</p>
-        </div>
-      )} */}
-
       <RestoreDialog
         isOpen={restoreDialog.isOpen}
         itemName={restoreDialog.itemName}
+        entityName="Customer"
         onConfirm={handleRestoreConfirm}
-        entityName="Agent"
         onCancel={() => setRestoreDialog(EMPTY_DIALOG)}
         isLoading={isRestoring}
       />

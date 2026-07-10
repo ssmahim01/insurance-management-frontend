@@ -1,5 +1,5 @@
+import { AgentLeaderCustomerTrash } from "@/components/customer/AgentLeaderCustomerTrash";
 import { Metadata } from "next";
-import { AgentLeaderSubscriptionTrash } from "@/components/agent-leader/customer-subscriptions/AgentLeaderSubscriptionTrash";
 
 export const metadata: Metadata = {
   title: "Subscription Trash",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <AgentLeaderSubscriptionTrash />;
+  return <AgentLeaderCustomerTrash />;
 }
