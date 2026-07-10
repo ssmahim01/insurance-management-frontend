@@ -60,6 +60,9 @@ const formatDate = (iso?: string | Date) => {
 const getCustomerName = (claim: IClaim) =>
   typeof claim.customer === "object" ? claim.customer.name : "—";
 
+const getCustomerPhone = (claim: IClaim) =>
+  typeof claim.customer === "object" ? claim.customer.phone : "—";
+
 // ─── Skeletons ────────────────────────────────────────────────────────────────
 
 function ClaimRowSkeleton() {
@@ -234,14 +237,6 @@ export default function ClaimManagement() {
 
   return (
     <div className="space-y-6">
-      {/* <PageHeader
-        title="Insurance Claims"
-        description="Review and manage customer claim submissions"
-        breadcrumbs={[
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Claims" },
-        ]}
-      /> */}
 
       <PageHeader
         title="Insurance Claims"
@@ -370,7 +365,15 @@ export default function ClaimManagement() {
 
                     {/* Customer */}
                     <TableCell className="text-slate-600 dark:text-slate-400 text-sm whitespace-nowrap">
-                      {getCustomerName(claim)}
+
+                       <div className="min-w-0">
+                          <p className="text-sm font-medium text-slate-900 dark:text-white truncate max-w-32">
+                             {getCustomerName(claim)}
+                          </p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate max-w-32">
+                             {getCustomerPhone(claim)}
+                          </p>
+                        </div>
                     </TableCell>
 
                     {/* Attachments */}

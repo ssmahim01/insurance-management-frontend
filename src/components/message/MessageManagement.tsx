@@ -11,6 +11,11 @@ import {
     X,
     MessageSquare,
     LayoutGrid,
+    CreditCard,
+    ShieldAlert,
+    Megaphone,
+    Bell,
+    KeyRound,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -25,7 +30,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+} from "@/components/ui/select";
 import {
     Table,
     TableBody,
@@ -41,10 +53,10 @@ import {
     useGetAllMessagesQuery,
     useSoftDeleteMessageMutation,
     IMessage,
+    MessageType,
 } from "@/redux/features/message/message.api";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
-import { Role } from "@/types/user.types";
 import { MessageDetailsModal } from "./MessageDetailsModal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -63,6 +75,66 @@ const formatDate = (iso?: string) => {
     });
 };
 
+const MESSAGE_TYPE_LABELS: Record<MessageType, string> = {
+    [MessageType.SUBSCRIPTION]: "Subscription",
+    [MessageType.PAYMENT]: "Payment",
+    [MessageType.CLAIM]: "Claim",
+    [MessageType.PROMOTIONAL]: "Promotional",
+    [MessageType.GENERAL]: "General",
+    [MessageType.OTP]: "OTP",
+};
+
+const MESSAGE_TYPE_COLORS: Record<MessageType, string> = {
+    [MessageType.SUBSCRIPTION]:
+        "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
+    [MessageType.PAYMENT]:
+        "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400",
+    [MessageType.CLAIM]:
+        "border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-800 dark:bg-purple-900/20 dark:text-purple-400",
+    [MessageType.PROMOTIONAL]:
+        "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400",
+    [MessageType.GENERAL]:
+        "border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
+    [MessageType.OTP]:
+        "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-900/20 dark:text-rose-400",
+};
+
+const MESSAGE_TYPE_ICONS: Record<MessageType, React.ElementType> = {
+    [MessageType.SUBSCRIPTION]: Bell,
+    [MessageType.PAYMENT]: CreditCard,
+    [MessageType.CLAIM]: ShieldAlert,
+    [MessageType.PROMOTIONAL]: Megaphone,
+    [MessageType.GENERAL]: MessageSquare,
+    [MessageType.OTP]: KeyRound,
+};
+
+const MESSAGE_TYPE_ICON_COLORS: Record<MessageType, { bg: string; icon: string }> = {
+    [MessageType.SUBSCRIPTION]: {
+        bg: "bg-blue-50 dark:bg-blue-900/20",
+        icon: "text-blue-600 dark:text-blue-400",
+    },
+    [MessageType.PAYMENT]: {
+        bg: "bg-emerald-50 dark:bg-emerald-900/20",
+        icon: "text-emerald-600 dark:text-emerald-400",
+    },
+    [MessageType.CLAIM]: {
+        bg: "bg-purple-50 dark:bg-purple-900/20",
+        icon: "text-purple-600 dark:text-purple-400",
+    },
+    [MessageType.PROMOTIONAL]: {
+        bg: "bg-amber-50 dark:bg-amber-900/20",
+        icon: "text-amber-600 dark:text-amber-400",
+    },
+    [MessageType.GENERAL]: {
+        bg: "bg-slate-100 dark:bg-slate-800",
+        icon: "text-slate-500 dark:text-slate-400",
+    },
+    [MessageType.OTP]: {
+        bg: "bg-rose-50 dark:bg-rose-900/20",
+        icon: "text-rose-600 dark:text-rose-400",
+    },
+};
+
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function MessageRowSkeleton() {
@@ -77,7 +149,7 @@ function MessageRowSkeleton() {
                     </div>
                 </div>
             </TableCell>
-            {Array.from({ length: 2 }).map((_, i) => (
+            {Array.from({ length: 3 }).map((_, i) => (
                 <TableCell key={i}>
                     <Skeleton className="h-4 w-20" />
                 </TableCell>
@@ -89,6 +161,19 @@ function MessageRowSkeleton() {
                 </div>
             </TableCell>
         </TableRow>
+    );
+}
+
+function StatCardSkeleton() {
+    return (
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
+            <div className="flex items-center justify-between mb-3">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-9 w-9 rounded-lg" />
+            </div>
+            <Skeleton className="h-7 w-14 mb-1" />
+            <Skeleton className="h-3 w-20" />
+        </div>
     );
 }
 
@@ -117,6 +202,7 @@ function SortIcon({
 export default function MessageManagement() {
     // ── filters ──
     const [searchTerm, setSearchTerm] = useState("");
+    const [typeFilter, setTypeFilter] = useState<"all" | MessageType>("all");
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [page, setPage] = useState(1);
@@ -134,11 +220,12 @@ export default function MessageManagement() {
 
     const { user } = useUser();
 
-    useEffect(() => { setPage(1); }, [searchTerm]);
+    useEffect(() => { setPage(1); }, [searchTerm, typeFilter]);
 
     // ── API ──
     const { data, isLoading, refetch } = useGetAllMessagesQuery({
         searchTerm: searchTerm || undefined,
+        type: typeFilter !== "all" ? typeFilter : undefined,
         page,
         limit,
         ...(startDate && { startDate }),
@@ -149,10 +236,13 @@ export default function MessageManagement() {
 
     // ── derived ──
     const messages: IMessage[] = data?.data ?? [];
+    const stats = data?.stats;
     const meta = data?.meta;
     const totalPage = meta?.totalPage ?? 1;
 
+    const hasActiveFilters = typeFilter !== "all";
     const hasDateFilter = !!(startDate || endDate);
+
 
     // ── client sort ──
     const sortedMessages = React.useMemo(() => {
@@ -173,6 +263,7 @@ export default function MessageManagement() {
         setSortField(null); setSortDir(null);
     };
 
+    const clearFilters = () => { setTypeFilter("all"); };
     const clearDateFilter = () => { setStartDate(""); setEndDate(""); };
 
     const openDetailsDialog = (m: IMessage) => { setViewingMessage(m); setIsDetailsOpen(true); };
@@ -231,11 +322,12 @@ export default function MessageManagement() {
                 }
             />
 
-            {/* ── Total Card ── */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="sm:col-span-3 flex flex-wrap items-center gap-3">
+            {/* ── Stat Cards ── */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-7 gap-4">
+                {/* Date filter row */}
+                <div className="sm:col-span-3 lg:col-span-7 flex flex-wrap items-center gap-3">
                     <p className="text-sm text-slate-500 dark:text-slate-400 shrink-0">
-                        Filter by date:
+                        Filter stats by date:
                     </p>
                     <div className="flex items-center gap-2 flex-wrap">
                         <Input
@@ -265,23 +357,60 @@ export default function MessageManagement() {
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 sm:col-span-1">
-                    <div className="flex items-center justify-between mb-3">
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Total Messages</p>
-                        <div className="p-2 rounded-lg bg-violet-50 dark:bg-violet-900/20">
-                            <LayoutGrid className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                {isLoading ? (
+                    <>
+                        <StatCardSkeleton />
+                        <StatCardSkeleton />
+                        <StatCardSkeleton />
+                        <StatCardSkeleton />
+                        <StatCardSkeleton />
+                        <StatCardSkeleton />
+                        <StatCardSkeleton />
+                    </>
+                ) : (
+                    <>
+                        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
+                            <div className="flex items-center justify-between mb-3">
+                                <p className="text-sm text-slate-500 dark:text-slate-400">Total</p>
+                                <div className="p-2 rounded-lg bg-violet-50 dark:bg-violet-900/20">
+                                    <LayoutGrid className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                                </div>
+                            </div>
+                            <p className="text-2xl font-semibold text-slate-900 dark:text-white">
+                                {stats?.total ?? 0}
+                            </p>
+                            <p className="text-xs mt-1 text-violet-600 dark:text-violet-400">
+                                sent messages
+                            </p>
                         </div>
-                    </div>
-                    <p className="text-2xl font-semibold text-slate-900 dark:text-white">
-                        {meta?.total ?? 0}
-                    </p>
-                    <p className="text-xs mt-1 text-violet-600 dark:text-violet-400">
-                        sent messages
-                    </p>
-                </div>
+
+                        {Object.values(MessageType).map((type) => {
+                            const Icon = MESSAGE_TYPE_ICONS[type];
+                            const colors = MESSAGE_TYPE_ICON_COLORS[type];
+                            return (
+                                <div
+                                    key={type}
+                                    className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5"
+                                >
+                                    <div className="flex items-center justify-between mb-3">
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                                            {MESSAGE_TYPE_LABELS[type]}
+                                        </p>
+                                        <div className={`p-2 rounded-lg ${colors.bg}`}>
+                                            <Icon className={`w-5 h-5 ${colors.icon}`} />
+                                        </div>
+                                    </div>
+                                    <p className="text-2xl font-semibold text-slate-900 dark:text-white">
+                                        {stats?.byType?.[type] ?? 0}
+                                    </p>
+                                </div>
+                            );
+                        })}
+                    </>
+                )}
             </div>
 
-            {/* ── Search ── */}
+            {/* ── Search & Filters ── */}
             <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -292,6 +421,37 @@ export default function MessageManagement() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
+
+                <Select
+                    value={typeFilter as any}
+                    onValueChange={(v) => setTypeFilter(v as "all" | MessageType)}
+                >
+                    <SelectTrigger className="w-48 h-9 text-sm">
+                        <span>
+                            {typeFilter === "all" ? "All Types" : MESSAGE_TYPE_LABELS[typeFilter]}
+                        </span>
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Types</SelectItem>
+                        {Object.values(MessageType).map((t) => (
+                            <SelectItem key={t} value={t}>
+                                {MESSAGE_TYPE_LABELS[t]}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+
+                {hasActiveFilters && (
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={clearFilters}
+                        title="Clear filters"
+                        className="shrink-0"
+                    >
+                        <X className="w-4 h-4" />
+                    </Button>
+                )}
             </div>
 
             {/* ── Table ── */}
@@ -301,6 +461,7 @@ export default function MessageManagement() {
                         <TableHeader>
                             <TableRow className="bg-slate-50 dark:bg-slate-800/50">
                                 <TableHead className="whitespace-nowrap">Message</TableHead>
+                                <TableHead className="whitespace-nowrap">Type</TableHead>
                                 <SortableTh field="phone" label="Phone" />
                                 <SortableTh field="createdAt" label="Sent" />
                                 <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
@@ -314,13 +475,13 @@ export default function MessageManagement() {
                                 ))
                             ) : sortedMessages.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={4}>
+                                    <TableCell colSpan={5}>
                                         <div className="flex flex-col items-center justify-center py-16 text-slate-400">
                                             <MessageSquare className="w-12 h-12 mb-4 opacity-30" />
-                                            {searchTerm ? (
+                                            {searchTerm || hasActiveFilters ? (
                                                 <>
                                                     <p className="text-base font-medium">No results found</p>
-                                                    <p className="text-sm mt-1">Try adjusting your search</p>
+                                                    <p className="text-sm mt-1">Try adjusting your search or filters</p>
                                                 </>
                                             ) : (
                                                 <>
@@ -347,6 +508,20 @@ export default function MessageManagement() {
                                                     {msg.message}
                                                 </p>
                                             </div>
+                                        </TableCell>
+
+                                        {/* Type */}
+                                        <TableCell>
+                                            {msg.type ? (
+                                                <Badge
+                                                    variant="outline"
+                                                    className={`whitespace-nowrap ${MESSAGE_TYPE_COLORS[msg.type]}`}
+                                                >
+                                                    {MESSAGE_TYPE_LABELS[msg.type]}
+                                                </Badge>
+                                            ) : (
+                                                "—"
+                                            )}
                                         </TableCell>
 
                                         {/* Phone */}
@@ -404,6 +579,7 @@ export default function MessageManagement() {
                                 {sortedMessages.length}
                             </span>{" "}
                             message{sortedMessages.length !== 1 ? "s" : ""}
+                            {hasActiveFilters && " (filtered)"}
                         </p>
                         {totalPage > 1 && (
                             <p className="text-xs text-slate-500 dark:text-slate-400">
