@@ -303,10 +303,6 @@ export default function PaymentManagement() {
   const hasActiveFilters = statusFilter !== "all";
   const hasDateFilter = !!(startDate || endDate);
 
-
-console.log("Payments ", payments)
-
-
   // ── client sort ──
   const sortedPayments = React.useMemo(() => {
     if (!sortField || !sortDir) return payments;

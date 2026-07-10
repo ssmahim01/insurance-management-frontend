@@ -1,13 +1,27 @@
-
 import { baseApi } from "../baseApi";
+
+export enum MessageType {
+  SUBSCRIPTION = "SUBSCRIPTION",
+  PAYMENT = "PAYMENT",
+  CLAIM = "CLAIM",
+  PROMOTIONAL = "PROMOTIONAL",
+  GENERAL = "GENERAL",
+  OTP = "OTP",
+}
 
 export interface IMessage {
   _id: string;
   message: string;
   phone: string;
+  type?: MessageType;
   isDeleted: boolean;
   createdAt?: string;
   updatedAt?: string;
+}
+
+interface IMessageStats {
+  total: number;
+  byType: Record<MessageType, number>;
 }
 
 interface IMessageListResponse {
@@ -18,6 +32,7 @@ interface IMessageListResponse {
     total: number;
     totalPage: number;
   };
+  stats: IMessageStats;
 }
 
 interface ISingleMessageResponse {
@@ -26,16 +41,18 @@ interface ISingleMessageResponse {
 
 interface GetMessagesParams {
   searchTerm?: string;
-  page?:       number;
-  limit?:      number;
-  startDate?:  string;
-  endDate?:    string;
-  sort?:       string;
+  type?: string;
+  page?: number;
+  limit?: number;
+  startDate?: string;
+  endDate?: string;
+  sort?: string;
 }
 
 interface ICreateMessagePayload {
   message: string;
-  phone:   string;
+  phone: string;
+  type?: MessageType;
 }
 
 export const messageApi = baseApi.injectEndpoints({
