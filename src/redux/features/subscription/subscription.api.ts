@@ -4,6 +4,7 @@ import {
   GetSubscriptionsParams,
   ICreateSubscriptionPayload,
   ICreateSubscriptionResponse,
+  IOverviewResponse,
   ISingleSubscriptionResponse,
   ISubscriptionListResponse,
   IUpdateSubscriptionPayload,
@@ -24,6 +25,29 @@ export const subscriptionApi = baseApi.injectEndpoints({
         data: payload,
       }),
       invalidatesTags: ["SUBSCRIPTIONS"],
+    }),
+
+    // ── OVERVIEW ANALYTICS ───────────────────────────────────────
+
+    getAdminOverview: builder.query<IOverviewResponse, void>({
+      query: () => ({
+        url: "/subscription/overview/admin",
+        method: "GET",
+      }),
+    }),
+
+    getAgentLeaderOverview: builder.query<IOverviewResponse, void>({
+      query: () => ({
+        url: "/subscription/overview/agent-leader",
+        method: "GET",
+      }),
+    }),
+
+    getAgentOverview: builder.query<IOverviewResponse, void>({
+      query: () => ({
+        url: "/subscription/overview/agent",
+        method: "GET",
+      }),
     }),
 
     // ── GET ALL (admin/super-admin) ────────────────────────────────────────
@@ -174,8 +198,6 @@ export const subscriptionApi = baseApi.injectEndpoints({
       invalidatesTags: ["SUBSCRIPTIONS"],
     }),
 
-
-
     // ── SOFT DELETE (move to trash) ────────────────────────────────────────
 
     softDeleteSubscription: builder.mutation<
@@ -210,6 +232,9 @@ export const {
   useGetAgentLeaderTrashSubscriptionsQuery,
   useGetMySubscriptionsQuery,
   useGetSingleSubscriptionQuery,
+  useGetAdminOverviewQuery,
+  useGetAgentLeaderOverviewQuery,
+  useGetAgentOverviewQuery,
   useGetCustomerSubscriptionsQuery,
   useUpdateSubscriptionMutation,
   useSoftDeleteSubscriptionMutation,

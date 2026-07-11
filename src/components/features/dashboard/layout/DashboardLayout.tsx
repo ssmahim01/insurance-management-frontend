@@ -12,16 +12,24 @@ import { Separator } from "@/components/ui/separator";
 import {
   Breadcrumb,
   BreadcrumbItem,
+  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import {
   LayoutDashboard,
   Package,
   Building2,
   Handshake,
-  Settings,
   User,
   Sun,
   Moon,
@@ -106,55 +114,101 @@ export const dashboardNavigation: NavGroup[] = [
         icon: Package,
       },
     ],
-  }
+  },
 ];
 
-interface DashboardHeaderProps {
-  pageTitle?: string;
+export interface BreadcrumbTrailItem {
+  label: string;
+  href?: string;
 }
 
-export function DashboardHeader({ pageTitle }: DashboardHeaderProps) {
+interface DashboardHeaderProps {
+  /** Backward-compatible single-crumb usage. */
+  pageTitle?: string;
+  /** Preferred: pass a full trail (e.g. from PageHeader's breadcrumbs shape) for multi-level context. */
+  breadcrumbs?: BreadcrumbTrailItem[];
+}
+
+export function DashboardHeader({ pageTitle, breadcrumbs }: DashboardHeaderProps) {
   const { theme, setTheme } = useTheme();
+
+  const trail: BreadcrumbTrailItem[] =
+    breadcrumbs && breadcrumbs.length > 0
+      ? breadcrumbs
+      : [{ label: pageTitle ?? "Dashboard" }];
+
   return (
-    <header className="sticky top-0 flex h-16 shrink-0 items-center gap-3 border-b border-gray-200/80 bg-background px-4 dark:border-gray-800">
-      <SidebarTrigger className="-ml-1 h-8 w-8 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100 transition-colors" />
+    <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-3 border-b border-gray-200/80 bg-background/80 backdrop-blur-sm px-4 dark:border-gray-800">
+     <SidebarTrigger className="-ml-1 h-8 w-8 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100 transition-colors" />
 
       <Separator
         orientation="vertical"
-        className="bg-gray-200 dark:bg-gray-700"
+        className="h-16 bg-gray-200 dark:bg-gray-700"
       />
 
       <Breadcrumb>
         <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbPage className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {pageTitle ?? "Dashboard"}
-            </BreadcrumbPage>
-          </BreadcrumbItem>
+          {trail.map((crumb, idx) => {
+            const isLast = idx === trail.length - 1;
+            return (
+              <React.Fragment key={`${crumb.label}-${idx}`}>
+                <BreadcrumbItem>
+                  {isLast || !crumb.href ? (
+                    <BreadcrumbPage className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {crumb.label}
+                    </BreadcrumbPage>
+                  ) : (
+                    <BreadcrumbLink
+                      href={crumb.href}
+                      className="text-sm text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+                    >
+                      {crumb.label}
+                    </BreadcrumbLink>
+                  )}
+                </BreadcrumbItem>
+                {!isLast && <BreadcrumbSeparator />}
+              </React.Fragment>
+            );
+          })}
         </BreadcrumbList>
       </Breadcrumb>
 
       <div className="ml-auto flex items-center gap-2" id="header-actions" />
+
       {/* Right Section */}
-      <div className="flex items-center gap-2">
-        {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative hover:bg-muted">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
-        </Button>
+      <div className="flex items-center gap-1.5 rounded-full border border-gray-200/80 bg-gray-50/60 p-1 dark:border-gray-800 dark:bg-gray-900/40">
+        {/* Notifications — UI only for now; no notifications API wired yet */}
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative h-8 w-8 rounded-full hover:bg-white dark:hover:bg-gray-800 transition-colors"
+            >
+              <Bell className="h-[18px] w-[18px]" />
+              <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-64 rounded-xl">
+            <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+              Notifications
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <div className="px-3 py-6 text-center text-sm text-gray-400">
+              You&apos;re all caught up.
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* Theme Toggle */}
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="hover:bg-muted"
+          className="h-8 w-8 rounded-full hover:bg-white dark:hover:bg-gray-800 transition-colors"
         >
-          {theme === "dark" ? (
-            <Sun className="w-5 h-5" />
-          ) : (
-            <Moon className="w-5 h-5" />
-          )}
+          <Sun className="h-[18px] w-[18px] rotate-0 scale-100 transition-all duration-300 dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-[18px] w-[18px] rotate-90 scale-0 transition-all duration-300 dark:rotate-0 dark:scale-100" />
         </Button>
       </div>
     </header>
@@ -165,12 +219,14 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
   onLogout?: () => void;
   pageTitle?: string;
+  breadcrumbs?: BreadcrumbTrailItem[];
   defaultOpen?: boolean;
 }
 
 export function DashboardLayoutWrapper({
   children,
   pageTitle,
+  breadcrumbs,
   defaultOpen = true,
 }: DashboardLayoutProps) {
   const router = useRouter();
@@ -189,7 +245,7 @@ export function DashboardLayoutWrapper({
       <TooltipProvider>
         <AppSidebar user={user?.data} onLogout={handleLogout} isLoading={isLoading} />
         <SidebarInset className="flex flex-col min-h-screen">
-          <DashboardHeader pageTitle={pageTitle} />
+          <DashboardHeader pageTitle={pageTitle} breadcrumbs={breadcrumbs} />
 
           <main className="flex-1 overflow-auto bg-gray-50/50 dark:bg-gray-950/50">
             <div className="p-4 md:p-6 lg:p-8">{children}</div>

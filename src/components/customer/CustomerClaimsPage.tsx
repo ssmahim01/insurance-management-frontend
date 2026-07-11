@@ -1,9 +1,9 @@
 "use client";
 
 import { ClaimPageContent } from "@/components/claim/ClaimPageContent";
-import { CreateClaimModal } from "../claim/CreateClaim";
+// import { CreateClaimModal } from "../claim/CreateClaim";
 import { useGetAllClaimsQuery } from "@/redux/features/claim/claim.api";
-import { useGetAllSubscriptionsQuery, useGetMySubscriptionsQuery } from "@/redux/features/subscription/subscription.api";
+// import { useGetMySubscriptionsQuery } from "@/redux/features/subscription/subscription.api";
 
 export function CustomerClaimsPage() {
   return (
@@ -15,9 +15,9 @@ export function CustomerClaimsPage() {
         { label: "Claims" },
       ]}
       useQuery={useGetAllClaimsQuery}
-      headerAction={(refetch) => (
-        <CreateClaimModal onSuccess={refetch} useSubscriptionsQuery={useGetAllSubscriptionsQuery} />
-      )}
+      // headerAction={(refetch) => (
+      //   <CreateClaimModal onSuccess={refetch} useSubscriptionsQuery={useGetMySubscriptionsQuery} />
+      // )}
     />
   );
 }

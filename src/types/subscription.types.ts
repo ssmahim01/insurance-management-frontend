@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // // ager frontend  /subscription.types.ts
 
 // import { IUser } from "./user.types";
@@ -174,6 +175,7 @@
 // Version  2
 // ager frontend  /subscription.types.ts
 
+
 import { IUser } from "./user.types";
 import { IInsurancePackage } from "./package.types";
 
@@ -253,6 +255,33 @@ export interface ISubscription {
 
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface IPackageWiseRevenue {
+  packageId: string | null; 
+  packageName?: string;      
+  subscriptions: number;
+  totalRevenue: number;     
+  averageRevenue: number;
+}
+
+export interface IOverviewCard {
+  subscriptions: number;
+  revenue: number;
+  averageRevenue: number;
+  packageWiseRevenue: IPackageWiseRevenue[];
+}
+
+export interface IOverviewData {
+  today: IOverviewCard;
+  month: IOverviewCard;
+  lifetime: IOverviewCard;
+}
+
+export interface IOverviewResponse {
+  success: boolean;
+  message: string;
+  data: IOverviewData;
 }
 
 export interface ICustomerAddress {
