@@ -91,6 +91,7 @@ const STATUS_LABELS: Record<SubscriptionStatus, string> = {
   [SubscriptionStatus.EXPIRED]: "Expired",
   [SubscriptionStatus.CANCELLED]: "Cancelled",
   [SubscriptionStatus.FAILED]: "Failed",
+  [SubscriptionStatus.REFUNDED]: "Refunded",
 };
 
 const STATUS_STYLES: Record<SubscriptionStatus, string> = {
@@ -104,6 +105,8 @@ const STATUS_STYLES: Record<SubscriptionStatus, string> = {
     "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400",
   [SubscriptionStatus.FAILED]:
     "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400",
+  REFUNDED:
+    "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
 };
 
 const STATUS_DOT: Record<SubscriptionStatus, string> = {
@@ -112,6 +115,7 @@ const STATUS_DOT: Record<SubscriptionStatus, string> = {
   [SubscriptionStatus.EXPIRED]: "bg-slate-400",
   [SubscriptionStatus.CANCELLED]: "bg-red-500",
   [SubscriptionStatus.FAILED]: "bg-red-500",
+   [SubscriptionStatus.REFUNDED]: "bg-red-500",
 };
 
 const PAYMENT_STYLES: Record<string, string> = {
@@ -627,8 +631,8 @@ export default function SubscriptionManagement() {
               <Crown className="w-4 h-4 text-slate-400 shrink-0" />
               {filterMode === "by_leader" && selectedLeaderId
                 ? (leadersData?.data ?? []).find(
-                    (l: IUser) => String(l._id) === selectedLeaderId,
-                  )?.name || "Leader"
+                  (l: IUser) => String(l._id) === selectedLeaderId,
+                )?.name || "Leader"
                 : "All Leaders"}
             </span>
           </SelectTrigger>
@@ -666,8 +670,8 @@ export default function SubscriptionManagement() {
               <UserCog className="w-4 h-4 text-slate-400 shrink-0" />
               {filterMode === "by_agent" && selectedAgentId
                 ? (usersData?.data ?? []).find(
-                    (a: IUser) => String(a._id) === selectedAgentId,
-                  )?.name || "Agent"
+                  (a: IUser) => String(a._id) === selectedAgentId,
+                )?.name || "Agent"
                 : "All Creators"}
             </span>
           </SelectTrigger>
@@ -853,7 +857,7 @@ export default function SubscriptionManagement() {
                       </TableCell>
                       <TableCell>
                         {sub.subscribeFor === SubscribeFor.OTHER &&
-                        sub.beneficiary ? (
+                          sub.beneficiary ? (
                           <div className="flex flex-col gap-0.5 max-w-32">
                             <span className="inline-flex items-center gap-1 text-xs font-medium text-violet-700 dark:text-violet-400">
                               <Users className="w-3 h-3 shrink-0" />

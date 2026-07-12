@@ -132,7 +132,7 @@ export function CustomerDetailsModal({
 
   const address = item.address;
   const addressParts = [
-    address?.union,
+    address?.street,
     address?.thana,
     address?.district,
     address?.division,
@@ -307,7 +307,7 @@ export function CustomerDetailsModal({
                   <Field icon={MapPin} label="Division"    value={address?.division} />
                   <Field icon={MapPin} label="District"    value={address?.district} />
                   <Field icon={MapPin} label="Thana"       value={address?.thana} />
-                  <Field icon={MapPin} label="Union / Ward" value={address?.union} />
+                  <Field icon={MapPin} label="Street" value={address?.street} />
                 </div>
                 <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
                   <span className="font-semibold">Full Address:</span>{" "}

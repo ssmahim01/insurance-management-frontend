@@ -14,6 +14,9 @@ import {
   CheckCircle2,
   XCircle,
   LayoutGrid,
+  Building2,
+  Stethoscope,
+  Pill,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -51,12 +54,11 @@ import { CreatePartnerModal } from "./CreatePartner";
 import { UpdatePartnerModal } from "./UpdatePartner";
 import { PartnerDetailsModal } from "./PartnerDetailsModal";
 
-// ─── Replace with your actual RTK Query hooks ─────────────────────────────────
 import {
   useGetAllPartnersQuery,
   useSoftDeletePartnerMutation,
 } from "@/redux/features/partner/partner.api";
-import { IPartner } from "@/types/partner.types";
+import { IPartner, PartnerCategory } from "@/types/partner.types";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { Role } from "@/types/user.types";
@@ -65,6 +67,7 @@ import { Role } from "@/types/user.types";
 
 type SortField = "name" | "phone" | "isActive" | "createdAt";
 type SortDir = "asc" | "desc" | null;
+type CategoryFilter = "all" | PartnerCategory;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -77,7 +80,12 @@ const formatDate = (iso?: string) => {
   });
 };
 
-// ─── Skeleton ─────────────────────────────────────────────────────────────────
+const CATEGORY_LABELS: Record<PartnerCategory, string> = {
+  [PartnerCategory.DIAGNOSTIC_HOSPITAL]: "Diagnostic / Hospital",
+  [PartnerCategory.PHARMACEUTICALS]: "Pharmaceuticals",
+};
+
+// ─── Skeleton ───
 
 function PartnerRowSkeleton() {
   return (
@@ -91,7 +99,7 @@ function PartnerRowSkeleton() {
           </div>
         </div>
       </TableCell>
-      {Array.from({ length: 4 }).map((_, i) => (
+      {Array.from({ length: 5 }).map((_, i) => (
         <TableCell key={i}>
           <Skeleton className="h-4 w-20" />
         </TableCell>
@@ -122,7 +130,7 @@ function StatCardSkeleton() {
   );
 }
 
-type StatColor = "violet" | "emerald" | "slate";
+type StatColor = "violet" | "emerald" | "slate" | "blue" | "amber";
 
 const STAT_COLOR_MAP: Record<StatColor, { bg: string; icon: string; text: string }> = {
   violet: {
@@ -139,6 +147,16 @@ const STAT_COLOR_MAP: Record<StatColor, { bg: string; icon: string; text: string
     bg: "bg-slate-100 dark:bg-slate-800",
     icon: "text-slate-500 dark:text-slate-400",
     text: "text-slate-500 dark:text-slate-400",
+  },
+  blue: {
+    bg: "bg-blue-50 dark:bg-blue-900/20",
+    icon: "text-blue-600 dark:text-blue-400",
+    text: "text-blue-600 dark:text-blue-400",
+  },
+  amber: {
+    bg: "bg-amber-50 dark:bg-amber-900/20",
+    icon: "text-amber-600 dark:text-amber-400",
+    text: "text-amber-600 dark:text-amber-400",
   },
 };
 
@@ -196,6 +214,7 @@ export default function PartnerManagement() {
   // ── filters ──
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "true" | "false">("all");
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
@@ -215,12 +234,13 @@ export default function PartnerManagement() {
 
   const { user, logout } = useUser();
 
-  useEffect(() => { setPage(1); }, [searchTerm, statusFilter]);
+  useEffect(() => { setPage(1); }, [searchTerm, statusFilter, categoryFilter]);
 
   // ── API ──
   const { data, isLoading, refetch } = useGetAllPartnersQuery({
     searchTerm: searchTerm || undefined,
     isActive: statusFilter !== "all" ? statusFilter : undefined,
+    category: categoryFilter !== "all" ? categoryFilter : undefined,
     page,
     limit,
     ...(startDate && { startDate }),
@@ -235,7 +255,7 @@ export default function PartnerManagement() {
   const meta = data?.meta;
   const totalPage = meta?.totalPage ?? 1;
 
-  const hasActiveFilters = statusFilter !== "all";
+  const hasActiveFilters = statusFilter !== "all" || categoryFilter !== "all";
   const hasDateFilter = !!(startDate || endDate);
 
   // ── client sort ──
@@ -259,7 +279,10 @@ export default function PartnerManagement() {
     setSortField(null); setSortDir(null);
   };
 
-  const clearFilters = () => { setStatusFilter("all"); };
+  const clearFilters = () => {
+    setStatusFilter("all");
+    setCategoryFilter("all");
+  };
   const clearDateFilter = () => { setStartDate(""); setEndDate(""); };
 
   const openDetailsDialog = (p: IPartner) => { setViewingPartner(p); setIsDetailsOpen(true); };
@@ -326,9 +349,9 @@ export default function PartnerManagement() {
       />
 
       {/* ── Stat Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {/* Date filter row */}
-        <div className="sm:col-span-3 flex flex-wrap items-center gap-3">
+        <div className="sm:col-span-3 lg:col-span-5 flex flex-wrap items-center gap-3">
           <p className="text-sm text-slate-500 dark:text-slate-400 shrink-0">
             Filter stats by date:
           </p>
@@ -365,6 +388,8 @@ export default function PartnerManagement() {
             <StatCardSkeleton />
             <StatCardSkeleton />
             <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
           </>
         ) : (
           <>
@@ -389,6 +414,20 @@ export default function PartnerManagement() {
               icon={XCircle}
               color="slate"
             />
+            <StatCard
+              label="Diagnostic / Hospital"
+              value={stats?.diagnosticHospital ?? 0}
+              sub="in this category"
+              icon={Stethoscope}
+              color="blue"
+            />
+            <StatCard
+              label="Pharmaceuticals"
+              value={stats?.pharmaceuticals ?? 0}
+              sub="in this category"
+              icon={Pill}
+              color="amber"
+            />
           </>
         )}
       </div>
@@ -405,6 +444,27 @@ export default function PartnerManagement() {
           />
         </div>
 
+        {/* Category filter */}
+        <Select
+          value={categoryFilter as any}
+          onValueChange={(v) => setCategoryFilter(v as CategoryFilter)}
+        >
+          <SelectTrigger className="w-full sm:w-52 h-9 text-sm">
+            <span className="truncate">
+              {categoryFilter === "all" ? "All Categories" : CATEGORY_LABELS[categoryFilter]}
+            </span>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {Object.values(PartnerCategory).map((cat) => (
+              <SelectItem key={cat} value={cat}>
+                {CATEGORY_LABELS[cat]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Status filter */}
         <Select
           value={statusFilter}
           onValueChange={(v) => setStatusFilter(v as "all" | "true" | "false")}
@@ -446,7 +506,8 @@ export default function PartnerManagement() {
               <TableRow className="bg-slate-50 dark:bg-slate-800/50">
                 <SortableTh field="name" label="Partner" />
                 <SortableTh field="phone" label="Phone" />
-                {/* <TableHead className="whitespace-nowrap">Email</TableHead> */}
+                <TableHead className="whitespace-nowrap">Category</TableHead>
+                <TableHead className="whitespace-nowrap">Branches</TableHead>
                 <TableHead className="whitespace-nowrap">Website</TableHead>
                 <SortableTh field="createdAt" label="Added" />
                 <SortableTh field="isActive" label="Status" />
@@ -461,7 +522,7 @@ export default function PartnerManagement() {
                 ))
               ) : sortedPartners.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7}>
+                  <TableCell colSpan={8}>
                     <div className="flex flex-col items-center justify-center py-16 text-slate-400">
                       <Handshake className="w-12 h-12 mb-4 opacity-30" />
                       {searchTerm || hasActiveFilters ? (
@@ -516,10 +577,34 @@ export default function PartnerManagement() {
                       {partner.phone ?? "—"}
                     </TableCell>
 
-                    {/* Email */}
-                    {/* <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
-                      {partner.email ?? "—"}
-                    </TableCell> */}
+                    {/* Category */}
+                    <TableCell>
+                      {partner.category ? (
+                        <Badge
+                          variant="outline"
+                          className={
+                            partner.category === PartnerCategory.DIAGNOSTIC_HOSPITAL
+                              ? "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+                              : "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400"
+                          }
+                        >
+                          {CATEGORY_LABELS[partner.category]}
+                        </Badge>
+                      ) : (
+                        <span className="text-slate-400 text-sm">—</span>
+                      )}
+                    </TableCell>
+
+                    {/* Branch Count */}
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className="border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-800 dark:bg-violet-900/20 dark:text-violet-400 gap-1"
+                      >
+                        <Building2 className="w-3 h-3" />
+                        {partner.branchCount ?? 0}
+                      </Badge>
+                    </TableCell>
 
                     {/* Website */}
                     <TableCell>

@@ -44,7 +44,7 @@ const schema = z
     division: z.string().optional(),
     district: z.string().optional(),
     thana: z.string().optional(),
-    union: z.string().optional(),
+    street: z.string().optional(),
     // ── Password change (optional) ──
     newPassword: z
       .string()
@@ -130,7 +130,7 @@ export function UpdateAdminModal({ open, onOpenChange, item, onSuccess }: Props)
         division: item.address?.division ?? "",
         district: item.address?.district ?? "",
         thana: item.address?.thana ?? "",
-        union: item.address?.union ?? "",
+        street: item.address?.street ?? "",
         newPassword: "",
         confirmNewPassword: "",
       });
@@ -218,7 +218,7 @@ export function UpdateAdminModal({ open, onOpenChange, item, onSuccess }: Props)
           division: data.division || "",
           district: data.district || "",
           thana: data.thana || "",
-          union: data.union || "",
+          street: data.street || "",
         },
       };
       if (data.newPassword && data.newPassword.trim().length > 0) {
@@ -392,8 +392,8 @@ export function UpdateAdminModal({ open, onOpenChange, item, onSuccess }: Props)
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="uad-union" className="text-xs font-semibold tracking-widest uppercase">Union / Ward</Label>
-                <Input id="uad-union" placeholder="e.g. Ward-10" {...register("union")} />
+                <Label htmlFor="uad-street" className="text-xs font-semibold tracking-widest uppercase">street</Label>
+                <Input id="uad-street" placeholder="e.g. Ward-10" {...register("street")} />
               </div>
             </div>
           </div>

@@ -57,7 +57,7 @@ const updateAgentSchema = z
     division: z.string().optional(),
     district: z.string().optional(),
     thana: z.string().optional(),
-    union: z.string().optional(),
+    street: z.string().optional(),
     newPassword: z
       .string()
       .min(6, "Password must be at least 6 characters")
@@ -137,7 +137,7 @@ export function UpdateAgentModal({
         division: item.address?.division ?? "",
         district: item.address?.district ?? "",
         thana: item.address?.thana ?? "",
-        union: item.address?.union ?? "",
+        street: item.address?.street ?? "",
         newPassword: "",
         confirmNewPassword: "",
       });
@@ -241,7 +241,7 @@ export function UpdateAgentModal({
           division: data.division || "",
           district: data.district || "",
           thana: data.thana || "",
-          union: data.union || "",
+          street: data.street || "",
         },
       };
       if (data.newPassword && data.newPassword.trim().length > 0) {
@@ -509,15 +509,15 @@ export function UpdateAgentModal({
 
               <div className="space-y-1.5">
                 <Label
-                  htmlFor="ua-union"
+                  htmlFor="ua-street"
                   className="text-xs font-semibold tracking-widest uppercase"
                 >
-                  Union / Ward
+                  Street
                 </Label>
                 <Input
-                  id="ua-union"
-                  placeholder="e.g. Ward-10"
-                  {...register("union")}
+                  id="ua-street"
+                  placeholder="e.g. Dhaka, 1230"
+                  {...register("street")}
                 />
               </div>
             </div>

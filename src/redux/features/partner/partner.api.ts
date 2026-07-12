@@ -1,4 +1,3 @@
-
 import { IPartner } from "@/types/partner.types";
 import { baseApi } from "../baseApi";
 
@@ -14,6 +13,8 @@ interface IPartnerListResponse {
     total: number;
     active: number;
     inactive: number;
+    diagnosticHospital: number;
+    pharmaceuticals: number;
   };
 }
 
@@ -24,6 +25,7 @@ interface ISinglePartnerResponse {
 interface GetPartnersParams {
   searchTerm?: string;
   isActive?:   string;
+  category?:   string;
   page?:       number;
   limit?:      number;
   startDate?:  string;
