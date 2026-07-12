@@ -15,7 +15,7 @@ export function AgentAddressCard({ agent }: AgentAddressCardProps) {
       <DetailRow label="Division" value={address?.division || "—"} />
       <DetailRow label="District" value={address?.district || "—"} />
       <DetailRow label="Thana" value={address?.thana || "—"} />
-      <DetailRow label="Union / Ward" value={address?.union || "—"} />
+      <DetailRow label="Street" value={address?.street || "—"} />
     </DetailCard>
   );
 }

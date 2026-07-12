@@ -22,7 +22,7 @@ export interface IAddress {
   division?: string;
   district?: string;
   thana?: string;
-  union?: string;
+  street?: string;
 }
 
 export interface INominee {
@@ -53,7 +53,7 @@ export interface IUser {
 
   createdBy?: string | IPopulatedCreatedBy;
   agentLeader?: string | IPopulatedAgentLeader; // only for agents
-
+  customId?: string;
   // BASIC INFO
   name: string;
   phone: string;

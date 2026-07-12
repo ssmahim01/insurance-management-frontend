@@ -20,8 +20,10 @@ import {
   Handshake,
   User,
   FileText,
+  Stethoscope,
+  Pill,
 } from "lucide-react";
-import { IPartner } from "@/types/partner.types";
+import { IPartner, PartnerCategory } from "@/types/partner.types";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -89,6 +91,16 @@ const formatDate = (iso?: string | null, withTime = false) => {
   return new Date(iso).toLocaleDateString("en-GB", opts);
 };
 
+const CATEGORY_LABELS: Record<PartnerCategory, string> = {
+  [PartnerCategory.DIAGNOSTIC_HOSPITAL]: "Diagnostic / Hospital",
+  [PartnerCategory.PHARMACEUTICALS]: "Pharmaceuticals",
+};
+
+const CATEGORY_ICONS: Record<PartnerCategory, React.ElementType> = {
+  [PartnerCategory.DIAGNOSTIC_HOSPITAL]: Stethoscope,
+  [PartnerCategory.PHARMACEUTICALS]: Pill,
+};
+
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 interface PartnerDetailsModalProps {
@@ -112,6 +124,8 @@ export function PartnerDetailsModal({
       : typeof item.createdBy === "string"
       ? item.createdBy
       : (item.createdBy as any)?.name ?? null;
+
+  const CategoryIcon = item.category ? CATEGORY_ICONS[item.category] : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -168,6 +182,19 @@ export function PartnerDetailsModal({
                     Inactive
                   </Badge>
                 )}
+                {item.category && CategoryIcon && (
+                  <Badge
+                    variant="outline"
+                    className={
+                      item.category === PartnerCategory.DIAGNOSTIC_HOSPITAL
+                        ? "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+                        : "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400"
+                    }
+                  >
+                    <CategoryIcon className="w-3 h-3 mr-1" />
+                    {CATEGORY_LABELS[item.category]}
+                  </Badge>
+                )}
                 <Badge
                   variant="secondary"
                   className="bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 border-violet-200 dark:border-violet-800"
@@ -194,6 +221,11 @@ export function PartnerDetailsModal({
                 label="Website"
                 value={item.website}
                 isLink={!!item.website}
+              />
+              <Field
+                icon={CategoryIcon ?? Handshake}
+                label="Category"
+                value={item.category ? CATEGORY_LABELS[item.category] : null}
               />
             </div>
           </div>

@@ -41,7 +41,7 @@ const createAgentSchema = z
     division: z.string().optional(),
     district: z.string().optional(),
     thana: z.string().optional(),
-    union: z.string().optional(),
+    street: z.string().optional(),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(1, "Please confirm your password"),
   })
@@ -90,7 +90,7 @@ export function CreateAgentModal({ onSuccess }: CreateAgentModalProps) {
       division: "",
       district: "",
       thana: "",
-      union: "",
+      street: "",
       password: "",
       confirmPassword: "",
     },
@@ -173,7 +173,7 @@ export function CreateAgentModal({ onSuccess }: CreateAgentModalProps) {
           division: data.division || "",
           district: data.district || "",
           thana: data.thana || "",
-          union: data.union || "",
+          street: data.street || "",
         },
       };
       formData.append("data", JSON.stringify(payload));
@@ -345,10 +345,10 @@ export function CreateAgentModal({ onSuccess }: CreateAgentModalProps) {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="a-union" className="text-xs font-semibold tracking-widest uppercase">
-                    Union / Ward
+                  <Label htmlFor="a-street" className="text-xs font-semibold tracking-widest uppercase">
+                    Street
                   </Label>
-                  <Input id="a-union" placeholder="e.g. Ward-10" {...register("union")} />
+                  <Input id="a-street" placeholder="e.g. Dhaka, 1230" {...register("street")} />
                 </div>
               </div>
             </div>

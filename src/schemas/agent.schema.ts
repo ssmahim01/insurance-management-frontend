@@ -21,7 +21,7 @@ export const agentCreateSchema = z
     division: z.string().optional(),
     district: z.string().optional(),
     thana: z.string().optional(),
-    union: z.string().optional(),
+    street: z.string().optional(),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(1, "Please confirm your password"),
   })
@@ -53,7 +53,7 @@ export const agentUpdateSchema = z
     division: z.string().optional(),
     district: z.string().optional(),
     thana: z.string().optional(),
-    union: z.string().optional(),
+    street: z.string().optional(),
     // Optional password change
     newPassword: z
       .string()

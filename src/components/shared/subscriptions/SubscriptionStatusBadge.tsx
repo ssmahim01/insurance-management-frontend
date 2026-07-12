@@ -10,6 +10,7 @@ const LABELS: Record<SubscriptionStatus, string> = {
   [SubscriptionStatus.ACTIVE]: "Active",
   [SubscriptionStatus.EXPIRED]: "Expired",
   [SubscriptionStatus.CANCELLED]: "Cancelled",
+  [SubscriptionStatus.REFUNDED]: "Refunded",
   [SubscriptionStatus.FAILED]: "Failed",
 };
 
@@ -24,6 +25,8 @@ const STYLES: Record<SubscriptionStatus, string> = {
     "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400",
   [SubscriptionStatus.FAILED]:
     "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400",
+  REFUNDED:
+    "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
 };
 
 const DOT: Record<SubscriptionStatus, string> = {
@@ -31,7 +34,8 @@ const DOT: Record<SubscriptionStatus, string> = {
   [SubscriptionStatus.ACTIVE]: "bg-emerald-500",
   [SubscriptionStatus.EXPIRED]: "bg-slate-400",
   [SubscriptionStatus.CANCELLED]: "bg-red-500",
-  [SubscriptionStatus.FAILED]: "bg-red-500",
+  [SubscriptionStatus.FAILED]: "bg-blue-500",
+  [SubscriptionStatus.REFUNDED]: "bg-red-500",
 };
 
 export function SubscriptionStatusBadge({ status }: SubscriptionStatusBadgeProps) {

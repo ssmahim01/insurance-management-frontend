@@ -28,12 +28,18 @@ import { Textarea } from "@/components/ui/textarea";
 
 // Replace with your actual mutation hook
 import { useUpdatePartnerMutation } from "@/redux/features/partner/partner.api";
-import { IPartner } from "@/types/partner.types";
+import { IPartner, PartnerCategory } from "@/types/partner.types";
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
+const CATEGORY_LABELS: Record<PartnerCategory, string> = {
+  [PartnerCategory.DIAGNOSTIC_HOSPITAL]: "Diagnostic / Hospital",
+  [PartnerCategory.PHARMACEUTICALS]: "Pharmaceuticals",
+};
+
 const updatePartnerSchema = z.object({
   name:        z.string().min(2, "Name must be at least 2 characters").max(100),
+  category:    z.nativeEnum(PartnerCategory, { error: "Please select a category" }),
   phone:       z.string().min(10, "Enter a valid phone number").max(15).optional().or(z.literal("")),
   email:       z.string().email("Enter a valid email address").optional().or(z.literal("")),
   website:     z.string().url("Enter a valid URL (e.g. https://example.com)").optional().or(z.literal("")),
@@ -75,12 +81,14 @@ export function UpdatePartnerModal({
   });
 
   const selectedStatus = watch("isActive");
+  const selectedCategory = watch("category");
 
   // ── Pre-fill ──
   useEffect(() => {
     if (open && item) {
       reset({
         name:        item.name ?? "",
+        category:    item.category ?? (undefined as any),
         phone:       item.phone ?? "",
         email:       item.email ?? "",
         website:     item.website ?? "",
@@ -115,6 +123,7 @@ export function UpdatePartnerModal({
       const formData = new FormData();
       const payload = {
         name:     data.name,
+        category: data.category,
         isActive: data.isActive === "true",
         ...(data.phone       && { phone:       data.phone }),
         ...(data.email       && { email:       data.email }),
@@ -168,6 +177,35 @@ export function UpdatePartnerModal({
                 </Label>
                 <Input id="up-name" placeholder="e.g. Green Life Insurance" {...register("name")} />
                 {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
+              </div>
+
+              {/* Category */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold tracking-widest uppercase">
+                  Category <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={selectedCategory ?? ""}
+                  onValueChange={(v) =>
+                    setValue("category", v as PartnerCategory, { shouldValidate: true })
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <span className="text-sm">
+                      {selectedCategory ? CATEGORY_LABELS[selectedCategory] : "Select category"}
+                    </span>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.values(PartnerCategory).map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {CATEGORY_LABELS[cat]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.category && (
+                  <p className="text-xs text-red-400">{errors.category.message}</p>
+                )}
               </div>
 
               <div className="space-y-1.5">
