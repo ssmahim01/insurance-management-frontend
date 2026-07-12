@@ -143,4 +143,4 @@ export interface ISingleUserResponse {
   success: boolean;
   message: string;
   data: IUser;
-}
+} 

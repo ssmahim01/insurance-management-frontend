@@ -10,8 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 import { ChevronRight, Home } from "lucide-react";
-import { useCreateContactMutation } from "@/redux/features/contact/contact.api";
 import { toast } from "sonner";
+import { useCreateContactMutation } from "@/redux/features/contact/contact.api";
 import { siteConfig } from "@/lib/sideConfig";
 
 
@@ -134,7 +134,7 @@ export default function ContactForm() {
       reset();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      console.error(err);
+      console.log(err);
       toast.error(err?.data?.message || "Something went wrong. Please try again later.");
     }
   }

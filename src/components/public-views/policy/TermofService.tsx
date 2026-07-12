@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import * as React from "react";
@@ -22,14 +23,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
-/**
- * ---------------------------------------------------------------------------
- * DATA
- * Each plan is broken into clause groups. Every clause group maps to one
- * accordion section so the document reads like a checklist instead of a wall
- * of legal text.
- * ---------------------------------------------------------------------------
- */
 
 type Clause = { label?: string; text: string };
 type Section = { id: string; title: string; icon: React.ElementType; clauses: Clause[] };
@@ -390,7 +383,7 @@ export default function MilvikTermsOfService() {
             </div>
 
             {/* Clause accordion */}
-            <Accordion type="single" collapsible defaultValue={plan.sections[0]?.id} className="w-full">
+            <Accordion defaultValue={[plan.sections[0].id]} className="w-full">
               {plan.sections.map((section) => {
                 const Icon = section.icon;
                 return (

@@ -16,10 +16,10 @@ import ThemeToggle from '@/components/shared/ThemeToggle'
 const navLinks = [
   { title: 'about us', path: '/about' },
   { title: 'products', path: '/products' },
-  { title: 'our doctors', path: '/our-doctors' },
-  { title: 'our partners', path: '/our-partners' },
+  { title: 'diagnastic', path: '/diagnastic' },
+  { title: 'farmacity', path: '/' },
   { title: 'contact', path: '/contact' },
-  { title: 'faq', path: '/faq' },
+  { title: 'faq', path: '/faqs' },
 ]
 
 export default function Navbar() {

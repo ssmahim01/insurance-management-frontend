@@ -70,7 +70,7 @@ export default function PartnerSection() {
           style={{ transitionDelay: visible ? "300ms" : "0ms" }}
         >
           <Link
-            href="/partner-hospitals"
+            href="/our-partners"
             className="group inline-flex items-center gap-2 rounded-full bg-[#00C896] px-7 py-3.5 text-sm font-semibold uppercase tracking-wide text-white transition-all duration-300 hover:bg-[#0F467C] hover:shadow-lg hover:shadow-black/10"
           >
             Our Partner Hospitals

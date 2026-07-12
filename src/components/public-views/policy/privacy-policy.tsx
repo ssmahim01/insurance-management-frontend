@@ -453,13 +453,6 @@ function useScrollSpy(ids: string[]) {
 export default function PrivacyPolicySection() {
   const ids = sections.map((s) => s.id);
   const activeId = useScrollSpy(ids);
-  const [showBackToTop, setShowBackToTop] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setShowBackToTop(window.scrollY > 600);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   return (
     <section className="bg-white dark:bg-neutral-950">
@@ -507,7 +500,7 @@ export default function PrivacyPolicySection() {
           </aside>
 
           {/* Content */}
-          <div className="min-w-0">
+          <div className="min-w-0 text-justify">
             {sections.map((s, index) => (
               <div
                 key={s.id}
@@ -587,19 +580,6 @@ export default function PrivacyPolicySection() {
           </div>
         </div>
       </div>
-
-      {/* Back to top */}
-      <button
-        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        aria-label="Back to top"
-        className={`fixed bottom-6 right-6 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-[#007A55] text-white shadow-lg transition-all duration-300 hover:bg-[#00A67E] ${
-          showBackToTop
-            ? "opacity-100 translate-y-0"
-            : "pointer-events-none translate-y-4 opacity-0"
-        }`}
-      >
-        <ArrowUp className="h-5 w-5" strokeWidth={2.5} />
-      </button>
     </section>
   );
 }

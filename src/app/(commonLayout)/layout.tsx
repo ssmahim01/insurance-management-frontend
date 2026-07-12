@@ -4,6 +4,7 @@ import ReduxProvider from '@/providers/ReduxProvider';
 import Navbar from '@/components/public-views/layout/Navbar';
 import Footer from '@/components/public-views/layout/Footer';
 import AnnouncementBar from '@/components/public-views/layout/AnnouncementBar';
+import ScrollToTopButton from '@/components/shared/ScrollToTopButton';
 
 export const metadata: Metadata = {
   title: 'Dashboard | Shurokkha',
@@ -17,6 +18,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <AnnouncementBar />
         <Navbar />
         {children}
+        <ScrollToTopButton />
         <Footer />
       </ReduxProvider>
   );
