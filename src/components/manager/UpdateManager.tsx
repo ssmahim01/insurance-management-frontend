@@ -44,7 +44,7 @@ const schema = z
     division: z.string().optional(),
     district: z.string().optional(),
     thana: z.string().optional(),
-    union: z.string().optional(),
+    street: z.string().optional(),
     // ── Password change (optional) ──
     newPassword: z
       .string()
@@ -129,7 +129,7 @@ export function UpdateManagerModal({ open, onOpenChange, item, onSuccess }: Prop
         division: item.address?.division ?? "",
         district: item.address?.district ?? "",
         thana: item.address?.thana ?? "",
-        union: item.address?.union ?? "",
+        street: item.address?.street ?? "",
         newPassword: "",
         confirmNewPassword: "",
       });
@@ -215,7 +215,7 @@ export function UpdateManagerModal({ open, onOpenChange, item, onSuccess }: Prop
           division: data.division || "",
           district: data.district || "",
           thana: data.thana || "",
-          union: data.union || "",
+          street: data.street || "",
         },
       };
       if (data.newPassword && data.newPassword.trim().length > 0) {
@@ -389,8 +389,8 @@ export function UpdateManagerModal({ open, onOpenChange, item, onSuccess }: Prop
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="umg-union" className="text-xs font-semibold tracking-widest uppercase">Union / Ward</Label>
-                <Input id="umg-union" placeholder="e.g. Ward-10" {...register("union")} />
+                <Label htmlFor="umg-street" className="text-xs font-semibold tracking-widest uppercase">Street</Label>
+                <Input id="umg-street" placeholder="e.g. Ward-10" {...register("street")} />
               </div>
             </div>
           </div>

@@ -33,8 +33,6 @@ import { IClaim, ClaimStatus } from "@/types/claim.types";
 import { ReviewClaimModal } from "./ReviewClaim";
 import { ClaimDetailsModal } from "./ClaimDetailsModal";
 import Link from "next/link";
-import { CreateClaimModal } from "./CreateClaim";
-// import { ClaimDetailsModal } from "./ClaimDetails";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 

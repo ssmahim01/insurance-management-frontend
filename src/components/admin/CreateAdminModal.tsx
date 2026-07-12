@@ -44,7 +44,7 @@ const schema = z
     division: z.string().optional(),
     district: z.string().optional(),
     thana: z.string().optional(),
-    union: z.string().optional(),
+    street: z.string().optional(),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(1, "Please confirm your password"),
   })
@@ -94,7 +94,7 @@ export function CreateAdminModal({ onSuccess }: Props) {
       division: "",
       district: "",
       thana: "",
-      union: "",
+      street: "",
       password: "",
       confirmPassword: "",
     },
@@ -171,7 +171,7 @@ export function CreateAdminModal({ onSuccess }: Props) {
           division: data.division || "",
           district: data.district || "",
           thana: data.thana || "",
-          union: data.union || "",
+          street: data.street || "",
         },
       };
       formData.append("data", JSON.stringify(payload));
@@ -359,15 +359,15 @@ export function CreateAdminModal({ onSuccess }: Props) {
 
                 <div className="space-y-1.5">
                   <Label
-                    htmlFor="ad-union"
+                    htmlFor="ad-street"
                     className="text-xs font-semibold tracking-widest uppercase"
                   >
-                    Union / Ward
+                    Street
                   </Label>
                   <Input
-                    id="ad-union"
+                    id="ad-street"
                     placeholder="e.g. Ward-10"
-                    {...register("union")}
+                    {...register("street")}
                   />
                 </div>
               </div>

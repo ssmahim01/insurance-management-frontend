@@ -252,16 +252,6 @@ export default function AgentManagement() {
   useEffect(() => { setPage(1); }, [searchTerm, leaderFilter, statusFilter]);
 
   // ── API calls ──
-  // const { data, isLoading, refetch } = useGetAllAgentsQuery({
-  //   searchTerm: searchTerm || undefined,
-  //   isActive:   statusFilter !== "all" ? statusFilter : undefined,
-  //   page,
-  //   limit,
-  //   ...(startDate && { startDate }),
-  //   ...(endDate   && { endDate }),
-  // });
-
-  // ── API calls ──
   const { data, isLoading, refetch } = useGetAllAgentsQuery({
     searchTerm: searchTerm || undefined,
     isActive: statusFilter !== "all" ? (statusFilter as IsActive) : undefined,
@@ -558,6 +548,7 @@ export default function AgentManagement() {
               <TableRow className="bg-slate-50 dark:bg-slate-800/50">
                 <SortableTh field="name" label="Agent" />
                 <SortableTh field="phone" label="Phone" />
+                <TableHead className="whitespace-nowrap">Agent ID</TableHead>
                 <TableHead className="whitespace-nowrap">Agent Leader</TableHead>
                 <TableHead className="whitespace-nowrap">Created By</TableHead>
                 <SortableTh field="createdAt" label="Joined" />
@@ -628,9 +619,14 @@ export default function AgentManagement() {
                         </div>
                       </TableCell>
 
-                      {/* Phone (standalone) */}
+                      {/* Phone */}
                       <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
                         {agent.phone ?? "—"}
+                      </TableCell>
+
+                      {/* Agent Id  */}
+                      <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
+                        {agent.customId ?? "—"}
                       </TableCell>
 
                       {/* Agent Leader */}

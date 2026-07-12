@@ -78,6 +78,17 @@ const PLAN_LABELS: Record<PlanType, string> = {
 
 const formatCurrency = (n?: number) => `৳${(n ?? 0).toLocaleString("en-BD")}`;
 
+const calculateAge = (dob: string): number => {
+  const birthDate = new Date(dob);
+  if (isNaN(birthDate.getTime())) return 0;
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+  return age;
+};
+
+
 // ── schema ──────────────────────────────────────────────────────────────────
 
 const schema = z
@@ -97,7 +108,7 @@ const schema = z
     division: z.string().optional(),
     district: z.string().optional(),
     thana: z.string().optional(),
-    union: z.string().optional(),
+    street: z.string().optional(),
     nomineeName: z.string().optional(),
     nomineeAge: z.string().optional(),
     nomineeRelationship: z.string().optional(),
@@ -138,18 +149,14 @@ const schema = z
           message: "Valid 11-digit phone required",
         });
       }
-      if (!data.nid?.trim())
-        ctx.addIssue({
-          code: "custom",
-          path: ["nid"],
-          message: "NID is required",
-        });
+
       if (!data.dateOfBirth?.trim()) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["dateOfBirth"],
-          message: "Date of birth is required",
-        });
+        ctx.addIssue({ code: "custom", path: ["dateOfBirth"], message: "Date of birth is required" });
+      } else {
+        const age = calculateAge(data.dateOfBirth);
+        if (age < 18 || age > 65) {
+          ctx.addIssue({ code: "custom", path: ["dateOfBirth"], message: "Age must be between 18 and 65 years" });
+        }
       }
       if (!data.gender)
         ctx.addIssue({
@@ -219,7 +226,7 @@ const defaultValues: FormValues = {
   division: "",
   district: "",
   thana: "",
-  union: "",
+  street: "",
   nomineeName: "",
   nomineeAge: "",
   nomineeRelationship: "",
@@ -247,8 +254,8 @@ const defaultValues: FormValues = {
 // ];
 
 interface CreateSubscriptionModalProps {
-    onSuccess?: () => void;
-    isCustomer?: boolean;
+  onSuccess?: () => void;
+  isCustomer?: boolean;
 }
 
 export function CreateSubscriptionModal({
@@ -379,13 +386,16 @@ export function CreateSubscriptionModal({
         field: "phone",
         message: "Valid 11-digit phone required",
       });
-    if (!values.nid?.trim())
-      missing.push({ field: "nid", message: "NID is required" });
-    if (!values.dateOfBirth?.trim())
-      missing.push({
-        field: "dateOfBirth",
-        message: "Date of birth is required",
-      });
+
+
+    if (!values.dateOfBirth?.trim()) {
+      missing.push({ field: "dateOfBirth", message: "Date of birth is required" });
+    } else {
+      const age = calculateAge(values.dateOfBirth);
+      if (age < 18 || age > 65) {
+        missing.push({ field: "dateOfBirth", message: "Age must be between 18 and 65 years" });
+      }
+    }
     if (!values.gender)
       missing.push({ field: "gender", message: "Gender is required" });
     if (!values.division?.trim())
@@ -480,64 +490,64 @@ export function CreateSubscriptionModal({
       }),
     };
 
-  let payload;
+    let payload;
 
-  // Customer Dashboard
-  if (isCustomer) {
-    // Backend should automatically use req.user.userId
-    payload = basePayload;
-  }
+    // Customer Dashboard
+    if (isCustomer) {
+      // Backend should automatically use req.user.userId
+      payload = basePayload;
+    }
 
-  // Staff -> Existing Customer
-  else if (values.mode === "existing") {
-    payload = {
-      ...basePayload,
-      customer: values.customerId,
-    };
-  }
+    // Staff -> Existing Customer
+    else if (values.mode === "existing") {
+      payload = {
+        ...basePayload,
+        customer: values.customerId,
+      };
+    }
 
-  // Staff -> New Customer
-  else {
-    payload = {
-      ...basePayload,
-      customerPayload: {
-        name: values.name!.trim(),
-        phone: values.phone!.trim(),
-        ...(values.email?.trim() && {
-          email: values.email.trim(),
-        }),
-
-        role: "CUSTOMER" as const,
-        nid: values.nid!.trim(),
-        dateOfBirth: values.dateOfBirth,
-        gender: values.gender,
-
-        address: {
-          division: values.division!.trim(),
-          district: values.district!.trim(),
-          thana: values.thana!.trim(),
-          ...(values.union?.trim() && {
-            union: values.union.trim(),
+    // Staff -> New Customer
+    else {
+      payload = {
+        ...basePayload,
+        customerPayload: {
+          name: values.name!.trim(),
+          phone: values.phone!.trim(),
+          ...(values.email?.trim() && {
+            email: values.email.trim(),
           }),
-        },
 
-        ...(values.nomineeName?.trim() && {
-          nominee: {
-            name: values.nomineeName.trim(),
-            ...(values.nomineeAge && {
-              age: Number(values.nomineeAge),
-            }),
-            ...(values.nomineeRelationship?.trim() && {
-              relationship: values.nomineeRelationship.trim(),
-            }),
-            ...(values.nomineePhone?.trim() && {
-              phone: values.nomineePhone.trim(),
+          role: "CUSTOMER" as const,
+          nid: values.nid!.trim(),
+          dateOfBirth: values.dateOfBirth,
+          gender: values.gender,
+
+          address: {
+            division: values.division!.trim(),
+            district: values.district!.trim(),
+            thana: values.thana!.trim(),
+            ...(values.street?.trim() && {
+              street: values.street.trim(),
             }),
           },
-        }),
-      },
-    };
-  }
+
+          ...(values.nomineeName?.trim() && {
+            nominee: {
+              name: values.nomineeName.trim(),
+              ...(values.nomineeAge && {
+                age: Number(values.nomineeAge),
+              }),
+              ...(values.nomineeRelationship?.trim() && {
+                relationship: values.nomineeRelationship.trim(),
+              }),
+              ...(values.nomineePhone?.trim() && {
+                phone: values.nomineePhone.trim(),
+              }),
+            },
+          }),
+        },
+      };
+    }
 
     try {
       const res = await createSubscription(payload as any).unwrap();
@@ -572,7 +582,7 @@ export function CreateSubscriptionModal({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-2xl w-full scrollbar-none">
         <DialogHeader className="text-center">
           <DialogTitle className="uppercase tracking-widest text-sm">
             Create Subscription
@@ -587,31 +597,29 @@ export function CreateSubscriptionModal({
             className="space-y-5 pr-2"
           >
             {/* ── Mode Toggle (New Customer first) ── */}
-            <div className={` grid ${!isCustomer ? "grid-cols-2": "grid-cols-1"} gap-2`}>
+            <div className={` grid ${!isCustomer ? "grid-cols-2" : "grid-cols-1"} gap-2`}>
               <button
                 type="button"
                 onClick={() => handleModeSwitch("new")}
-                className={`flex items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-all duration-200 ${
-                  mode === "new"
-                    ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 scale-[1.02]"
-                    : "border-slate-200 text-slate-500 dark:border-slate-700"
-                }`}
+                className={`flex items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-all duration-200 ${mode === "new"
+                  ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 scale-[1.02]"
+                  : "border-slate-200 text-slate-500 dark:border-slate-700"
+                  }`}
               >
                 <UserPlus className="w-4 h-4" /> New Customer
               </button>
-             {!isCustomer && (
-               <button
-                type="button"
-                onClick={() => handleModeSwitch("existing")}
-                className={`flex items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-all duration-200 ${
-                  mode === "existing"
+              {!isCustomer && (
+                <button
+                  type="button"
+                  onClick={() => handleModeSwitch("existing")}
+                  className={`flex items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-all duration-200 ${mode === "existing"
                     ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 scale-[1.02]"
                     : "border-slate-200 text-slate-500 dark:border-slate-700"
-                }`}
-              >
-                <UserCheck className="w-4 h-4" /> Existing Customer
-              </button>
-             )}
+                    }`}
+                >
+                  <UserCheck className="w-4 h-4" /> Existing Customer
+                </button>
+              )}
             </div>
 
             {/* ── Wizard Step Indicator (New Customer only) ── */}
@@ -619,11 +627,10 @@ export function CreateSubscriptionModal({
               <div className="flex items-center justify-center gap-3 py-1">
                 <div className="flex items-center gap-2">
                   <div
-                    className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold transition-all duration-300 ${
-                      step >= 1
-                        ? "bg-indigo-600 text-white scale-100"
-                        : "bg-slate-200 text-slate-500 dark:bg-slate-700"
-                    }`}
+                    className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold transition-all duration-300 ${step >= 1
+                      ? "bg-indigo-600 text-white scale-100"
+                      : "bg-slate-200 text-slate-500 dark:bg-slate-700"
+                      }`}
                   >
                     {step > 1 ? (
                       <Check className="w-4 h-4" />
@@ -640,19 +647,17 @@ export function CreateSubscriptionModal({
 
                 <div className="relative h-0.5 w-10 bg-slate-200 dark:bg-slate-700 overflow-hidden rounded-full">
                   <div
-                    className={`absolute inset-y-0 left-0 bg-indigo-600 transition-all duration-500 ease-out ${
-                      step === 2 ? "w-full" : "w-0"
-                    }`}
+                    className={`absolute inset-y-0 left-0 bg-indigo-600 transition-all duration-500 ease-out ${step === 2 ? "w-full" : "w-0"
+                      }`}
                   />
                 </div>
 
                 <div className="flex items-center gap-2">
                   <div
-                    className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold transition-all duration-300 ${
-                      step === 2
-                        ? "bg-indigo-600 text-white scale-100"
-                        : "bg-slate-200 text-slate-500 dark:bg-slate-700"
-                    }`}
+                    className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold transition-all duration-300 ${step === 2
+                      ? "bg-indigo-600 text-white scale-100"
+                      : "bg-slate-200 text-slate-500 dark:bg-slate-700"
+                      }`}
                   >
                     <HeartHandshake className="w-4 h-4" />
                   </div>
@@ -819,17 +824,20 @@ export function CreateSubscriptionModal({
                       </div>
                       <Input placeholder="Email" {...form.register("email")} />
                       <div className="space-y-1.5">
-                        <Input placeholder="NID *" {...form.register("nid")} />
+                        <Input placeholder="NID" {...form.register("nid")} />
                         {form.formState.errors.nid && (
                           <p className="text-xs text-red-500">
                             {form.formState.errors.nid.message}
                           </p>
                         )}
                       </div>
+
                       <div className="space-y-1.5">
                         <Input
                           type="date"
                           placeholder="Date of Birth *"
+                          max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split("T")[0]}
+                          min={new Date(new Date().setFullYear(new Date().getFullYear() - 65)).toISOString().split("T")[0]}
                           {...form.register("dateOfBirth")}
                         />
                         {form.formState.errors.dateOfBirth && (
@@ -838,6 +846,8 @@ export function CreateSubscriptionModal({
                           </p>
                         )}
                       </div>
+
+
                       <div className="space-y-1.5 col-span-2">
                         <Select
                           value={form.watch("gender") ?? ""}
@@ -878,7 +888,7 @@ export function CreateSubscriptionModal({
                             <span>
                               {divisionId
                                 ? divisions.find((d) => d.id === divisionId)
-                                    ?.name
+                                  ?.name
                                 : "Division *"}
                             </span>
                           </SelectTrigger>
@@ -907,8 +917,8 @@ export function CreateSubscriptionModal({
                             <span>
                               {districtId
                                 ? availableDistricts.find(
-                                    (d) => d.id === districtId,
-                                  )?.name
+                                  (d) => d.id === districtId,
+                                )?.name
                                 : "District *"}
                             </span>
                           </SelectTrigger>
@@ -937,8 +947,8 @@ export function CreateSubscriptionModal({
                             <span>
                               {thanaId
                                 ? availableUpazilas.find(
-                                    (u) => u.id === thanaId,
-                                  )?.name
+                                  (u) => u.id === thanaId,
+                                )?.name
                                 : "Thana *"}
                             </span>
                           </SelectTrigger>
@@ -958,9 +968,9 @@ export function CreateSubscriptionModal({
                       </div>
 
                       <Input
-                        placeholder="Union"
+                        placeholder="Street"
                         className="h-8 w-full text-base px-4"
-                        {...form.register("union")}
+                        {...form.register("street")}
                       />
                     </div>
 
@@ -1068,11 +1078,10 @@ function SubscribeForBlock({ form }: { form: any }) {
           onClick={() =>
             form.setValue("subscribeFor", "SELF", { shouldValidate: true })
           }
-          className={`flex items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-all duration-200 ${
-            subscribeFor === "SELF"
-              ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 scale-[1.02]"
-              : "border-slate-200 text-slate-500 dark:border-slate-700"
-          }`}
+          className={`flex items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-all duration-200 ${subscribeFor === "SELF"
+            ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 scale-[1.02]"
+            : "border-slate-200 text-slate-500 dark:border-slate-700"
+            }`}
         >
           <User className="w-4 h-4" /> For Myself
         </button>
@@ -1081,11 +1090,10 @@ function SubscribeForBlock({ form }: { form: any }) {
           onClick={() =>
             form.setValue("subscribeFor", "OTHER", { shouldValidate: true })
           }
-          className={`flex items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-all duration-200 ${
-            subscribeFor === "OTHER"
-              ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 scale-[1.02]"
-              : "border-slate-200 text-slate-500 dark:border-slate-700"
-          }`}
+          className={`flex items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-all duration-200 ${subscribeFor === "OTHER"
+            ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 scale-[1.02]"
+            : "border-slate-200 text-slate-500 dark:border-slate-700"
+            }`}
         >
           <Users className="w-4 h-4" /> For Someone Else
         </button>

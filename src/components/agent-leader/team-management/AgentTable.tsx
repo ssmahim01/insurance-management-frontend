@@ -110,6 +110,11 @@ export function AgentTable({
             <TableHead className="font-semibold text-foreground">
               Agent
             </TableHead>
+
+            <TableHead className="font-semibold text-foreground">
+              Agent ID
+            </TableHead>
+
             <TableHead className="font-semibold text-foreground">
               Contact
             </TableHead>
@@ -149,6 +154,11 @@ export function AgentTable({
                       {agent.name}
                     </p>
                   </div>
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="text-sm">
+                  <p className="text-foreground">{agent.customId}</p>
                 </div>
               </TableCell>
               <TableCell>

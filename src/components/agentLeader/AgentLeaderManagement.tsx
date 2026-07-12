@@ -59,13 +59,6 @@ import { AgentLeaderDetailsModal } from "./AgentLeaderDetailsModal";
 import { CreateAgentLeaderModal } from "./CreateAgentLeader";
 import Link from "next/link";
 
-// ─── TODO: create these three modals mirroring the Agent ones ────────────────
-// import { CreateAgentLeaderModal } from "./CreateAgentLeader";
-// import { AgentLeaderDetailsModal } from "./AgentLeaderDetailsModal";
-// import { UpdateAgentLeaderModal } from "./UpdateAgentLeader";
-
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 type SortField = "name" | "phone" | "isActive" | "createdAt";
 type SortDir = "asc" | "desc" | null;
 
@@ -392,16 +385,16 @@ export default function AgentLeaderManagement() {
           { label: "Dashboard", href: "/dashboard" },
           { label: "Agent Leader Management" },
         ]}
-        action={  <div className="flex items-center gap-2">
-            <Link href="/admin/dashboard/agent-leader/trash">
-              <Button variant="outline" className="hover:cursor-pointer flex items-center">
-                <Trash2 className="mr-2 h-4 w-4" />
-                <span>Trash</span>
-              </Button>
-            </Link>
+        action={<div className="flex items-center gap-2">
+          <Link href="/admin/dashboard/agent-leader/trash">
+            <Button variant="outline" className="hover:cursor-pointer flex items-center">
+              <Trash2 className="mr-2 h-4 w-4" />
+              <span>Trash</span>
+            </Button>
+          </Link>
 
-            <CreateAgentLeaderModal onSuccess={refetch} />
-          </div>}
+          <CreateAgentLeaderModal onSuccess={refetch} />
+        </div>}
       />
 
       {/* ── Stat Cards ── */}
@@ -532,6 +525,7 @@ export default function AgentLeaderManagement() {
               <TableRow className="bg-slate-50 dark:bg-slate-800/50">
                 <SortableTh field="name" label="Agent Leader" />
                 <SortableTh field="phone" label="Phone" />
+                <TableHead className="whitespace-nowrap">Agent Leader ID</TableHead>
                 <TableHead className="whitespace-nowrap">Created By</TableHead>
                 <SortableTh field="createdAt" label="Joined" />
                 <TableHead className="whitespace-nowrap">Last Login</TableHead>
@@ -610,6 +604,11 @@ export default function AgentLeaderManagement() {
                       {/* Phone */}
                       <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
                         {leader.phone ?? "—"}
+                      </TableCell>
+
+                      {/* Agent Id  */}
+                      <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
+                        {leader.customId ?? "—"}
                       </TableCell>
 
                       {/* Created By */}
