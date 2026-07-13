@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
@@ -25,6 +26,7 @@ import { DeleteSubscriptionDialog } from "./DeleteSubscriptionDialog";
 import { SubscriptionDetailsModal } from "@/components/subscription/SubscriptionDetailsModal";
 import { UpdateSubscriptionModal } from "@/components/subscription/UpdateSubscriptionModal";
 import { getNestedName } from "@/lib/utils/format-subscription";
+import { SubscriptionCards } from "@/components/customer/SubscriptionCard";
 
 const DEFAULT_FILTERS: ISubscriptionFilters = {
   searchTerm: "",
@@ -70,6 +72,8 @@ interface SubscriptionPageContentProps {
   allowUpdate?: boolean;
   /** Show the Delete action + dialog. Set this to match what the backend route actually authorizes for the viewer's role. Default true. */
   allowDelete?: boolean;
+  /** "table" (default) renders the dense data table used by admin/agent views. "cards" renders a premium, mobile-first card grid — use for customer-facing pages. */
+  layout?: "table" | "cards";
 }
 
 export function SubscriptionPageContent({
@@ -82,6 +86,7 @@ export function SubscriptionPageContent({
   showAgentColumn = true,
   allowUpdate = true,
   allowDelete = true,
+  layout = "table",
 }: SubscriptionPageContentProps) {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
@@ -160,7 +165,7 @@ export function SubscriptionPageContent({
 
   const combinedHeaderAction =
     trashHref || resolvedHeaderAction ? (
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col md:flex-row items-center gap-2">
         {trashHref && (
           <Link href={trashHref}>
             <Button
@@ -203,14 +208,25 @@ export function SubscriptionPageContent({
         />
       ) : (
         <>
-          <SubscriptionTable
-            subscriptions={subscriptions}
-            isLoading={isLoading}
-            showAgentColumn={showAgentColumn}
-            onViewDetails={setDetailsSub}
-            onUpdate={allowUpdate ? setUpdateSub : undefined}
-            onDelete={allowDelete ? setDeleteSub : undefined}
-          />
+          {layout === "cards" ? (
+            <SubscriptionCards
+              subscriptions={subscriptions}
+              isLoading={isLoading}
+              showAgentColumn={showAgentColumn}
+              onViewDetails={setDetailsSub}
+              onUpdate={allowUpdate ? setUpdateSub : undefined}
+              onDelete={allowDelete ? setDeleteSub : undefined}
+            />
+          ) : (
+            <SubscriptionTable
+              subscriptions={subscriptions}
+              isLoading={isLoading}
+              showAgentColumn={showAgentColumn}
+              onViewDetails={setDetailsSub}
+              onUpdate={allowUpdate ? setUpdateSub : undefined}
+              onDelete={allowDelete ? setDeleteSub : undefined}
+            />
+          )}
           <SubscriptionPagination
             meta={meta}
             currentPage={page}

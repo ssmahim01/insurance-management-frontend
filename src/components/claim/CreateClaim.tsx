@@ -145,15 +145,15 @@ export function CreateClaimModal({
 
   return (
     <>
-      <Button variant="outline" onClick={() => setOpen(true)} className="group hover:cursor-pointer border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white duration-300 w-full mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60">
+      <Button variant="outline" onClick={() => setOpen(true)} className="group hover:cursor-pointer  bg-green-600 hover:bg-green-700 hover:text-white text-white duration-300 w-full mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60">
         <Plus className="h-4 w-4" />
         Submit Claim
       </Button>
 
       <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); else setOpen(true); }}>
-        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto p-6">
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] scrollbar-none overflow-y-auto p-6">
           <DialogHeader className="flex flex-col items-center gap-2 pb-2">
-            <div className="w-12 h-12 rounded-xl bg-linear-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-md mb-1">
+            <div className="w-12 h-12 rounded-xl bg-green-600 hover:bg-green-700 hover:text-white text-white flex items-center justify-center shadow-md mb-1">
               <FileText className="w-6 h-6 text-white" />
             </div>
             <DialogTitle className="text-xl font-bold tracking-widest uppercase">Submit a Claim</DialogTitle>
@@ -171,7 +171,7 @@ export function CreateClaimModal({
                 value={watchedSubscription}
                 onValueChange={(v) => setValue("subscription", v as any, { shouldValidate: true })}
               >
-                <SelectTrigger className="h-9 text-sm">
+                <SelectTrigger className="h-9 text-sm w-full">
                   {isSubsLoading ? (
                     <span className="text-slate-400">Loading...</span>
                   ) : (
@@ -253,7 +253,7 @@ export function CreateClaimModal({
             </div>
 
             {/* ── Submit ── */}
-            <Button type="submit" variant="outline" disabled={isLoading} className="group hover:cursor-pointer border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white duration-300 cursor-pointer font-bold tracking-widest uppercase transition-colors w-full mt-2 disabled:opacity-60">
+            <Button type="submit" variant="outline" disabled={isLoading} className="group hover:cursor-pointer bg-green-600 hover:bg-green-700 hover:text-white text-white duration-300 cursor-pointer font-bold tracking-widest uppercase transition-colors w-full mt-2 disabled:opacity-60">
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />

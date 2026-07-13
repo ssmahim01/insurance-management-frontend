@@ -9,6 +9,47 @@ export enum ClaimStatus {
 
 // ── CORE ──────────────────────────────────────────────────────────────
 
+// export interface IClaim {
+//   _id: string;
+
+//   customer: string | {
+//     _id: string;
+//     name: string;
+//     phone: string;
+//     picture?: string;
+//   };
+
+//   subscription: string | {
+//     _id: string;
+//     subscriptionId?: string;
+//   };
+
+//   serviceTitle: string;
+
+//   description: string;
+
+//   attachments?: string[];
+
+//   status: ClaimStatus;
+
+//   adminNote?: string;
+
+//   reviewedBy?: string | {
+//     _id: string;
+//     name: string;
+//   };
+
+//   reviewedAt?: string;
+
+//   isDeleted: boolean;
+
+//   createdAt: string;
+//   updatedAt: string;
+// }
+
+
+// claim.types.ts — subscription shape updated
+
 export interface IClaim {
   _id: string;
 
@@ -19,9 +60,14 @@ export interface IClaim {
     picture?: string;
   };
 
-  subscription: string | {
+  subscription:  {
     _id: string;
     subscriptionId?: string;
+    package?: string | {
+      _id: string;
+      name?: string;
+      title?: string;
+    } | string;
   };
 
   serviceTitle: string;
@@ -46,6 +92,7 @@ export interface IClaim {
   createdAt: string;
   updatedAt: string;
 }
+
 
 // ── STATS ─────────────────────────────────────────────────────────────
 

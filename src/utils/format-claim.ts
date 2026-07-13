@@ -11,7 +11,7 @@ export const getClaimSubscriptionLabel = (
   subscription: IClaim["subscription"],
 ): string => {
   if (!subscription) return "—";
-  if (typeof subscription === "string") return subscription.slice(-8);
+  if (typeof subscription === "string") return (subscription as string).slice(-8);
   return subscription.subscriptionId ?? subscription._id.slice(-8);
 };
 

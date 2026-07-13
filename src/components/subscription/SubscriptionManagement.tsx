@@ -115,7 +115,7 @@ const STATUS_DOT: Record<SubscriptionStatus, string> = {
   [SubscriptionStatus.EXPIRED]: "bg-slate-400",
   [SubscriptionStatus.CANCELLED]: "bg-red-500",
   [SubscriptionStatus.FAILED]: "bg-red-500",
-   [SubscriptionStatus.REFUNDED]: "bg-red-500",
+  [SubscriptionStatus.REFUNDED]: "bg-red-500",
 };
 
 const PAYMENT_STYLES: Record<string, string> = {

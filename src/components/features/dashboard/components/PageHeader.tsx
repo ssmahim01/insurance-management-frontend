@@ -41,7 +41,7 @@ export function PageHeader({
       )}
 
       {/* Title and Action */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start flex-col md:flex-row justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
           {description && (
