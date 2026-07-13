@@ -29,7 +29,7 @@ export default function ScrollToTopButton({
     <button
       onClick={scrollToTop}
       aria-label="Scroll to top"
-      className={`fixed bottom-6 right-6 z-50 flex h-11 w-11 items-center justify-center rounded-full btn-bg text-white cursor-pointer ${
+      className={`fixed bottom-5 right-0 z-50 flex h-10 w-10 items-center justify-center rounded-tl-[10px] rounded-bl-[10px] btn-bg text-white cursor-pointer ${
         visible
           ? "translate-y-0 opacity-100"
           : "pointer-events-none translate-y-4 opacity-0"
