@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { AdminOverviewPage } from "@/components/admin/overview/AdminOverviewPage";
+import { DashboardPageContent } from "@/components/admin/overview/DashboardPageContent";
 
 export const metadata: Metadata = {
   title: "Overview",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <AdminOverviewPage />;
+  return <DashboardPageContent />;
 }

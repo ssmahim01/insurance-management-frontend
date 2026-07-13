@@ -1,0 +1,69 @@
+"use client";
+
+import { PieChart as PieChartIcon, CreditCard } from "lucide-react";
+import { useGetDashboardOverviewQuery } from "@/redux/features/dashboard/dashboard.api";
+import { OverviewDashboard } from "@/components/shared/overview/OverviewDashboard";
+import { KpiGrid } from "./KpiGrid";
+import { StatusBreakdownRow, AverageRevenueBanner } from "./StatusBreakdownRow";
+import { RevenueChart } from "./RevenueChart";
+import { StatusPieChart } from "./StatusPieChart";
+import { TopPackagesList } from "./TopPackagesList";
+import { PackagePerformanceTable } from "./PackagePerformanceTable";
+import { RecentSubscriptionsTable } from "./RecentSubscriptionsTable";
+import { RecentCustomersTable } from "./RecentCustomersTable";
+import { DashboardSkeleton } from "./DashboardSkeleton";
+import { DashboardErrorState } from "./DashboardErrorState";
+import { DashboardHeader } from "./DashboardHeader";
+
+export function DashboardPageContent() {
+  const { data, isLoading, isError, refetch } = useGetDashboardOverviewQuery();
+
+  if (isLoading) return <DashboardSkeleton />;
+  if (isError || !data?.data) return <DashboardErrorState onRetry={refetch} />;
+
+  const dashboard = data.data;
+
+  return (
+    <div className="space-y-6">
+      <DashboardHeader onRefresh={refetch} />
+      <KpiGrid summary={dashboard.summary} />
+      <StatusBreakdownRow summary={dashboard.summary} />
+      <AverageRevenueBanner summary={dashboard.summary} />
+
+      <RevenueChart data={dashboard.revenueChart} />
+      <div>
+        <h2 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">
+          Overview
+        </h2>
+        {/* Reused unmodified — IDashboardOverviewCard is structurally assignable to IOverviewCard */}
+        <OverviewDashboard
+          data={dashboard.overview}
+          isLoading={false}
+          isError={false}
+          onRetry={refetch}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <StatusPieChart
+          title="Subscription Status"
+          icon={PieChartIcon}
+          data={dashboard.subscriptionStatusChart}
+        />
+        <StatusPieChart
+          title="Payment Status"
+          icon={CreditCard}
+          data={dashboard.paymentStatusChart}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TopPackagesList items={dashboard.topPackages} />
+        <PackagePerformanceTable items={dashboard.topPackages} />
+      </div>
+
+      <RecentSubscriptionsTable items={dashboard.recentSubscriptions} />
+      <RecentCustomersTable items={dashboard.recentCustomers} />
+    </div>
+  );
+}

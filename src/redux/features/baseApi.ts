@@ -14,6 +14,7 @@ export const baseApi = createApi({
     "BRANCHES",
     "PACKAGES",
     "PACKAGE",
+    "DASHBOARD",
     "CLAIMS",
     "CLAIM",
     "BRANCH",

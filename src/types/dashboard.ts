@@ -7,6 +7,16 @@ export interface SidebarItem {
   children?: SidebarItem[];
 }
 
+export interface IRevenueChartPoint {
+  month: string;
+  revenue: number;
+  subscriptions: number;
+}
+
+export interface IStatusChartPoint {
+  name: string;
+  value: number;
+}
 
 export interface NavItem {
   id: string;
@@ -23,6 +33,114 @@ export interface NavGroup {
 export interface DashboardMetadata {
   title: string;
   description: string;
+}
+
+export interface IDashboardSummary {
+  totalRevenue: number;
+  totalSubscriptions: number;
+  totalCustomers: number;
+  totalPackages: number;
+  totalAgents: number;
+  totalAgentLeaders: number;
+
+  activeSubscriptions: number;
+  pendingSubscriptions: number;
+  expiredSubscriptions: number;
+  cancelledSubscriptions: number;
+
+  paidSubscriptions: number;
+  unpaidSubscriptions: number;
+
+  averageRevenue: number;
+}
+
+export interface IDashboardPackageRevenue {
+  packageId: string;
+  packageName: string;
+  subscriptions: number;
+  totalRevenue: number;
+  averageRevenue: number;
+}
+
+export interface IDashboardOverviewCard {
+  subscriptions: number;
+  revenue: number;
+  averageRevenue: number;
+
+  packageWiseRevenue: IDashboardPackageRevenue[];
+}
+
+export interface IDashboardOverview {
+  today: IDashboardOverviewCard;
+  month: IDashboardOverviewCard;
+  lifetime: IDashboardOverviewCard;
+}
+
+export interface IRevenueChart {
+  month: string;
+  revenue: number;
+  subscriptions: number;
+}
+
+export interface IStatusChart {
+  name: string;
+  value: number;
+}
+
+export interface IRecentSubscription {
+  _id: string;
+
+  customerName: string;
+  customerPhone: string;
+  customerPicture?: string;
+
+  packageName: string;
+
+  amount: number;
+
+  paymentStatus: string;
+  subscriptionStatus: string;
+
+  agentName: string;
+  agentRole: string;
+
+  createdAt: string;
+}
+
+export interface IRecentCustomer {
+  _id: string;
+
+  name: string;
+  phone: string;
+  picture?: string;
+
+  createdBy: string;
+  createdByRole: string;
+
+  createdAt: string;
+
+  totalSubscriptions: number;
+  totalSpent: number;
+}
+
+export interface IDashboardResponse {
+  data: {
+    summary: IDashboardSummary;
+
+    overview: IDashboardOverview;
+
+    topPackages: IDashboardPackageRevenue[];
+
+    revenueChart: IRevenueChart[];
+
+    subscriptionStatusChart: IStatusChart[];
+
+    paymentStatusChart: IStatusChart[];
+
+    recentSubscriptions: IRecentSubscription[];
+
+    recentCustomers: IRecentCustomer[];
+  };
 }
 
 export interface StatsCardProps {
@@ -47,7 +165,7 @@ export interface FilterState {
   search?: string;
   status?: string;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 export interface TableColumn<T> {
