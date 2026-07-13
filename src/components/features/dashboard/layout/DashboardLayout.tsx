@@ -179,15 +179,9 @@ export function DashboardHeader({ pageTitle, breadcrumbs }: DashboardHeaderProps
       <div className="flex items-center gap-1.5 rounded-full border border-gray-200/80 bg-gray-50/60 p-1 dark:border-gray-800 dark:bg-gray-900/40">
         {/* Notifications — UI only for now; no notifications API wired yet */}
         <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative h-8 w-8 rounded-full hover:bg-white dark:hover:bg-gray-800 transition-colors"
-            >
-              <Bell className="h-[18px] w-[18px]" />
+          <DropdownMenuTrigger className="relative h-8 w-8 rounded-full hover:bg-white dark:hover:bg-gray-800 transition-colors">
+              <Bell className="h-4.5 w-4.5" />
               <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-64 rounded-xl">
             <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wide text-gray-400">

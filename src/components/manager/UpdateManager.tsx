@@ -206,6 +206,7 @@ export function UpdateManagerModal({ open, onOpenChange, item, onSuccess }: Prop
   const onSubmit = async (data: FormValues) => {
     try {
       const formData = new FormData();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const payload: Record<string, any> = {
         name: data.name,
         phone: data.phone,
@@ -228,6 +229,7 @@ export function UpdateManagerModal({ open, onOpenChange, item, onSuccess }: Prop
       toast.success("Manager updated successfully!");
       handleClose();
       onSuccess?.();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error?.data?.message || "Failed to update manager");
     }
