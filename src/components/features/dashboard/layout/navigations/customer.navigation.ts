@@ -53,13 +53,7 @@ export const customerNavigation: NavGroup[] = [
         label: "Messages",
         href: "/customer/dashboard/messages",
         icon: MessageSquare,
-      },
-      {
-        id: "settings",
-        label: "Settings",
-        href: "/customer/dashboard/settings",
-        icon: Settings,
-      },
+      }
     ],
   },
 ];
