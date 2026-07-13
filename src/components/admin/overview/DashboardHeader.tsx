@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, RefreshCw, ShieldCheck } from "lucide-react";
+import { CalendarDays, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface DashboardHeaderProps {
