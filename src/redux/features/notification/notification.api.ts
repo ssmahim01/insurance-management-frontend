@@ -82,6 +82,15 @@ export const notificationApi = baseApi.injectEndpoints({
       providesTags: ["NOTIFICATIONS"],
     }),
 
+    getMyNotifications: builder.query<INotificationListResponse, GetNotificationsParams | undefined>({
+      query: (params) => ({
+        url: "/notification/my-notifications",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["NOTIFICATIONS"],
+    }),
+
     getAllTrashNotifications: builder.query<INotificationListResponse, GetNotificationsParams | undefined>({
       query: (params) => ({
         url: "/notification/all-trash-notifications",
@@ -136,6 +145,7 @@ export const notificationApi = baseApi.injectEndpoints({
 export const {
   useCreateNotificationMutation,
   useGetAllNotificationsQuery,
+  useGetMyNotificationsQuery,
   useGetAllTrashNotificationsQuery,
   useGetSingleNotificationQuery,
   useMarkAsReadMutation,
