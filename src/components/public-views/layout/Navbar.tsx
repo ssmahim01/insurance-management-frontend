@@ -17,7 +17,7 @@ const navLinks = [
   { title: 'about us', path: '/about' },
   { title: 'products', path: '/products' },
   { title: 'diagnastic', path: '/diagnastic' },
-  { title: 'farmacity', path: '/' },
+  { title: 'pharmacy', path: '/pharmacy' },
   { title: 'contact', path: '/contact' },
   { title: 'faq', path: '/faqs' },
 ]
@@ -40,7 +40,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Menu */}
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-8 lg:flex">
           {navLinks.map((link) => {
             const active = pathname === link.path;
 
@@ -61,7 +61,7 @@ export default function Navbar() {
         </nav>
 
         {/* Desktop Button */}
-        <div className="md:flex items-center gap-4 hidden">
+        <div className="lg:flex items-center gap-4 hidden">
             <ThemeToggle />
             <div className="">
                 <Button className={"cursor-pointer btn-bg text-white"}>
@@ -71,10 +71,10 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Menu */}
-        <div className='flex items-center gap-4 md:hidden'>
+        <div className='flex items-center gap-4 lg:hidden'>
           <ThemeToggle />
           <Sheet>
-          <SheetTrigger className="flex items-center gap-4 md:hidden">
+          <SheetTrigger className="flex items-center gap-4 lg:hidden">
             <Menu className="h-6 w-6" />
           </SheetTrigger>
 
@@ -87,7 +87,7 @@ export default function Navbar() {
                   <Link
                     key={link.path}
                     href={link.path}
-                    className={`rounded-md py-2 transition-colors hover:bg-muted ${
+                    className={`rounded-md px-2 py-2 uppercase transition-colors hover:bg-muted ${
                       active ? "bg-primary text-primary-foreground" : ""
                     }`}
                   >
