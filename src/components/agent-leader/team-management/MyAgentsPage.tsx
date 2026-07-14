@@ -12,13 +12,16 @@ import { toast } from "sonner";
 import { IAgentFilters } from "@/types/agent-leader";
 
 import { PageHeader } from "@/components/shared/PageHeader";
+import { ViewToggle, ViewMode } from "@/components/shared/dashboard/ViewToggle";
 import { AgentStatsCards } from "./AgentStatsCards";
 import { AgentFilters } from "./AgentFilters";
 import { AgentTable } from "./AgentTable";
+import { AgentCard, AgentCardSkeleton } from "./AgentCard";
+import { AgentDetailsModal } from "./AgentDetailsModal";
 import { AgentEmptyState } from "./AgentEmptyState";
 import { AgentPagination } from "./AgentPagination";
 import { DeleteAgentDialog } from "./DeleteAgentDialog";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { IUser } from "@/types/user.types";
 import { CreateAgentModal } from "./AgentForm";
@@ -43,6 +46,13 @@ export function MyAgentsPage() {
     agentName: "",
   });
 
+  // ── view mode: table (default) or grid ──
+  const [viewMode, setViewMode] = useState<ViewMode>("table");
+
+  // ── view-details modal ──
+  const [viewingAgent, setViewingAgent] = useState<IUser | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
   // Build query params
   const queryParams = {
     page,
@@ -61,7 +71,7 @@ export function MyAgentsPage() {
     endDate: filters.endDate,
   };
 
-  const { data, isLoading, error, refetch } = useGetMyAgentsQuery(queryParams);
+  const { data, isLoading, isFetching, error, refetch } = useGetMyAgentsQuery(queryParams);
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
   const [editingAgent, setEditingAgent] = useState<IUser | null>(null);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
@@ -100,11 +110,16 @@ export function MyAgentsPage() {
     [router],
   );
 
+  // ── opens the details modal instead of navigating to a new page ──
   const handleViewDetails = useCallback(
     (agentId: string) => {
-      router.push(`/agent-leader/dashboard/my-agents/${agentId}`);
+      const agent = data?.data?.find((a) => a._id === agentId);
+      if (agent) {
+        setViewingAgent(agent);
+        setIsDetailsOpen(true);
+      }
     },
-    [router],
+    [data?.data],
   );
 
   const handleToggleBlock = useCallback(
@@ -139,7 +154,14 @@ export function MyAgentsPage() {
   };
 
   return (
-    <div>
+    <div className="space-y-6">
+      {/* <DashboardHeroBanner
+        title="My Agents"
+        description="Manage your assigned insurance agents, monitor their activity, customer growth and performance."
+        onRefresh={refetch}
+        isRefreshing={isFetching}
+      /> */}
+
       {/* Header */}
       <PageHeader
         title="My Agents"
@@ -150,7 +172,7 @@ export function MyAgentsPage() {
         ]}
       />
 
-      <div className="mb-6 flex flex-wrap items-center justify-end gap-3">
+      <div className="flex flex-wrap items-center justify-end gap-3">
         <Button
           variant="outline"
           onClick={() => router.push("/agent-leader/dashboard/my-agents/trash")}
@@ -163,7 +185,6 @@ export function MyAgentsPage() {
       </div>
 
       {/* Stats Cards */}
-
       <AgentStatsCards stats={data?.stats} isLoading={isLoading} />
 
       <AgentFilters
@@ -171,23 +192,55 @@ export function MyAgentsPage() {
         onFiltersChange={handleFiltersChange}
         onReset={handleResetFilters}
       />
+
+      {/* ── Section header: count + view toggle ── */}
+      {data?.data && data.data.length > 0 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+            {isLoading
+              ? "Loading agents…"
+              : `${data?.meta?.total ?? data.data.length} agent${(data?.meta?.total ?? data.data.length) !== 1 ? "s" : ""}`}
+          </p>
+          <ViewToggle view={viewMode} onChange={setViewMode} />
+        </div>
+      )}
+
       {/* Table or Empty State */}
       {data?.data && data.data.length > 0 ? (
         <>
-          <AgentTable
-            agents={data.data}
-            isLoading={isLoading}
-            onViewDetails={handleViewDetails}
-            onEdit={(agentId) => {
-              const agent = data.data.find((a) => a._id === agentId);
-              if (agent) handleEdit(agent);
-            }}
-            onToggleBlock={handleToggleBlock}
-            onDelete={(agentId) => {
-              const agent = data.data.find((a) => a._id === agentId);
-              if (agent) handleDeleteClick(agentId, agent.name);
-            }}
-          />
+          {viewMode === "table" ? (
+            <AgentTable
+              agents={data.data}
+              isLoading={isLoading}
+              onViewDetails={handleViewDetails}
+              onEdit={(agentId) => {
+                const agent = data.data.find((a) => a._id === agentId);
+                if (agent) handleEdit(agent);
+              }}
+              onToggleBlock={handleToggleBlock}
+              onDelete={(agentId) => {
+                const agent = data.data.find((a) => a._id === agentId);
+                if (agent) handleDeleteClick(agentId, agent.name);
+              }}
+            />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {isLoading
+                ? Array.from({ length: 6 }).map((_, i) => <AgentCardSkeleton key={i} />)
+                : data.data.map((agent) => (
+                    <AgentCard
+                      key={agent._id}
+                      agent={agent}
+                      onViewDetails={handleViewDetails}
+                      onDelete={(agentId) => {
+                        const found = data.data.find((a) => a._id === agentId);
+                        if (found) handleDeleteClick(agentId, found.name);
+                      }}
+                    />
+                  ))}
+            </div>
+          )}
+
           {editingAgent && (
             <UpdateAgentModal
               open={isUpdateOpen}
@@ -196,6 +249,13 @@ export function MyAgentsPage() {
               onSuccess={refetch}
             />
           )}
+
+          <AgentDetailsModal
+            open={isDetailsOpen}
+            onOpenChange={setIsDetailsOpen}
+            item={viewingAgent}
+          />
+
           <AgentPagination
             meta={data.meta}
             currentPage={page}

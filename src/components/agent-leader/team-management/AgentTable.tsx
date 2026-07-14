@@ -25,6 +25,14 @@ interface AgentTableProps {
   onDelete: (agentId: string) => void;
 }
 
+// ── status → left-accent + subtle row tint, brand-consistent (emerald/blue palette) ──
+const STATUS_ROW_ACCENT: Record<IsActive, string> = {
+  [IsActive.ACTIVE]: "border-l-4 border-l-emerald-500",
+  [IsActive.INACTIVE]: "border-l-4 border-l-slate-300 dark:border-l-slate-600",
+  [IsActive.BLOCKED]: "border-l-4 border-l-red-500 bg-red-50/40 dark:bg-red-950/10",
+  [IsActive.ALL]: "border-l-4 border-l-slate-300 dark:border-l-slate-600",
+};
+
 export function AgentTable({
   agents,
   isLoading,
@@ -136,79 +144,82 @@ export function AgentTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {agents.map((agent) => (
-            <TableRow
-              key={agent._id}
-              className="border-b border-border hover:bg-muted/30 transition-colors"
-            >
-              <TableCell>
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={agent.picture} alt={agent.name} />
-                    <AvatarFallback className="text-xs font-semibold">
-                      {agent.name?.substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">
-                      {agent.name}
-                    </p>
+          {agents.map((agent) => {
+            const status = agent?.isActive ?? IsActive.ALL;
+            return (
+              <TableRow
+                key={agent._id}
+                className={`border-b border-border hover:bg-muted/30 transition-colors ${STATUS_ROW_ACCENT[status]}`}
+              >
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={agent.picture} alt={agent.name} />
+                      <AvatarFallback className="text-xs font-semibold">
+                        {agent.name?.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">
+                        {agent.name}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="text-sm">
-                  <p className="text-foreground">{agent.customId}</p>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="text-sm">
-                  <p className="text-foreground">{agent.phone}</p>
-                  {agent.email && (
-                    <p className="text-xs text-muted-foreground">
-                      {agent.email}
-                    </p>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell>
-                <span className="text-sm font-medium text-foreground">0</span>
-              </TableCell>
-              <TableCell>
-                <span className="text-sm text-muted-foreground">
-                  {agent.lastLoginAt
-                    ? format(new Date(agent.lastLoginAt), "MMM dd, yyyy")
-                    : "Never"}
-                </span>
-              </TableCell>
-              <TableCell>
-                <span className="text-sm text-muted-foreground">
-                  {format(new Date(agent.createdAt || ""), "MMM dd, yyyy")}
-                </span>
-              </TableCell>
-              <TableCell>
-                <AgentStatusBadge status={agent?.isActive ?? IsActive.ALL} />
-              </TableCell>
-              <TableCell className="text-right">
-                <AgentActions
-                  agentId={agent._id as string}
-                  agentStatus={agent?.isActive ?? IsActive.ALL}
-                  onViewDetails={() => onViewDetails(agent._id as string)}
-                  // onViewCustomers={() => onViewCustomers(agent._id as string)}
-                  // onEdit={() => {
-                  //   router.push(`/agent-leader/my-agents/${agent._id}/edit`);
-                  // }}
-                  // onToggleBlock={() =>
-                  //   onToggleBlock(
-                  //     agent._id as string,
-                  //     agent.isActive ?? IsActive.BLOCKED,
-                  //   )
-                  // }
-                  onDelete={() => onDelete(agent._id as string)}
-                />
-              </TableCell>
-            </TableRow>
-          ))}
+                </TableCell>
+                <TableCell>
+                  <div className="text-sm">
+                    <p className="text-foreground">{agent.customId}</p>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="text-sm">
+                    <p className="text-foreground">{agent.phone}</p>
+                    {agent.email && (
+                      <p className="text-xs text-muted-foreground">
+                        {agent.email}
+                      </p>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <span className="text-sm font-medium text-foreground">0</span>
+                </TableCell>
+                <TableCell>
+                  <span className="text-sm text-muted-foreground">
+                    {agent.lastLoginAt
+                      ? format(new Date(agent.lastLoginAt), "MMM dd, yyyy")
+                      : "Never"}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <span className="text-sm text-muted-foreground">
+                    {format(new Date(agent.createdAt || ""), "MMM dd, yyyy")}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <AgentStatusBadge status={status} />
+                </TableCell>
+                <TableCell className="text-right">
+                  <AgentActions
+                    agentId={agent._id as string}
+                    agentStatus={status}
+                    onViewDetails={() => onViewDetails(agent._id as string)}
+                    // onViewCustomers={() => onViewCustomers(agent._id as string)}
+                    // onEdit={() => {
+                    //   router.push(`/agent-leader/my-agents/${agent._id}/edit`);
+                    // }}
+                    // onToggleBlock={() =>
+                    //   onToggleBlock(
+                    //     agent._id as string,
+                    //     agent.isActive ?? IsActive.BLOCKED,
+                    //   )
+                    // }
+                    onDelete={() => onDelete(agent._id as string)}
+                  />
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>

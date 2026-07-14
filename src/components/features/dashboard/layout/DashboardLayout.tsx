@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   SidebarInset,
@@ -9,6 +10,7 @@ import {
 } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -34,6 +36,7 @@ import {
   Sun,
   Moon,
   Bell,
+  Clock,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -43,6 +46,7 @@ import { useUser } from "@/context/UserContext";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useGetMeQuery } from "@/redux/features/user/user.api";
+import { IUser } from "@/types/user.types";
 
 export interface NavItem {
   id: string;
@@ -127,9 +131,70 @@ interface DashboardHeaderProps {
   pageTitle?: string;
   /** Preferred: pass a full trail (e.g. from PageHeader's breadcrumbs shape) for multi-level context. */
   breadcrumbs?: BreadcrumbTrailItem[];
+  /** Signed-in user, used for the greeting + identity chip. Optional/display-only — logout stays in AppSidebar. */
+  user?: IUser;
+  isUserLoading?: boolean;
 }
 
-export function DashboardHeader({ pageTitle, breadcrumbs }: DashboardHeaderProps) {
+function getGreeting() {
+  const hour = new Date().getHours();
+
+  if (hour < 5) return "Good Night";
+  if (hour < 12) return "Good Morning";
+  if (hour < 14) return "Good Noon";
+  if (hour < 18) return "Good Afternoon";
+  if (hour < 21) return "Good Evening";
+
+  return "Good Night";
+}
+
+function formatRole(role?: string) {
+  if (!role) return "";
+  return role
+    .toLowerCase()
+    .split("_")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+/** Live clock chip — mounted client-side only to avoid SSR/CSR time mismatches. */
+function LiveClock() {
+  const [now, setNow] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setNow(new Date());
+    }, 100);
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  if (!now) return null;
+
+  const time = now.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+  const offsetMinutes = -now.getTimezoneOffset();
+  const offsetHours = offsetMinutes / 60;
+  const offsetLabel = `UTC${offsetHours >= 0 ? "+" : ""}${offsetHours}`;
+
+  return (
+    <div className="hidden md:flex items-center gap-2 rounded-full border border-emerald-100 dark:border-emerald-900/60 bg-emerald-50/80 dark:bg-emerald-950/30 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+      <Clock className="h-3.5 w-3.5" />
+      <span className="tabular-nums">{time}</span>
+      <span className="text-emerald-500/80 dark:text-emerald-500/90">{offsetLabel}</span>
+    </div>
+  );
+}
+
+export function DashboardHeader({
+  pageTitle,
+  breadcrumbs,
+  user,
+  isUserLoading,
+}: DashboardHeaderProps) {
   const { theme, setTheme } = useTheme();
 
   const trail: BreadcrumbTrailItem[] =
@@ -137,73 +202,116 @@ export function DashboardHeader({ pageTitle, breadcrumbs }: DashboardHeaderProps
       ? breadcrumbs
       : [{ label: pageTitle ?? "Dashboard" }];
 
+  const firstName = user?.name?.split(" ")[0];
+
   return (
-    <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-3 border-b border-gray-200/80 bg-background/80 backdrop-blur-sm px-4 dark:border-gray-800">
-     <SidebarTrigger className="-ml-1 h-8 w-8 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100 transition-colors" />
+    <header className="sticky top-0 z-20 border-b border-gray-200/80 bg-linear-to-r from-white via-white to-emerald-50/40 dark:from-gray-950 dark:via-gray-950 dark:to-emerald-950/10 backdrop-blur-sm dark:border-gray-800">
+      {/* brand accent line */}
+      {/* <div className="h-0.5 w-full bg-linear-to-r from-emerald-500 via-emerald-500 to-blue-600" /> */}
 
-      <Separator
-        orientation="vertical"
-        className="h-16 bg-gray-200 dark:bg-gray-700"
-      />
+      <div className="flex h-16 shrink-0 items-center gap-3 px-4">
+        <SidebarTrigger className="-ml-1 h-8 w-8 rounded-lg text-gray-500 hover:bg-emerald-50 hover:text-emerald-700 dark:text-gray-400 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400 transition-colors duration-200" />
 
-      <Breadcrumb>
-        <BreadcrumbList>
-          {trail.map((crumb, idx) => {
-            const isLast = idx === trail.length - 1;
-            return (
-              <React.Fragment key={`${crumb.label}-${idx}`}>
-                <BreadcrumbItem>
-                  {isLast || !crumb.href ? (
-                    <BreadcrumbPage className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {crumb.label}
-                    </BreadcrumbPage>
-                  ) : (
-                    <BreadcrumbLink
-                      href={crumb.href}
-                      className="text-sm text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
-                    >
-                      {crumb.label}
-                    </BreadcrumbLink>
-                  )}
-                </BreadcrumbItem>
-                {!isLast && <BreadcrumbSeparator />}
-              </React.Fragment>
-            );
-          })}
-        </BreadcrumbList>
-      </Breadcrumb>
+        <Separator
+          orientation="vertical"
+          className="h-16 bg-gray-200 dark:bg-gray-700"
+        />
 
-      <div className="ml-auto flex items-center gap-2" id="header-actions" />
+        {/* ── Greeting + breadcrumb ── */}
+        <div className="flex flex-col justify-center min-w-0">
+          {firstName && (
+            <p className="hidden sm:block text-[11px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400 leading-tight">
+              {getGreeting()}, {firstName}
+            </p>
+          )}
+          <Breadcrumb>
+            <BreadcrumbList>
+              {trail.map((crumb, idx) => {
+                const isLast = idx === trail.length - 1;
+                return (
+                  <React.Fragment key={`${crumb.label}-${idx}`}>
+                    <BreadcrumbItem>
+                      {isLast || !crumb.href ? (
+                        <BreadcrumbPage className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                          {crumb.label}
+                        </BreadcrumbPage>
+                      ) : (
+                        <BreadcrumbLink
+                          href={crumb.href}
+                          className="text-sm text-gray-400 hover:text-emerald-600 dark:text-gray-500 dark:hover:text-emerald-400 transition-colors"
+                        >
+                          {crumb.label}
+                        </BreadcrumbLink>
+                      )}
+                    </BreadcrumbItem>
+                    {!isLast && <BreadcrumbSeparator />}
+                  </React.Fragment>
+                );
+              })}
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
 
-      {/* Right Section */}
-      <div className="flex items-center gap-1.5 rounded-full border border-gray-200/80 bg-gray-50/60 p-1 dark:border-gray-800 dark:bg-gray-900/40">
-        {/* Notifications — UI only for now; no notifications API wired yet */}
-        <DropdownMenu>
-          <DropdownMenuTrigger className="relative h-8 w-8 rounded-full hover:bg-white dark:hover:bg-gray-800 transition-colors">
+        {/* ── Page-level action portal (unchanged) ── */}
+        <div className="ml-auto flex items-center gap-2" id="header-actions" />
+
+        {/* ── Live clock ── */}
+        <LiveClock />
+
+        {/* ── Right cluster ── */}
+        <div className="flex items-center gap-1.5 rounded-full border border-gray-200/80 bg-gray-50/60 p-2 dark:border-gray-800 dark:bg-gray-900/40 shadow-sm">
+          {/* Notifications — UI only for now; no notifications API wired yet */}
+          <DropdownMenu>
+            <DropdownMenuTrigger className="relative h-6 w-6 rounded-full hover:bg-white dark:hover:bg-gray-800 transition-colors duration-200">
               <Bell className="h-4.5 w-4.5" />
-              <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64 rounded-xl">
-            <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-              Notifications
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <div className="px-3 py-6 text-center text-sm text-gray-400">
-              You&apos;re all caught up.
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-gray-900" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64 rounded-xl">
+              <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                Notifications
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <div className="px-3 py-6 text-center text-sm text-gray-400">
+                You&apos;re all caught up.
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-        {/* Theme Toggle */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="h-8 w-8 rounded-full hover:bg-white dark:hover:bg-gray-800 transition-colors"
-        >
-          <Sun className="h-4.5 w-4.5 rotate-0 scale-100 transition-all duration-300 dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-4.5 w-4.5 rotate-90 scale-0 transition-all duration-300 dark:rotate-0 dark:scale-100" />
-        </Button>
+          {/* Theme Toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="relative h-6 w-6 rounded-full hover:bg-white dark:hover:bg-gray-800 transition-colors duration-200"
+          >
+            <Sun className="h-4.5 w-4.5 rotate-0 scale-100 transition-all duration-300 dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-4.5 w-4.5 rotate-90 scale-0 transition-all duration-300 dark:rotate-0 dark:scale-100" />
+          </Button>
+        </div>
+
+        {/* ── User identity chip (display-only; logout lives in AppSidebar) ── */}
+        {isUserLoading ? (
+          <div className="hidden sm:flex items-center gap-2 pl-1">
+            <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-800 animate-pulse" />
+          </div>
+        ) : user ? (
+          <div className="hidden sm:flex items-center gap-2 pl-1">
+            <div className="flex flex-col items-end leading-tight">
+              <span className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate max-w-32">
+                {user.name}
+              </span>
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium truncate max-w-32">
+                {formatRole((user as any).role)}
+              </span>
+            </div>
+            <Avatar className="h-9 w-9 ring-2 ring-emerald-100 dark:ring-emerald-900/60">
+              <AvatarImage src={user.picture} alt={user.name} />
+              <AvatarFallback className="bg-linear-to-br from-emerald-500 to-blue-600 text-white text-xs font-bold">
+                {user.name?.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+        ) : null}
       </div>
     </header>
   );
@@ -239,7 +347,12 @@ export function DashboardLayoutWrapper({
       <TooltipProvider>
         <AppSidebar user={user?.data} onLogout={handleLogout} isLoading={isLoading} />
         <SidebarInset className="flex flex-col min-h-screen">
-          <DashboardHeader pageTitle={pageTitle} breadcrumbs={breadcrumbs} />
+          <DashboardHeader
+            pageTitle={pageTitle}
+            breadcrumbs={breadcrumbs}
+            user={user?.data}
+            isUserLoading={isLoading}
+          />
 
           <main className="flex-1 overflow-auto bg-gray-50/50 dark:bg-gray-950/50">
             <div className="p-4 md:p-6 lg:p-8">{children}</div>

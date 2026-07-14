@@ -10,14 +10,20 @@ interface DashboardHeaderProps {
 export function DashboardHeader({
   onRefresh,
 }: DashboardHeaderProps) {
+  
+ const getGreeting = () => {
   const hour = new Date().getHours();
 
-  const greeting =
-    hour < 12
-      ? "Good Morning"
-      : hour < 18
-        ? "Good Afternoon"
-        : "Good Evening";
+  if (hour < 5) return "Good Night";
+  if (hour < 12) return "Good Morning";
+  if (hour < 14) return "Good Noon";
+  if (hour < 18) return "Good Afternoon";
+  if (hour < 21) return "Good Evening";
+
+  return "Good Night";
+};
+
+const greeting = getGreeting();
 
   const today = new Intl.DateTimeFormat("en-US", {
     weekday: "long",

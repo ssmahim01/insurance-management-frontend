@@ -48,18 +48,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  useGetMyLeaderCustomersQuery,
   useDeleteUserMutation,
   useGetMyLeaderBothCustomersQuery,
 } from "@/redux/features/user/user.api";
 
 import { PageHeader } from "../../shared/PageHeader";
+import { ViewToggle, ViewMode } from "@/components/shared/dashboard/ViewToggle";
 import { Pagination } from "../../pagination/Pagination";
 import { CustomerDetailsModal } from "../../customer/CustomerDetailsModal";
 import { UpdateCustomerModal } from "../../customer/UpdateCustomer";
+import { CustomerCard, CustomerCardSkeleton } from "../../customer/CustomerCard";
 import { IsActive, IUser } from "@/types/user.types";
 import { CustomerSubscriptionsModal } from "../../customer/CustomerSubscriptionDetailsModal";
-import { CreateSubscriptionModal } from "../../subscription/CreateSubscriptionModal";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -136,10 +136,10 @@ function CustomerRowSkeleton() {
 
 function StatCardSkeleton() {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800 p-5 shadow-sm">
       <div className="flex items-center justify-between mb-3">
         <Skeleton className="h-4 w-28" />
-        <Skeleton className="h-9 w-9 rounded-lg" />
+        <Skeleton className="h-10 w-10 rounded-xl" />
       </div>
       <Skeleton className="h-7 w-16 mb-1" />
       <Skeleton className="h-3 w-24" />
@@ -151,27 +151,31 @@ type StatColor = "blue" | "emerald" | "slate" | "red";
 
 const STAT_COLOR_MAP: Record<
   StatColor,
-  { bg: string; icon: string; text: string }
+  { iconBg: string; icon: string; text: string; ring: string }
 > = {
   blue: {
-    bg: "bg-blue-50 dark:bg-blue-900/20",
-    icon: "text-blue-600 dark:text-blue-400",
+    iconBg: "bg-linear-to-br from-blue-500 to-blue-600",
+    icon: "text-white",
     text: "text-blue-600 dark:text-blue-400",
+    ring: "hover:ring-blue-200 dark:hover:ring-blue-900",
   },
   emerald: {
-    bg: "bg-emerald-50 dark:bg-emerald-900/20",
-    icon: "text-emerald-600 dark:text-emerald-400",
+    iconBg: "bg-linear-to-br from-emerald-500 to-emerald-600",
+    icon: "text-white",
     text: "text-emerald-600 dark:text-emerald-400",
+    ring: "hover:ring-emerald-200 dark:hover:ring-emerald-900",
   },
   slate: {
-    bg: "bg-slate-100 dark:bg-slate-800",
-    icon: "text-slate-500 dark:text-slate-400",
+    iconBg: "bg-linear-to-br from-slate-400 to-slate-500",
+    icon: "text-white",
     text: "text-slate-500 dark:text-slate-400",
+    ring: "hover:ring-slate-200 dark:hover:ring-slate-800",
   },
   red: {
-    bg: "bg-red-50 dark:bg-red-900/20",
-    icon: "text-red-500 dark:text-red-400",
+    iconBg: "bg-linear-to-br from-red-500 to-rose-600",
+    icon: "text-white",
     text: "text-red-500 dark:text-red-400",
+    ring: "hover:ring-red-200 dark:hover:ring-red-900",
   },
 };
 
@@ -190,17 +194,21 @@ function StatCard({
 }) {
   const c = STAT_COLOR_MAP[color];
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
+    <div
+      className={`group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800 p-5 shadow-sm ring-1 ring-transparent transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md ${c.ring}`}
+    >
       <div className="flex items-center justify-between mb-3">
         <p className="text-sm text-slate-500 dark:text-slate-400">{label}</p>
-        <div className={`p-2 rounded-lg ${c.bg}`}>
+        <div
+          className={`p-2.5 rounded-xl ${c.iconBg} shadow-sm transition-transform duration-300 group-hover:scale-110`}
+        >
           <Icon className={`w-5 h-5 ${c.icon}`} />
         </div>
       </div>
-      <p className="text-2xl font-semibold text-slate-900 dark:text-white">
+      <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
         {value}
       </p>
-      {sub && <p className={`text-xs mt-1 ${c.text}`}>{sub}</p>}
+      {sub && <p className={`text-xs mt-1 font-medium ${c.text}`}>{sub}</p>}
     </div>
   );
 }
@@ -252,9 +260,7 @@ function SortableTh({
 export default function AgentLeaderCustomerManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<IsActive | "all">("all");
-  const [genderFilter, setGenderFilter] = useState<
-    "MALE" | "FEMALE" | "OTHER" | "all"
-  >("all");
+  const [genderFilter, setGenderFilter] = useState<"MALE" | "FEMALE" | "OTHER" | "all">("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
@@ -263,6 +269,9 @@ export default function AgentLeaderCustomerManagement() {
   // ── sort ──
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>(null);
+
+  // ── view mode: table (default) or grid ──
+  const [viewMode, setViewMode] = useState<ViewMode>("table");
 
   // ── modals ──
   const [editingCustomer, setEditingCustomer] = useState<IUser | null>(null);
@@ -391,24 +400,6 @@ export default function AgentLeaderCustomerManagement() {
     }
   };
 
-  //   const SortableTh = ({
-  //     field,
-  //     label,
-  //   }: {
-  //     field: SortField;
-  //     label: string;
-  //   }) => (
-  //     <TableHead
-  //       className="cursor-pointer select-none whitespace-nowrap"
-  //       onClick={() => handleSort(field)}
-  //     >
-  //       <span className="inline-flex items-center hover:text-slate-900 dark:hover:text-white transition-colors">
-  //         {label}
-  //         <SortIcon field={field} sortField={sortField} sortDir={sortDir} />
-  //       </span>
-  //     </TableHead>
-  //   );
-
   const getAgentName = (c: IUser): string => {
     const a = c.createdBy;
     if (!a) return "—";
@@ -418,6 +409,13 @@ export default function AgentLeaderCustomerManagement() {
 
   return (
     <div className="space-y-6">
+      {/* <DashboardHeroBanner
+        title="My Agent Customers"
+        description="Track and manage customers created by the agents on your team."
+        onRefresh={refetch}
+        isRefreshing={isFetching}
+      /> */}
+
       <PageHeader
         title="My Agent Customers"
         description="Manage customers created by your agents"
@@ -430,7 +428,7 @@ export default function AgentLeaderCustomerManagement() {
             <Link href="/agent-leader/dashboard/customers/trash">
               <Button
                 variant="outline"
-                className="hover:cursor-pointer flex items-center"
+                className="hover:cursor-pointer flex items-center transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5 active:scale-95"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 <span>Trash</span>
@@ -444,7 +442,7 @@ export default function AgentLeaderCustomerManagement() {
 
       {/* ── Stat Cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="sm:col-span-2 lg:col-span-4 flex flex-wrap items-center gap-3">
+        <div className="sm:col-span-2 lg:col-span-4 flex flex-wrap items-center gap-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 px-4 py-3 shadow-sm">
           <p className="text-sm text-slate-500 dark:text-slate-400 shrink-0">
             Filter stats by date:
           </p>
@@ -466,7 +464,7 @@ export default function AgentLeaderCustomerManagement() {
               <Button
                 variant="outline"
                 size="icon"
-                className="h-9 w-9 shrink-0"
+                className="h-9 w-9 shrink-0 transition-all duration-200 hover:shadow-sm active:scale-95"
                 onClick={clearDateFilter}
                 title="Clear date filter"
               >
@@ -518,7 +516,7 @@ export default function AgentLeaderCustomerManagement() {
       </div>
 
       {/* ── Search & Filters ── */}
-      <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
+      <div className="flex flex-col sm:flex-row gap-3 flex-wrap rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-3 shadow-sm">
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
@@ -575,255 +573,327 @@ export default function AgentLeaderCustomerManagement() {
             size="icon"
             onClick={clearFilters}
             title="Clear filters"
-            className="shrink-0"
+            className="shrink-0 transition-all duration-200 hover:shadow-sm active:scale-95"
           >
             <X className="w-4 h-4" />
           </Button>
         )}
       </div>
 
-      {/* ── Table ── */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-slate-50 dark:bg-slate-800/50">
-                <SortableTh
-                  field="name"
-                  label="Customer"
-                  sortField={sortField}
-                  sortDir={sortDir}
-                  handleSort={handleSort}
-                />
-
-                <SortableTh
-                  field="phone"
-                  label="Phone"
-                  sortField={sortField}
-                  sortDir={sortDir}
-                  handleSort={handleSort}
-                />
-
-                <SortableTh
-                  field="gender"
-                  label="Gender"
-                  sortField={sortField}
-                  sortDir={sortDir}
-                  handleSort={handleSort}
-                />
-
-                <TableHead className="whitespace-nowrap">NID</TableHead>
-
-                <TableHead className="whitespace-nowrap">Created By</TableHead>
-
-                <SortableTh
-                  field="createdAt"
-                  label="Joined"
-                  sortField={sortField}
-                  sortDir={sortDir}
-                  handleSort={handleSort}
-                />
-
-                <TableHead className="whitespace-nowrap">Last Login</TableHead>
-
-                <SortableTh
-                  field="isActive"
-                  label="Status"
-                  sortField={sortField}
-                  sortDir={sortDir}
-                  handleSort={handleSort}
-                />
-
-                <TableHead className="text-right whitespace-nowrap">
-                  Actions
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {isLoading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <CustomerRowSkeleton key={i} />
-                ))
-              ) : sortedCustomers.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={9}>
-                    <div className="flex flex-col items-center justify-center py-16 text-slate-400">
-                      <Users className="w-12 h-12 mb-4 opacity-30" />
-                      {searchTerm || hasActiveFilters ? (
-                        <>
-                          <p className="text-base font-medium">
-                            No results found
-                          </p>
-                          <p className="text-sm mt-1">
-                            Try adjusting your search or filters
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <p className="text-base font-medium">
-                            No customers found under your agents.
-                          </p>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                sortedCustomers.map((customer) => {
-                  const status = customer.isActive ?? IsActive.INACTIVE;
-                  return (
-                    <TableRow
-                      key={String(customer._id)}
-                      className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
-                    >
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          {customer.picture ? (
-                            <Image
-                              src={customer.picture}
-                              width={200}
-                              height={200}
-                              priority
-                              quality={90}
-                              alt={customer.name}
-                              className="w-9 h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 shrink-0"
-                            />
-                          ) : (
-                            <div className="w-9 h-9 rounded-full bg-linear-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                              {customer.name?.charAt(0)?.toUpperCase() ?? "C"}
-                            </div>
-                          )}
-                          <div className="min-w-0">
-                            <p className="font-medium text-slate-900 dark:text-white truncate max-w-36">
-                              {customer.name ?? "—"}
-                            </p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
-                        {customer.phone ?? "—"}
-                      </TableCell>
-                      <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
-                        {customer.gender ? (
-                          GENDER_LABELS[customer.gender]
-                        ) : (
-                          <span className="text-slate-300 dark:text-slate-600 italic text-xs">
-                            —
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
-                        {customer.nid ?? (
-                          <span className="text-slate-300 dark:text-slate-600 italic text-xs">
-                            —
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <span className="inline-flex items-center gap-1.5 text-sm text-slate-700 dark:text-slate-300">
-                          <UserCog className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          {getAgentName(customer)}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
-                        {formatDate(customer.createdAt)}
-                      </TableCell>
-                      <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
-                        {customer.lastLoginAt ? (
-                          formatDate(customer.lastLoginAt)
-                        ) : (
-                          <span className="text-slate-300 dark:text-slate-600 italic text-xs">
-                            Never
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={
-                            STATUS_STYLES[status as IsActive] ??
-                            STATUS_STYLES[IsActive.INACTIVE]
-                          }
-                        >
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full mr-1.5 inline-block ${STATUS_DOT[status as IsActive] ?? STATUS_DOT[IsActive.INACTIVE]}`}
-                          />
-                          {STATUS_LABELS[status as IsActive] ?? "Unknown"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-1.5 justify-end">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8"
-                            title="View details"
-                            onClick={() => openDetailsDialog(customer)}
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8"
-                            title="View subscriptions"
-                            onClick={() => openSubscriptionsDialog(customer)}
-                          >
-                            <PackageCheck className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8"
-                            title="Edit customer"
-                            onClick={() => openEditDialog(customer)}
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            className="h-8 w-8"
-                            title="Delete customer"
-                            onClick={() => openDeleteDialog(customer)}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
-
-          <Pagination
-            page={page}
-            totalPage={totalPage}
-            onPageChange={setPage}
-          />
-        </div>
-
-        {!isLoading && sortedCustomers.length > 0 && (
-          <div className="px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Showing{" "}
-              <span className="font-semibold text-slate-700 dark:text-slate-300">
-                {sortedCustomers.length}
-              </span>{" "}
-              customer{sortedCustomers.length !== 1 ? "s" : ""}
-              {hasActiveFilters && " (filtered)"}
-            </p>
-            {totalPage > 1 && (
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Page {page} of {totalPage}
-              </p>
-            )}
-          </div>
-        )}
+      {/* ── Section header: count + view toggle ── */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+          {isLoading ? "Loading customers…" : `${meta?.total ?? sortedCustomers.length} customer${(meta?.total ?? sortedCustomers.length) !== 1 ? "s" : ""}`}
+        </p>
+        <ViewToggle view={viewMode} onChange={setViewMode} />
       </div>
+
+      {/* ── Table View ── */}
+      {viewMode === "table" && (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-slate-50 dark:bg-slate-800/50">
+                  <SortableTh
+                    field="name"
+                    label="Customer"
+                    sortField={sortField}
+                    sortDir={sortDir}
+                    handleSort={handleSort}
+                  />
+
+                  <SortableTh
+                    field="phone"
+                    label="Phone"
+                    sortField={sortField}
+                    sortDir={sortDir}
+                    handleSort={handleSort}
+                  />
+
+                  <SortableTh
+                    field="gender"
+                    label="Gender"
+                    sortField={sortField}
+                    sortDir={sortDir}
+                    handleSort={handleSort}
+                  />
+
+                  <TableHead className="whitespace-nowrap">NID</TableHead>
+
+                  <TableHead className="whitespace-nowrap">Created By</TableHead>
+
+                  <SortableTh
+                    field="createdAt"
+                    label="Joined"
+                    sortField={sortField}
+                    sortDir={sortDir}
+                    handleSort={handleSort}
+                  />
+
+                  <TableHead className="whitespace-nowrap">Last Login</TableHead>
+
+                  <SortableTh
+                    field="isActive"
+                    label="Status"
+                    sortField={sortField}
+                    sortDir={sortDir}
+                    handleSort={handleSort}
+                  />
+
+                  <TableHead className="text-right whitespace-nowrap">
+                    Actions
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
+                {isLoading ? (
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <CustomerRowSkeleton key={i} />
+                  ))
+                ) : sortedCustomers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={9}>
+                      <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+                        <Users className="w-12 h-12 mb-4 opacity-30" />
+                        {searchTerm || hasActiveFilters ? (
+                          <>
+                            <p className="text-base font-medium">
+                              No results found
+                            </p>
+                            <p className="text-sm mt-1">
+                              Try adjusting your search or filters
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-base font-medium">
+                              No customers found under your agents.
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  sortedCustomers.map((customer) => {
+                    const status = customer.isActive ?? IsActive.INACTIVE;
+                    return (
+                      <TableRow
+                        key={String(customer._id)}
+                        className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+                      >
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            {customer.picture ? (
+                              <Image
+                                src={customer.picture}
+                                width={200}
+                                height={200}
+                                priority
+                                quality={90}
+                                alt={customer.name}
+                                className="w-9 h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 shrink-0"
+                              />
+                            ) : (
+                              <div className="w-9 h-9 rounded-full bg-linear-to-br from-emerald-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                                {customer.name?.charAt(0)?.toUpperCase() ?? "C"}
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="font-medium text-slate-900 dark:text-white truncate max-w-36">
+                                {customer.name ?? "—"}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
+                          {customer.phone ?? "—"}
+                        </TableCell>
+                        <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
+                          {customer.gender ? (
+                            GENDER_LABELS[customer.gender]
+                          ) : (
+                            <span className="text-slate-300 dark:text-slate-600 italic text-xs">
+                              —
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
+                          {customer.nid ?? (
+                            <span className="text-slate-300 dark:text-slate-600 italic text-xs">
+                              —
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <span className="inline-flex items-center gap-1.5 text-sm text-slate-700 dark:text-slate-300">
+                            <UserCog className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            {getAgentName(customer)}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
+                          {formatDate(customer.createdAt)}
+                        </TableCell>
+                        <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
+                          {customer.lastLoginAt ? (
+                            formatDate(customer.lastLoginAt)
+                          ) : (
+                            <span className="text-slate-300 dark:text-slate-600 italic text-xs">
+                              Never
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={
+                              STATUS_STYLES[status as IsActive] ??
+                              STATUS_STYLES[IsActive.INACTIVE]
+                            }
+                          >
+                            <span
+                              className={`h-1.5 w-1.5 rounded-full mr-1.5 inline-block ${STATUS_DOT[status as IsActive] ?? STATUS_DOT[IsActive.INACTIVE]}`}
+                            />
+                            {STATUS_LABELS[status as IsActive] ?? "Unknown"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1.5 justify-end">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8 transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5 active:scale-95"
+                              title="View details"
+                              onClick={() => openDetailsDialog(customer)}
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8 transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5 active:scale-95"
+                              title="View subscriptions"
+                              onClick={() => openSubscriptionsDialog(customer)}
+                            >
+                              <PackageCheck className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8 transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5 active:scale-95"
+                              title="Edit customer"
+                              onClick={() => openEditDialog(customer)}
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="h-8 w-8 transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5 active:scale-95"
+                              title="Delete customer"
+                              onClick={() => openDeleteDialog(customer)}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+
+            <Pagination
+              page={page}
+              totalPage={totalPage}
+              onPageChange={setPage}
+            />
+          </div>
+
+          {!isLoading && sortedCustomers.length > 0 && (
+            <div className="px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Showing{" "}
+                <span className="font-semibold text-slate-700 dark:text-slate-300">
+                  {sortedCustomers.length}
+                </span>{" "}
+                customer{sortedCustomers.length !== 1 ? "s" : ""}
+                {hasActiveFilters && " (filtered)"}
+              </p>
+              {totalPage > 1 && (
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Page {page} of {totalPage}
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Grid View ── */}
+      {viewMode === "grid" && (
+        <div className="space-y-4">
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <CustomerCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : sortedCustomers.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-slate-400 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800 shadow-sm">
+              <Users className="w-12 h-12 mb-4 opacity-30" />
+              {searchTerm || hasActiveFilters ? (
+                <>
+                  <p className="text-base font-medium">No results found</p>
+                  <p className="text-sm mt-1">Try adjusting your search or filters</p>
+                </>
+              ) : (
+                <p className="text-base font-medium">
+                  No customers found under your agents.
+                </p>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {sortedCustomers.map((customer) => (
+                  <CustomerCard
+                    key={String(customer._id)}
+                    customer={customer}
+                    showAgentColumn
+                    getAgentName={getAgentName}
+                    onViewDetails={openDetailsDialog}
+                    onViewSubscriptions={openSubscriptionsDialog}
+                    onEdit={openEditDialog}
+                    onDelete={openDeleteDialog}
+                  />
+                ))}
+              </div>
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800 shadow-sm px-4 py-3">
+                <Pagination page={page} totalPage={totalPage} onPageChange={setPage} />
+                <div className="flex items-center justify-between pt-2">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Showing{" "}
+                    <span className="font-semibold text-slate-700 dark:text-slate-300">
+                      {sortedCustomers.length}
+                    </span>{" "}
+                    customer{sortedCustomers.length !== 1 ? "s" : ""}
+                    {hasActiveFilters && " (filtered)"}
+                  </p>
+                  {totalPage > 1 && (
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Page {page} of {totalPage}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       {/* ── Modals ── */}
       {editingCustomer && (

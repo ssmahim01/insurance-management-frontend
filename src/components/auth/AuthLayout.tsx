@@ -27,7 +27,7 @@ export function AuthLayout({
           {/* Content */}
           <div className="relative z-10 space-y-4">
             <div className="space-y-2">
-              <Link href="/login">
+              <Link href="/">
                 <Image
                   src={"/assets/shurokkha-logo-1.png"}
                   alt="Shurokkha Logo"

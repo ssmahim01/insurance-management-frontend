@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { AgentLeaderOverviewPage } from "@/components/agent-leader/overview/AgentLeaderOverviewPage";
+import { DashboardPageContent } from "@/components/admin/overview/DashboardPageContent";
 
 export const metadata: Metadata = {
   title: "Overview",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <AgentLeaderOverviewPage />;
+  return <DashboardPageContent />;
 }

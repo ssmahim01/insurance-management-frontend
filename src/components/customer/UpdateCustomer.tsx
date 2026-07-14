@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 "use client";
 
@@ -711,6 +712,7 @@ export function UpdateCustomerModal({
           <Button
             type="submit"
             disabled={isLoading}
+            variant={"outline"}
             className="group hover:cursor-pointer border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white duration-300 w-full mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60"
           >
             {isLoading ? (
