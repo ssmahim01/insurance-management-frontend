@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { HeartPulse, Shield, Sparkles, Stethoscope, Plus } from "lucide-react";
+import { HeartPulse, Shield, Sparkles, Stethoscope } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Accordion,
@@ -100,7 +100,7 @@ export default function FaqComponent() {
         <div className="relative flex flex-wrap justify-center gap-1 border-b border-slate-200 dark:border-slate-800">
           {/* sliding indicator */}
           <span
-            className="absolute bottom-0 h-[2px] bg-[#F4801F] transition-all duration-300 ease-out"
+            className="absolute bottom-0 h-0.5 bg-[#F4801F] transition-all duration-300 ease-out"
             style={{ left: indicator.left, width: indicator.width }}
           />
           {PRODUCTS.map((product) => {

@@ -124,6 +124,7 @@ export function UpdateAgentLeaderModal({ open, onOpenChange, item, onSuccess }: 
     formState: { errors },
     reset,
   } = useForm<FormValues>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(schema) as any,
   });
 
@@ -220,6 +221,7 @@ export function UpdateAgentLeaderModal({ open, onOpenChange, item, onSuccess }: 
   const onSubmit = async (data: FormValues) => {
     try {
       const formData = new FormData();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const payload: Record<string, any> = {
         name: data.name,
         phone: data.phone,
@@ -244,6 +246,7 @@ export function UpdateAgentLeaderModal({ open, onOpenChange, item, onSuccess }: 
       toast.success("Agent Leader updated successfully!");
       handleClose();
       onSuccess?.();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error?.data?.message || "Failed to update agent leader");
     }
