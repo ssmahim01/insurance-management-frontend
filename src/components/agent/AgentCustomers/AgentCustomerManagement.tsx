@@ -534,7 +534,6 @@ export default function AgentCustomerManagement() {
                   </TableHead>
                 </TableRow>
               </TableHeader>
-
               <TableBody>
                 {isLoading ? (
                   Array.from({ length: 6 }).map((_, i) => (
