@@ -102,7 +102,7 @@ function ClaimCard({ claim, onViewDetails, onEdit }: ClaimCardProps) {
       {/* Header: package title + status */}
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-11 h-11 rounded-full bg-green-600 flex items-center justify-center shrink-0 shadow-sm ring-1 ring-black/5">
+          <div className="w-11 h-11 rounded-full bg-linear-to-br from-green-400 to-green-600 flex items-center justify-center shrink-0 shadow-sm ring-1 ring-black/5">
             <FileText className="w-5 h-5 text-white" />
           </div>
           <div className="min-w-0">
