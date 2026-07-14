@@ -166,10 +166,11 @@ export default function ProfilePage() {
         open={openModal}
         onOpenChange={setOpenModal}
       />
-      <ChangePasswordModal
-        open={openPasswordModal}
-        onOpenChange={setOpenPasswordModal}
-      />
+      
+      <ChangePasswordModal 
+      open={openPasswordModal} 
+      onOpenChange={setOpenPasswordModal} 
+       />
     </div>
   );
 }

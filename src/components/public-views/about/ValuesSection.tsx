@@ -93,7 +93,7 @@ export default function ValuesSection() {
                 {value.title}
               </h3>
 
-              <p className="text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+              <p className="text-sm leading-relaxed text-justify text-gray-500 dark:text-gray-400">
                 {value.description}
               </p>
             </div>

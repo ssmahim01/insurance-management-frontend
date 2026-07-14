@@ -103,11 +103,11 @@ export default function PurposeSection() {
                 />
               </div>
 
-              <h3 className="mb-2 text-base font-bold text-[#0B1F3A] dark:text-white">
+              <h3 className="mb-2 text-base  font-bold text-[#0B1F3A] dark:text-white">
                 {item.title}
               </h3>
 
-              <p className="text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+              <p className="text-sm leading-relaxed text-justify text-gray-500 dark:text-gray-400">
                 {item.description}
               </p>
             </div>

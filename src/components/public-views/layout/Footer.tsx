@@ -205,7 +205,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className="mt-8 border-t border-black/5 pt-6 text-center dark:border-white/10">
           <p className="text-sm text-gray-500 dark:text-gray-500">
-            Copyright © {new Date().getFullYear()} dotskillsbd
+            © 2026 Shurokka Health. All Rights Reserved. Developed by <Link target="_blank" href={"https://dotskillsbd.com"}>Dotskills</Link>.
           </p>
         </div>
       </div>
