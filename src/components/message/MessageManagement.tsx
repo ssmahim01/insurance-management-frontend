@@ -86,7 +86,7 @@ const MESSAGE_TYPE_LABELS: Record<MessageType, string> = {
 
 const MESSAGE_TYPE_COLORS: Record<MessageType, string> = {
     [MessageType.SUBSCRIPTION]:
-        "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
+        "border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/20 dark:text-green-400",
     [MessageType.PAYMENT]:
         "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400",
     [MessageType.CLAIM]:
@@ -110,8 +110,8 @@ const MESSAGE_TYPE_ICONS: Record<MessageType, React.ElementType> = {
 
 const MESSAGE_TYPE_ICON_COLORS: Record<MessageType, { bg: string; icon: string }> = {
     [MessageType.SUBSCRIPTION]: {
-        bg: "bg-blue-50 dark:bg-blue-900/20",
-        icon: "text-blue-600 dark:text-blue-400",
+        bg: "bg-green-50 dark:bg-green-900/20",
+        icon: "text-green-600 dark:text-green-400",
     },
     [MessageType.PAYMENT]: {
         bg: "bg-emerald-50 dark:bg-emerald-900/20",

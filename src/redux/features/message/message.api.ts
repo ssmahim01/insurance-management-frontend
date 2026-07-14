@@ -85,6 +85,15 @@ export const messageApi = baseApi.injectEndpoints({
       providesTags: ["MESSAGES"],
     }),
 
+    getMyMessages: builder.query<IMessageListResponse, GetMessagesParams | undefined>({
+      query: (params) => ({
+        url: "/message/my-messages",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["MESSAGES"],
+    }),
+
     getSingleMessage: builder.query<ISingleMessageResponse, string>({
       query: (id) => ({
         url: `/message/${id}`,
@@ -131,6 +140,7 @@ export const messageApi = baseApi.injectEndpoints({
 export const {
   useCreateMessageMutation,
   useGetAllMessagesQuery,
+  useGetMyMessagesQuery,
   useGetAllTrashMessagesQuery,
   useGetSingleMessageQuery,
   useUpdateMessageMutation,
