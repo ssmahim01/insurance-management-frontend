@@ -30,10 +30,9 @@ export function DashboardPageContent() {
       <StatusBreakdownRow summary={dashboard.summary} />
       <AverageRevenueBanner summary={dashboard.summary} />
 
-      <RevenueChart data={dashboard.revenueChart} />
       <div>
-        <h2 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wide">
-          Overview
+        <h2 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">
+          Package Performance Overview
         </h2>
         {/* Reused unmodified — IDashboardOverviewCard is structurally assignable to IOverviewCard */}
         <OverviewDashboard
@@ -43,6 +42,7 @@ export function DashboardPageContent() {
           onRetry={refetch}
         />
       </div>
+      <RevenueChart data={dashboard.revenueChart} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <StatusPieChart

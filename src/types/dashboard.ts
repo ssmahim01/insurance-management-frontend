@@ -42,6 +42,7 @@ export interface IDashboardSummary {
   totalPackages: number;
   totalAgents: number;
   totalAgentLeaders: number;
+ color?: "emerald" | "blue" | "violet" | "amber" | "cyan" | "rose";
 
   activeSubscriptions: number;
   pendingSubscriptions: number;

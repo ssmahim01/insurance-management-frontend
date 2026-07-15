@@ -194,7 +194,7 @@ export function CreateAgentModal({ onSuccess }: CreateAgentModalProps) {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)} variant={"outline"} className="group hover:cursor-pointer border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all duration-300">
+      <Button onClick={() => setOpen(true)} variant={"default"} className="group hover:cursor-pointer border-indigo-600 text-white bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 transition-transform ease-in-out flex gap-2 items-center">
         <Plus className="h-4 w-4" />
         Add Agent
       </Button>

@@ -13,6 +13,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 import Link from "next/link";
@@ -62,35 +63,66 @@ function getActiveHref(
 }
 
 function NavItemRow({ item, isActive }: { item: NavItem; isActive: boolean }) {
-  const { state } = useSidebar();
-  const isCollapsed = state === "collapsed";
+  const { state, isMobile } = useSidebar();
+  const isCollapsed = state === "collapsed" && !isMobile;
   const Icon = item.icon;
 
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
+        
         isActive={isActive}
         tooltip={isCollapsed ? item.label : undefined}
         className={cn(
-          "group/nav relative gap-3 rounded-xl transition-all duration-200 text-[13.5px]",
+          "group/nav relative h-10 gap-3 rounded-xl px-2.5 text-[14px] font-medium",
+          "transition-all duration-200 ease-out",
           isActive
-            ? "bg-emerald-50 text-emerald-700 font-semibold dark:bg-emerald-900/20 dark:text-emerald-400"
-            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100",
+            ? cn(
+                "bg-linear-to-r from-emerald-500/12 via-emerald-500/8 to-blue-500/10",
+                "text-emerald-700 font-semibold shadow-sm ring-1 ring-emerald-500/15",
+                "dark:from-emerald-400/15 dark:via-emerald-400/10 dark:to-blue-400/10",
+                "dark:text-emerald-400 dark:ring-emerald-400/20",
+              )
+            : cn(
+                "text-gray-600 hover:bg-gray-100/80 hover:text-gray-900 hover:shadow-sm",
+                "dark:text-gray-400 dark:hover:bg-gray-800/60 dark:hover:text-gray-100",
+              ),
         )}
       >
-        <Link href={item.href} className="flex items-center gap-3 w-full">
-          {isActive && (
-            <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-r-full bg-emerald-600 dark:bg-emerald-400" />
+        <Link
+          href={item.href}
+          className={cn(
+            "flex w-full items-center gap-3",
+            "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0",
           )}
-          <Icon
-            className={cn(
-              "h-4 w-4 shrink-0 transition-transform duration-200 group-hover/nav:scale-110",
-              isActive
-                ? "text-emerald-600 dark:text-emerald-400"
-                : "text-gray-500 dark:text-gray-500",
-            )}
-          />
-          <span className="truncate">{item.label}</span>
+        >
+          {/* active accent bar — hidden in icon-only mode to avoid edge clipping */}
+          {isActive && (
+            <span
+              className={cn(
+                "absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full",
+                "bg-linear-to-b from-emerald-500 via-emerald-500 to-blue-500",
+                "shadow-[0_0_10px_rgba(16,185,129,0.55)]",
+                "group-data-[collapsible=icon]:hidden",
+              )}
+            />
+          )}
+
+          {/* fixed-size icon box: icon never shifts between collapsed/expanded */}
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+            <Icon
+              className={cn(
+                "h-[18px] w-[18px] shrink-0 transition-transform duration-200 group-hover/nav:scale-110",
+                isActive
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-gray-500 dark:text-gray-500 group-hover/nav:text-current",
+              )}
+            />
+          </span>
+
+          <span className="truncate group-data-[collapsible=icon]:hidden">
+            {item.label}
+          </span>
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
@@ -102,7 +134,7 @@ export function AppSidebarSkeleton() {
     <Sidebar collapsible="icon" className="border-r border-gray-200/80 dark:border-gray-800">
       <SidebarHeader className="border-b mb-3 border-gray-200/80 dark:border-gray-800">
         <div className="ml-2 my-2">
-          <Skeleton className="h-12 w-12 rounded-md" />
+          <Skeleton className="h-12 w-12 rounded-xl" />
         </div>
       </SidebarHeader>
 
@@ -115,8 +147,8 @@ export function AppSidebarSkeleton() {
             <SidebarMenu>
               {Array.from({ length: 4 }).map((_, itemIdx) => (
                 <SidebarMenuItem key={itemIdx}>
-                  <div className="flex items-center gap-3 px-2 py-2">
-                    <Skeleton className="h-4 w-4 rounded shrink-0" />
+                  <div className="flex items-center gap-3 px-2.5 py-2.5">
+                    <Skeleton className="h-5 w-5 rounded shrink-0" />
                     <Skeleton className="h-4 flex-1" />
                   </div>
                 </SidebarMenuItem>
@@ -152,9 +184,6 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
   const navigation = getDashboardNavigation(user?.role);
   const activeHref = getActiveHref(navigation, pathname);
 
-  // Derives the role's dashboard root from the nav config itself (first
-  // group's first item) instead of hardcoding "/dashboard", which doesn't
-  // exist under any actual role's route tree in this app.
   const dashboardRoot = navigation[0]?.items[0]?.href ?? "";
 
   if (isLoading) return <AppSidebarSkeleton />;
@@ -177,51 +206,60 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
   return (
     <Sidebar
       collapsible="icon"
-      className="border-r border-gray-200/80 dark:border-gray-800"
+      className="border-r border-gray-200/80 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-950/50"
     >
       {/* ── Header / Logo ── */}
-      <SidebarHeader className="border-b mb-3 border-gray-200/80 dark:border-gray-800">
-        <Link href={dashboardRoot || "#"} className="flex items-center py-1">
-          <Image
-            src={"/assets/shurokkha-logo-1.png"}
-            alt="Shurokkha Logo"
-            width={200}
-            height={200}
-            quality={90}
+      <SidebarHeader className="border-b mb-2 border-gray-200/80 dark:border-gray-800">
+        <Link href={"/"} className="flex items-center py-1 group-data-[collapsible=icon]:justify-center">
+          <div
             className={cn(
-              "rounded-md object-contain ml-2 transition-all duration-200",
-              isCollapsed ? "h-8 w-8" : "h-12 w-12",
+              "relative rounded-xl ring-1 ring-emerald-500/10 transition-all duration-200",
+              "bg-linear-to-br from-emerald-50 via-white to-blue-50 dark:from-emerald-950/30 dark:via-gray-900 dark:to-blue-950/20",
+              isCollapsed ? "h-9 w-9 ml-1" : "h-12 w-12 ml-2",
             )}
-            priority
-          />
+          >
+            <Image
+              src={"/assets/shurokkha-logo-1.png"}
+              alt="Shurokkha Logo"
+              fill
+              quality={90}
+              className="rounded-xl object-contain p-1"
+              priority
+            />
+          </div>
         </Link>
       </SidebarHeader>
 
       {/* ── Navigation ── */}
-      <SidebarContent className="py-3">
-        {navigation.map((group) => (
-          <SidebarGroup key={group.label} className="px-2 py-1">
-            <SidebarGroupLabel
-              className={cn(
-                "font-bold uppercase tracking-widest text-[10.5px] text-gray-400 dark:text-gray-500 px-2 pb-1 transition-all duration-200",
-                isCollapsed && "opacity-0 h-0 overflow-hidden py-0",
-              )}
-            >
-              {group.label}
-            </SidebarGroupLabel>
+      <SidebarContent className="py-1 bg-gray-50/50 dark:bg-gray-950/50">
+        <ScrollArea className="h-full px-2">
+          <div className="py-2">
+            {navigation.map((group) => (
+              <SidebarGroup key={group.label} className="px-1 py-1.5">
+                <SidebarGroupLabel
+                  className={cn(
+                    "font-bold uppercase tracking-widest text-[10.5px] text-gray-400 dark:text-gray-500 px-2 pb-1.5",
+                    "transition-all duration-200",
+                    "group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:h-0 group-data-[collapsible=icon]:overflow-hidden group-data-[collapsible=icon]:py-0",
+                  )}
+                >
+                  {group.label}
+                </SidebarGroupLabel>
 
-            <SidebarMenu>
-              {group.items.map((item) => (
-                <NavItemRow key={item.id} item={item} isActive={item.href === activeHref} />
-              ))}
-            </SidebarMenu>
-          </SidebarGroup>
-        ))}
+                <SidebarMenu>
+                  {group.items.map((item) => (
+                    <NavItemRow key={item.id} item={item} isActive={item.href === activeHref} />
+                  ))}
+                </SidebarMenu>
+              </SidebarGroup>
+            ))}
+          </div>
+        </ScrollArea>
       </SidebarContent>
 
       {/* ── Footer / User ── */}
       {user && (
-        <SidebarFooter className="border-t border-gray-200/80 dark:border-gray-800 p-2">
+        <SidebarFooter className="border-t border-gray-200/80 bg-gray-50/50 dark:bg-gray-950/50 dark:border-gray-800 p-2">
           <SidebarMenu>
             <SidebarMenuItem>
               <DropdownMenu>
@@ -229,8 +267,10 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
                   <SidebarMenuButton
                     size="lg"
                     className={cn(
-                      "gap-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors",
-                      isCollapsed && "justify-center",
+                      "gap-3 rounded-xl transition-all duration-200",
+                      "hover:bg-linear-to-r hover:from-emerald-50 hover:to-blue-50",
+                      "dark:hover:from-emerald-900/20 dark:hover:to-blue-900/10",
+                      "group-data-[collapsible=icon]:justify-center",
                     )}
                     tooltip={
                       isCollapsed
@@ -238,25 +278,21 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
                         : undefined
                     }
                   >
-                    <Avatar className="h-8 w-8 shrink-0 rounded-lg ring-2 ring-transparent hover:ring-emerald-200 dark:hover:ring-emerald-900 transition-all">
+                    <Avatar className="h-8 w-8 shrink-0 rounded-lg ring-2 ring-transparent transition-all duration-200 hover:ring-emerald-300 dark:hover:ring-emerald-800">
                       <AvatarImage src={user.picture} alt={user.name} />
-                      <AvatarFallback className="rounded-lg bg-emerald-100 text-emerald-700 text-xs font-bold dark:bg-emerald-900/30 dark:text-emerald-400">
+                      <AvatarFallback className="rounded-lg bg-linear-to-br from-emerald-500 to-blue-500 text-white text-xs font-bold">
                         {initials}
                       </AvatarFallback>
                     </Avatar>
-                    {!isCollapsed && (
-                      <>
-                        <div className="min-w-0 flex-1 text-left">
-                          <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-50">
-                            {user.name || "User"}
-                          </p>
-                          <p className="truncate text-[11px] text-gray-400 dark:text-gray-500">
-                            {user.phone}
-                          </p>
-                        </div>
-                        <ChevronDown className="h-4 w-4 shrink-0 text-gray-400 ml-auto" />
-                      </>
-                    )}
+                    <div className="min-w-0 flex-1 text-left group-data-[collapsible=icon]:hidden">
+                      <p className="truncate text-[13.5px] font-semibold text-gray-900 dark:text-gray-50">
+                        {user.name || "User"}
+                      </p>
+                      <p className="truncate text-[11px] text-gray-400 dark:text-gray-500">
+                        {user.phone}
+                      </p>
+                    </div>
+                    <ChevronDown className="h-4 w-4 shrink-0 text-gray-400 ml-auto group-data-[collapsible=icon]:hidden" />
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
 
@@ -274,7 +310,7 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
                       {user.phone}
                     </p>
                     {roleLabel && (
-                      <span className="mt-1.5 inline-block rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400">
+                      <span className="mt-1.5 inline-block rounded-full bg-linear-to-r from-emerald-50 to-blue-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:from-emerald-900/20 dark:to-blue-900/20 dark:text-emerald-400">
                         {roleLabel}
                       </span>
                     )}

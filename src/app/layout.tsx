@@ -1,15 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/lib/providers/ThemeProvider";
 import { UserProvider } from "@/context/UserContext";
 import { Toaster } from "sonner";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+import { Plus_Jakarta_Sans, Inter } from "next/font/google";
+
+const fontSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
+  variable: "--font-sans",
+  weight: ["400", "500", "600", "700", "800"],
 });
 const inter = Inter({
   subsets: ["latin"],
@@ -57,7 +58,7 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} bg-background`}
     >
-      <body className="font-sans antialiased bg-background text-foreground" >
+      <body className={`${fontSans.variable} font-sans antialiased`} >
         <UserProvider>
           <Toaster richColors position="top-right" />
             <ThemeProvider>

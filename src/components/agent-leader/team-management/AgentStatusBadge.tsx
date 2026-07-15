@@ -8,17 +8,40 @@ interface AgentStatusBadgeProps {
 }
 
 export function AgentStatusBadge({ status }: AgentStatusBadgeProps) {
-  const variants: Record<string, { badge: 'default' | 'secondary' | 'destructive'; label: string }> = {
-    [IsActive.ACTIVE]: { badge: 'default', label: 'Active' },
-    [IsActive.INACTIVE]: { badge: 'secondary', label: 'Inactive' },
-    [IsActive.BLOCKED]: { badge: 'destructive', label: 'Blocked' },
-  };
+ const variants: Record<
+  string,
+  {
+    className: string;
+    label: string;
+  }
+> = {
+  [IsActive.ACTIVE]: {
+    label: "Active",
+    className:
+      "bg-emerald-100 text-emerald-700 border border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-800",
+  },
 
-  const config = variants[status || ''] || variants[IsActive.INACTIVE];
+  [IsActive.INACTIVE]: {
+    label: "Inactive",
+    className:
+      "bg-amber-100 text-amber-700 border border-amber-300 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-800",
+  },
 
-  return (
-    <Badge variant={config.badge} className="font-medium">
-      {config.label}
-    </Badge>
-  );
+  [IsActive.BLOCKED]: {
+    label: "Blocked",
+    className:
+      "bg-rose-100 text-rose-700 border border-rose-300 dark:bg-rose-500/15 dark:text-rose-400 dark:border-rose-800",
+  },
+};
+
+  const config =
+  variants[status || IsActive.INACTIVE];
+
+return (
+  <Badge
+    className={`rounded-full px-3 py-1 font-semibold tracking-wide ${config.className}`}
+  >
+    {config.label}
+  </Badge>
+);
 }

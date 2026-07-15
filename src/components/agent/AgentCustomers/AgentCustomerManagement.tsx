@@ -42,11 +42,15 @@ import { ViewToggle, ViewMode } from "@/components/shared/dashboard/ViewToggle";
 import { Pagination } from "../../pagination/Pagination";
 import { CustomerDetailsModal } from "../../customer/CustomerDetailsModal";
 import { UpdateCustomerModal } from "../../customer/UpdateCustomer";
-import { CustomerCard, CustomerCardSkeleton } from "../../customer/CustomerCard";
+import {
+  CustomerCard,
+  CustomerCardSkeleton,
+} from "../../customer/CustomerCard";
 import { IsActive, IUser } from "@/types/user.types";
 import { CustomerSubscriptionsModal } from "../../customer/CustomerSubscriptionDetailsModal";
 import { CreateSubscriptionModal } from "../../subscription/CreateSubscriptionModal";
 import Image from "next/image";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 type SortField = "name" | "phone" | "isActive" | "createdAt" | "gender";
 type SortDir = "asc" | "desc" | null;
@@ -136,31 +140,44 @@ type StatColor = "blue" | "emerald" | "slate" | "red";
 
 const STAT_COLOR_MAP: Record<
   StatColor,
-  { iconBg: string; icon: string; text: string; ring: string }
+  {
+    bg: string;
+    iconBg: string;
+    icon: string;
+    ring: string;
+    glow: string;
+  }
 > = {
   blue: {
-    iconBg: "bg-linear-to-br from-blue-500 to-blue-600",
+    bg: "bg-linear-to-br from-blue-900 via-indigo-800 to-cyan-950",
+    iconBg: "bg-white/15 backdrop-blur-sm",
     icon: "text-white",
-    text: "text-blue-600 dark:text-blue-400",
-    ring: "hover:ring-blue-200 dark:hover:ring-blue-900",
+    ring: "hover:ring-blue-300/40",
+    glow: "hover:shadow-blue-500/25",
   },
+
   emerald: {
-    iconBg: "bg-linear-to-br from-emerald-500 to-emerald-600",
+    bg: "bg-linear-to-br from-emerald-900 via-green-800 to-teal-950",
+    iconBg: "bg-white/15 backdrop-blur-sm",
     icon: "text-white",
-    text: "text-emerald-600 dark:text-emerald-400",
-    ring: "hover:ring-emerald-200 dark:hover:ring-emerald-900",
+    ring: "hover:ring-emerald-300/40",
+    glow: "hover:shadow-emerald-500/25",
   },
+
   slate: {
-    iconBg: "bg-linear-to-br from-slate-400 to-slate-500",
+    bg: "bg-linear-to-br from-slate-900 via-indigo-800 to-slate-950",
+    iconBg: "bg-white/10 backdrop-blur-sm",
     icon: "text-white",
-    text: "text-slate-500 dark:text-slate-400",
-    ring: "hover:ring-slate-200 dark:hover:ring-slate-800",
+    ring: "hover:ring-slate-300/30",
+    glow: "hover:shadow-slate-500/20",
   },
+
   red: {
-    iconBg: "bg-linear-to-br from-red-500 to-rose-600",
+    bg: "bg-linear-to-br from-rose-900 via-red-800 to-red-950",
+    iconBg: "bg-white/15 backdrop-blur-sm",
     icon: "text-white",
-    text: "text-red-500 dark:text-red-400",
-    ring: "hover:ring-red-200 dark:hover:ring-red-900",
+    ring: "hover:ring-red-300/40",
+    glow: "hover:shadow-red-500/25",
   },
 };
 
@@ -178,22 +195,55 @@ function StatCard({
   color: StatColor;
 }) {
   const c = STAT_COLOR_MAP[color];
+
   return (
     <div
-      className={`group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800 p-5 shadow-sm ring-1 ring-transparent transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md ${c.ring}`}
+      className={`
+        group
+        relative
+        overflow-hidden
+        rounded-2xl
+        p-5
+        text-white
+        ${c.bg}
+        shadow-lg
+        ring-1
+        ring-white/10
+        transition-all
+        duration-300
+        hover:-translate-y-1
+        hover:shadow-2xl
+        ${c.glow}
+        ${c.ring}
+      `}
     >
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-sm text-slate-500 dark:text-slate-400">{label}</p>
+      {/* Decorative Glow */}
+      <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/10 blur-3xl transition-all duration-300 group-hover:bg-white/20" />
+
+      <div className="relative flex items-center justify-between mb-4">
+        <p className="text-xs font-semibold uppercase tracking-wider text-white/80">
+          {label}
+        </p>
+
         <div
-          className={`p-2.5 rounded-xl ${c.iconBg} shadow-sm transition-transform duration-300 group-hover:scale-110`}
+          className={`
+            flex h-11 w-11 items-center justify-center
+            rounded-xl
+            ${c.iconBg}
+            transition-transform
+            duration-300
+            group-hover:scale-110
+          `}
         >
-          <Icon className={`w-5 h-5 ${c.icon}`} />
+          <Icon className={`h-5 w-5 ${c.icon}`} />
         </div>
       </div>
-      <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+
+      <p className="relative text-3xl font-bold tracking-tight text-white">
         {value}
       </p>
-      {sub && <p className={`text-xs mt-1 font-medium ${c.text}`}>{sub}</p>}
+
+      {sub && <p className="relative mt-2 text-sm text-white/75">{sub}</p>}
     </div>
   );
 }
@@ -219,7 +269,9 @@ function SortIcon({
 export default function AgentCustomerManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<IsActive | "all">("all");
-  const [genderFilter, setGenderFilter] = useState<"MALE" | "FEMALE" | "OTHER" | "all">("all");
+  const [genderFilter, setGenderFilter] = useState<
+    "MALE" | "FEMALE" | "OTHER" | "all"
+  >("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
@@ -343,7 +395,7 @@ export default function AgentCustomerManagement() {
       className="cursor-pointer select-none whitespace-nowrap"
       onClick={() => handleSort(field)}
     >
-      <span className="inline-flex items-center hover:text-slate-900 dark:hover:text-white transition-colors">
+      <span className="inline-flex items-center hover:text-slate-900 dark:hover:text-white transition-colors text-white">
         {label}
         <SortIcon field={field} sortField={sortField} sortDir={sortDir} />
       </span>
@@ -510,7 +562,9 @@ export default function AgentCustomerManagement() {
       {/* ── Section header: count + view toggle ── */}
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-          {isLoading ? "Loading customers…" : `${meta?.total ?? sortedCustomers.length} customer${(meta?.total ?? sortedCustomers.length) !== 1 ? "s" : ""}`}
+          {isLoading
+            ? "Loading customers…"
+            : `${meta?.total ?? sortedCustomers.length} customer${(meta?.total ?? sortedCustomers.length) !== 1 ? "s" : ""}`}
         </p>
         <ViewToggle view={viewMode} onChange={setViewMode} />
       </div>
@@ -518,166 +572,188 @@ export default function AgentCustomerManagement() {
       {/* ── Table View ── */}
       {viewMode === "table" && (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-slate-50 dark:bg-slate-800/50">
-                  <SortableTh field="name" label="Customer" />
-                  <SortableTh field="phone" label="Phone" />
-                  <SortableTh field="gender" label="Gender" />
-                  <TableHead className="whitespace-nowrap">NID</TableHead>
-                  <SortableTh field="createdAt" label="Joined" />
-                  <TableHead className="whitespace-nowrap">Last Login</TableHead>
-                  <SortableTh field="isActive" label="Status" />
-                  <TableHead className="text-right whitespace-nowrap">
-                    Actions
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              
-              <TableBody>
-                {isLoading ? (
-                  Array.from({ length: 6 }).map((_, i) => (
-                    <CustomerRowSkeleton key={i} />
-                  ))
-                ) : sortedCustomers.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8}>
-                      <div className="flex flex-col items-center justify-center py-16 text-slate-400">
-                        <Users className="w-12 h-12 mb-4 opacity-30" />
-                        {searchTerm || hasActiveFilters ? (
-                          <>
-                            <p className="text-base font-medium">
-                              No results found
-                            </p>
-                            <p className="text-sm mt-1">
-                              Try adjusting your search or filters
-                            </p>
-                          </>
-                        ) : (
-                          <p className="text-base font-medium">
-                            You haven&apos;t created any customers yet.
-                          </p>
-                        )}
-                      </div>
-                    </TableCell>
+          <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+            <ScrollArea className="w-full whitespace-nowrap">
+              <Table className="min-w-275">
+                <TableHeader className="sticky top-0 z-10">
+                  <TableRow className="border-none bg-linear-to-r from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
+                    <SortableTh field="name" label="Customer" />
+                    <SortableTh field="phone" label="Phone" />
+                    <SortableTh field="gender" label="Gender" />
+                    <TableHead className="whitespace-nowrap text-white">NID</TableHead>
+                    <SortableTh field="createdAt" label="Joined" />
+                    <TableHead className="whitespace-nowrap text-white">
+                      Last Login
+                    </TableHead>
+                    <SortableTh field="isActive" label="Status" />
+                    <TableHead className="text-right whitespace-nowrap text-white">
+                      Actions
+                    </TableHead>
                   </TableRow>
-                ) : (
-                  sortedCustomers.map((customer) => {
-                    const status = customer.isActive ?? IsActive.INACTIVE;
-                    return (
-                      <TableRow
-                        key={String(customer._id)}
-                        className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
-                      >
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            {customer.picture ? (
-                              <Image
-                                src={customer.picture}
-                                width={200}
-                                height={200}
-                                priority
-                                quality={90}
-                                alt={customer.name}
-                                className="w-9 h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 shrink-0"
-                              />
-                            ) : (
-                              <div className="w-9 h-9 rounded-full bg-linear-to-br from-emerald-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                                {customer.name?.charAt(0)?.toUpperCase() ?? "C"}
-                              </div>
-                            )}
-                            <div className="min-w-0">
-                              <p className="font-medium text-slate-900 dark:text-white truncate max-w-36">
-                                {customer.name ?? "—"}
+                </TableHeader>
+
+                <TableBody>
+                  {isLoading ? (
+                    Array.from({ length: 6 }).map((_, i) => (
+                      <CustomerRowSkeleton key={i} />
+                    ))
+                  ) : sortedCustomers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8}>
+                        <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+                          <Users className="w-12 h-12 mb-4 opacity-30" />
+                          {searchTerm || hasActiveFilters ? (
+                            <>
+                              <p className="text-base font-medium">
+                                No results found
                               </p>
+                              <p className="text-sm mt-1">
+                                Try adjusting your search or filters
+                              </p>
+                            </>
+                          ) : (
+                            <p className="text-base font-medium">
+                              You haven&apos;t created any customers yet.
+                            </p>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    sortedCustomers.map((customer, index) => {
+                      const status = customer.isActive ?? IsActive.INACTIVE;
+                      return (
+                        <TableRow
+                          key={String(customer._id)}
+                          className={`
+border-b
+transition-all
+duration-300
+hover:shadow-sm
+hover:scale-[1.002]
+hover:bg-indigo-50
+dark:hover:bg-indigo-950/20
+
+${
+  index % 2 === 0
+    ? "bg-white dark:bg-background"
+    : "bg-linear-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
+}
+`}
+                        >
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              {customer.picture ? (
+                                <Image
+                                  src={customer.picture}
+                                  width={200}
+                                  height={200}
+                                  priority
+                                  quality={90}
+                                  alt={customer.name}
+                                  className="w-9 h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 shrink-0"
+                                />
+                              ) : (
+                                <div className="w-9 h-9 rounded-full bg-linear-to-br from-emerald-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                                  {customer.name?.charAt(0)?.toUpperCase() ??
+                                    "C"}
+                                </div>
+                              )}
+                              <div className="min-w-0">
+                                <p className="font-medium text-slate-900 dark:text-white truncate max-w-36">
+                                  {customer.name ?? "—"}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
-                          {customer.phone ?? "—"}
-                        </TableCell>
-                        <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
-                          {customer.gender ? (
-                            GENDER_LABELS[customer.gender]
-                          ) : (
-                            <span className="text-slate-300 dark:text-slate-600 italic text-xs">
-                              —
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
-                          {customer.nid ?? (
-                            <span className="text-slate-300 dark:text-slate-600 italic text-xs">
-                              —
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
-                          {formatDate(customer.createdAt)}
-                        </TableCell>
-                        <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
-                          {customer.lastLoginAt ? (
-                            formatDate(customer.lastLoginAt)
-                          ) : (
-                            <span className="text-slate-300 dark:text-slate-600 italic text-xs">
-                              Never
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={
-                              STATUS_STYLES[status as IsActive] ??
-                              STATUS_STYLES[IsActive.INACTIVE]
-                            }
-                          >
-                            <span
-                              className={`h-1.5 w-1.5 rounded-full mr-1.5 inline-block ${STATUS_DOT[status as IsActive] ?? STATUS_DOT[IsActive.INACTIVE]}`}
-                            />
-                            {STATUS_LABELS[status as IsActive] ?? "Unknown"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1.5 justify-end">
-                            <Button
+                          </TableCell>
+                          <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
+                            {customer.phone ?? "—"}
+                          </TableCell>
+                          <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
+                            {customer.gender ? (
+                              GENDER_LABELS[customer.gender]
+                            ) : (
+                              <span className="text-slate-300 dark:text-slate-600 italic text-xs">
+                                —
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
+                            {customer.nid ?? (
+                              <span className="text-slate-300 dark:text-slate-600 italic text-xs">
+                                —
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
+                            {formatDate(customer.createdAt)}
+                          </TableCell>
+                          <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
+                            {customer.lastLoginAt ? (
+                              formatDate(customer.lastLoginAt)
+                            ) : (
+                              <span className="text-slate-300 dark:text-slate-600 italic text-xs">
+                                Never
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
                               variant="outline"
-                              size="icon"
-                              className="h-8 w-8 transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5 active:scale-95"
-                              title="View details"
-                              onClick={() => openDetailsDialog(customer)}
+                              className={
+                                STATUS_STYLES[status as IsActive] ??
+                                STATUS_STYLES[IsActive.INACTIVE]
+                              }
                             >
-                              <Eye className="w-3.5 h-3.5" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8 transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5 active:scale-95"
-                              title="View subscriptions"
-                              onClick={() => openSubscriptionsDialog(customer)}
-                            >
-                              <PackageCheck className="w-3.5 h-3.5" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8 transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5 active:scale-95"
-                              title="Edit customer"
-                              onClick={() => openEditDialog(customer)}
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </Button>
-                            {/* No Delete action: backend's deleteUser route does
+                              <span
+                                className={`h-1.5 w-1.5 rounded-full mr-1.5 inline-block ${STATUS_DOT[status as IsActive] ?? STATUS_DOT[IsActive.INACTIVE]}`}
+                              />
+                              {STATUS_LABELS[status as IsActive] ?? "Unknown"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-1.5 justify-end">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8 transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5 active:scale-95"
+                                title="View details"
+                                onClick={() => openDetailsDialog(customer)}
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8 transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5 active:scale-95"
+                                title="View subscriptions"
+                                onClick={() =>
+                                  openSubscriptionsDialog(customer)
+                                }
+                              >
+                                <PackageCheck className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8 transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5 active:scale-95"
+                                title="Edit customer"
+                                onClick={() => openEditDialog(customer)}
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </Button>
+                              {/* No Delete action: backend's deleteUser route does
                                 not currently authorize Role.AGENT. */}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
 
             <Pagination
               page={page}
@@ -721,7 +797,9 @@ export default function AgentCustomerManagement() {
               {searchTerm || hasActiveFilters ? (
                 <>
                   <p className="text-base font-medium">No results found</p>
-                  <p className="text-sm mt-1">Try adjusting your search or filters</p>
+                  <p className="text-sm mt-1">
+                    Try adjusting your search or filters
+                  </p>
                 </>
               ) : (
                 <p className="text-base font-medium">
@@ -744,7 +822,11 @@ export default function AgentCustomerManagement() {
                 ))}
               </div>
               <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800 shadow-sm px-4 py-3">
-                <Pagination page={page} totalPage={totalPage} onPageChange={setPage} />
+                <Pagination
+                  page={page}
+                  totalPage={totalPage}
+                  onPageChange={setPage}
+                />
                 <div className="flex items-center justify-between pt-2">
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     Showing{" "}

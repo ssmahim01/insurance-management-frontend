@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CheckCircle2, Clock, XCircle, Ban, ShieldCheck, ShieldAlert } from "lucide-react";
 import { IDashboardSummary } from "@/types/dashboard";
 import { formatCurrency } from "@/lib/utils/format-subscription";
+import { cn } from "@/lib/utils";
+import { useGetMeQuery } from "@/redux/features/user/user.api";
 
 interface StatusChipProps {
   label: string;
@@ -9,22 +12,59 @@ interface StatusChipProps {
   tone: "success" | "warning" | "muted" | "danger";
 }
 
-const TONE_STYLES: Record<StatusChipProps["tone"], string> = {
-  success: "bg-cyan-600/10 text-cyan-700 dark:text-cyan-400",
-  warning: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  muted: "bg-slate-500/10 text-slate-600 dark:text-slate-400",
-  danger: "bg-red-500/10 text-red-600 dark:text-red-400",
-};
+const TONE_STYLES = {
+  success: {
+    card: "bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/40 dark:to-emerald-900/20 border-emerald-200 dark:border-emerald-800",
+    icon: "bg-emerald-500 text-white",
+    value: "text-emerald-700 dark:text-emerald-400",
+  },
+
+  warning: {
+    card: "bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/40 dark:to-amber-900/20 border-amber-200 dark:border-amber-800",
+    icon: "bg-amber-500 text-white",
+    value: "text-amber-700 dark:text-amber-400",
+  },
+
+  muted: {
+    card: "bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 border-slate-200 dark:border-slate-700",
+    icon: "bg-slate-500 text-white",
+    value: "text-slate-700 dark:text-slate-300",
+  },
+
+  danger: {
+    card: "bg-gradient-to-br from-rose-50 to-red-100 dark:from-rose-950/40 dark:to-red-900/20 border-rose-200 dark:border-rose-800",
+    icon: "bg-rose-500 text-white",
+    value: "text-rose-700 dark:text-rose-400",
+  },
+} as const;
 
 function StatusChip({ label, value, icon: Icon, tone }: StatusChipProps) {
+  const styles = TONE_STYLES[tone];
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border p-3.5 transition-colors duration-200 hover:bg-muted/30">
-      <div className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${TONE_STYLES[tone]}`}>
+    <div
+  className={cn(
+    "flex items-center gap-3 rounded-xl border p-3.5 duration-500 hover:scale-105 transition-transform transform ease-in-out hover:shadow-xl hover:-translate-y-0.5",
+    styles.card
+  )}
+>
+     <div
+  className={cn(
+    "h-9 w-9 rounded-lg flex items-center justify-center shrink-0",
+    styles.icon
+  )}
+>
         <Icon className="h-4 w-4" />
       </div>
       <div className="min-w-0">
         <p className="text-xs text-muted-foreground truncate">{label}</p>
-        <p className="text-lg font-bold text-foreground tabular-nums">{value.toLocaleString()}</p>
+       <p
+  className={cn(
+    "text-lg font-bold tabular-nums",
+    styles.value
+  )}
+>
+  {value.toLocaleString()}
+</p>
       </div>
     </div>
   );
@@ -34,16 +74,64 @@ interface StatusBreakdownRowProps {
   summary: IDashboardSummary;
 }
 
+
+
 export function StatusBreakdownRow({ summary }: StatusBreakdownRowProps) {
+
+  const items: any[] = [
+  {
+    label: "Active Subscriptions",
+    value: summary.activeSubscriptions,
+    icon: CheckCircle2,
+    tone: "success",
+  },
+  {
+    label: "Pending Subscriptions",
+    value: summary.pendingSubscriptions,
+    icon: Clock,
+    tone: "warning",
+  },
+  {
+    label: "Expired Subscriptions",
+    value: summary.expiredSubscriptions,
+    icon: XCircle,
+    tone: "muted",
+  },
+  {
+    label: "Cancelled Subscriptions",
+    value: summary.cancelledSubscriptions,
+    icon: Ban,
+    tone: "danger",
+  },
+  {
+    label: "Paid Subscriptions",
+    value: summary.paidSubscriptions,
+    icon: ShieldCheck,
+    tone: "success",
+  },
+  {
+    label: "Unpaid Subscriptions",
+    value: summary.unpaidSubscriptions,
+    icon: ShieldAlert,
+    tone: "muted",
+  },
+].filter((item) => item.value > 0);
+
+  const { data: me } = useGetMeQuery(undefined);
+  const role = me?.data?.role;
+  
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-      <StatusChip label="Active" value={summary.activeSubscriptions} icon={CheckCircle2} tone="success" />
-      <StatusChip label="Pending" value={summary.pendingSubscriptions} icon={Clock} tone="warning" />
-      <StatusChip label="Expired" value={summary.expiredSubscriptions} icon={XCircle} tone="muted" />
-      <StatusChip label="Cancelled" value={summary.cancelledSubscriptions} icon={Ban} tone="danger" />
-      <StatusChip label="Paid" value={summary.paidSubscriptions} icon={ShieldCheck} tone="success" />
-      <StatusChip label="Unpaid" value={summary.unpaidSubscriptions} icon={ShieldAlert} tone="muted" />
-    </div>
+   <div className={`grid ${role === "ADMIN" ? "grid-cols-2 md:grid-cols-4 xl:grid-cols-5" : role === "AGENT_LEADER" ? "grid-cols-2 md:grid-cols-3 xl:grid-cols-4" : "grid-cols-2 md:grid-cols-2 xl:grid-cols-2"} gap-3`}>
+  {items.map((item) => (
+    <StatusChip
+      key={item.label}
+      label={item.label}
+      value={item.value}
+      icon={item.icon}
+      tone={item.tone}
+    />
+  ))}
+</div>
   );
 }
 

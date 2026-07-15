@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 
 interface KpiCardProps {
@@ -5,28 +6,108 @@ interface KpiCardProps {
   value: string;
   icon: LucideIcon;
   sub?: string;
-  accent?: "navy" | "cyan";
+color?: "emerald" | "blue" | "violet" | "amber" | "cyan" | "rose";
 }
 
-export function KpiCard({ label, value, icon: Icon, sub, accent = "cyan" }: KpiCardProps) {
-  const iconWrap =
-    accent === "navy"
-      ? "bg-slate-900/5 dark:bg-slate-100/10"
-      : "bg-cyan-600/10";
-  const iconColor =
-    accent === "navy"
-      ? "text-slate-700 dark:text-slate-300"
-      : "text-cyan-700 dark:text-cyan-400";
+export function KpiCard({
+  label,
+  value,
+  icon: Icon,
+  sub,
+  color = "cyan",
+}: KpiCardProps) {
+const COLORS = {
+  emerald: {
+    bg: "bg-gradient-to-br from-emerald-950 via-green-950 to-emerald-900",
+    icon: "bg-emerald-500 text-white",
+    value: "text-emerald-100",
+    border: "hover:border-emerald-800",
+    glow: "group-hover:shadow-emerald-500/20",
+    blob: "bg-emerald-500/10",
+  },
+
+  blue: {
+    bg: "bg-gradient-to-br from-blue-950 via-indigo-950 to-blue-900",
+    icon: "bg-blue-500 text-white",
+    value: "text-blue-100",
+    border: "hover:border-blue-800",
+    glow: "group-hover:shadow-blue-500/20",
+    blob: "bg-blue-500/10",
+  },
+
+  violet: {
+    bg: "bg-gradient-to-br from-violet-950 via-purple-950 to-violet-900",
+    icon: "bg-violet-500 text-white",
+    value: "text-violet-100",
+    border: "hover:border-violet-800",
+    glow: "group-hover:shadow-violet-500/20",
+    blob: "bg-violet-500/10",
+  },
+
+  amber: {
+    bg: "bg-gradient-to-br from-amber-950 via-yellow-950 to-amber-900",
+    icon: "bg-amber-500 text-white",
+    value: "text-amber-100",
+    border: "hover:border-amber-800",
+    glow: "group-hover:shadow-amber-500/20",
+    blob: "bg-amber-500/10",
+  },
+
+  cyan: {
+    bg: "bg-gradient-to-br from-cyan-950 via-slate-950 to-cyan-900",
+    icon: "bg-cyan-500 text-white",
+    value: "text-cyan-100",
+    border: "hover:border-cyan-800",
+    glow: "group-hover:shadow-cyan-500/20",
+    blob: "bg-cyan-500/10",
+  },
+
+  rose: {
+    bg: "bg-gradient-to-br from-rose-950 via-red-950 to-rose-900",
+    icon: "bg-rose-500 text-white",
+    value: "text-rose-100",
+    border: "hover:border-rose-800",
+    glow: "group-hover:shadow-rose-500/20",
+    blob: "bg-rose-500/10",
+  },
+} as const;
+      
+const styles = COLORS[color];
 
   return (
-    <div className="group rounded-2xl border border-border bg-background p-5 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-cyan-200 dark:hover:border-cyan-900">
+<div
+  className={cn(
+    "group relative overflow-hidden rounded-2xl border p-5 duration-500 hover:scale-105 transition-transform transform ease-in-out hover:shadow-xl hover:-translate-y-1",
+    styles.bg,
+    styles.border,
+    styles.glow
+  )}
+>
+     <div
+  className={cn(
+    "absolute right-0 top-0 h-24 w-24 rounded-full blur-3xl transition-all duration-300",
+    styles.blob
+  )}
+/>
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</span>
-        <div className={`h-8 w-8 rounded-lg ${iconWrap} flex items-center justify-center transition-transform duration-300 group-hover:scale-110`}>
-          <Icon className={`h-4 w-4 ${iconColor}`} />
+        <span className="text-xs font-medium text-white uppercase tracking-wide">
+          {label}
+        </span>
+      <div
+  className={cn(
+    "h-10 w-10 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110",
+    styles.icon
+  )}
+>
+         <Icon className="h-5 w-5" />
         </div>
       </div>
-      <p className="text-2xl font-bold text-foreground tabular-nums">{value}</p>
+      <p
+  className={cn(
+    "text-2xl font-bold tabular-nums",
+    styles.value
+  )}
+>{value}</p>
       {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
     </div>
   );

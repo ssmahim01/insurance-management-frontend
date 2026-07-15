@@ -14,6 +14,7 @@ import {
 import { IsActive, IUser } from "@/types/user.types";
 import { AgentStatusBadge } from "./AgentStatusBadge";
 import { AgentActions } from "./AgentActions";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 interface AgentTableProps {
   agents: IUser[];
@@ -28,9 +29,12 @@ interface AgentTableProps {
 // ── status → left-accent + subtle row tint, brand-consistent (emerald/blue palette) ──
 const STATUS_ROW_ACCENT: Record<IsActive, string> = {
   [IsActive.ACTIVE]: "border-l-4 border-l-emerald-500",
-  [IsActive.INACTIVE]: "border-l-4 border-l-slate-300 dark:border-l-slate-600",
-  [IsActive.BLOCKED]: "border-l-4 border-l-red-500 bg-red-50/40 dark:bg-red-950/10",
-  [IsActive.ALL]: "border-l-4 border-l-slate-300 dark:border-l-slate-600",
+
+  [IsActive.INACTIVE]: "border-l-4 border-l-amber-500",
+
+  [IsActive.BLOCKED]: "border-l-4 border-l-rose-500",
+
+  [IsActive.ALL]: "border-l-4 border-l-slate-400",
 };
 
 export function AgentTable({
@@ -46,7 +50,7 @@ export function AgentTable({
     return (
       <div className="rounded-lg border border-border overflow-hidden">
         <table className="w-full">
-          <thead className="bg-muted/50">
+         <thead className="bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 text-white">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground">
                 Agent
@@ -111,51 +115,63 @@ export function AgentTable({
   }
 
   return (
-    <div className="rounded-lg border border-border overflow-hidden">
-      <Table>
-        <TableHeader className="bg-muted/50 sticky top-0">
-          <TableRow className="border-b border-border hover:bg-transparent">
-            <TableHead className="font-semibold text-foreground">
-              Agent
-            </TableHead>
+   <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+  <ScrollArea className="w-full whitespace-nowrap">
+      <Table className="min-w-[1050px]">
+        <TableHeader className="sticky top-0 z-10">
+          <TableRow className="border-none bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
+            <TableHead className="text-white font-semibold">Agent</TableHead>
 
-            <TableHead className="font-semibold text-foreground">
-              Agent ID
-            </TableHead>
+            <TableHead className="text-white font-semibold">Agent ID</TableHead>
 
-            <TableHead className="font-semibold text-foreground">
-              Contact
-            </TableHead>
-            <TableHead className="font-semibold text-foreground">
+            <TableHead className="text-white font-semibold">Contact</TableHead>
+
+            <TableHead className="text-white font-semibold">
               Customers
             </TableHead>
-            <TableHead className="font-semibold text-foreground">
+
+            <TableHead className="text-white font-semibold">
               Last Login
             </TableHead>
-            <TableHead className="font-semibold text-foreground">
-              Joined
-            </TableHead>
-            <TableHead className="font-semibold text-foreground">
-              Status
-            </TableHead>
-            <TableHead className="text-right font-semibold text-foreground">
+
+            <TableHead className="text-white font-semibold">Joined</TableHead>
+
+            <TableHead className="text-white font-semibold">Status</TableHead>
+
+            <TableHead className="text-right text-white font-semibold">
               Actions
             </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {agents.map((agent) => {
+          {agents.map((agent, index) => {
             const status = agent?.isActive ?? IsActive.ALL;
             return (
               <TableRow
                 key={agent._id}
-                className={`border-b border-border hover:bg-muted/30 transition-colors ${STATUS_ROW_ACCENT[status]}`}
+                className={`
+                  border-b
+                  transition-all
+                  duration-300
+                  hover:shadow-sm
+                  hover:scale-[1.002]
+                  hover:bg-indigo-50
+                  dark:hover:bg-indigo-950/20
+
+                  ${
+                    index % 2 === 0
+                      ? "bg-white dark:bg-background"
+                      : "bg-gradient-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
+                  }
+
+                ${STATUS_ROW_ACCENT[status]}
+                `}
               >
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={agent.picture} alt={agent.name} />
-                      <AvatarFallback className="text-xs font-semibold">
+                     <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-cyan-500 text-white text-xs font-bold">
                         {agent.name?.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -222,6 +238,8 @@ export function AgentTable({
           })}
         </TableBody>
       </Table>
+      <ScrollBar orientation="horizontal" />
+      </ScrollArea>
     </div>
   );
 }

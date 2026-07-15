@@ -174,11 +174,11 @@ export function MyAgentsPage() {
 
       <div className="flex flex-wrap items-center justify-end gap-3">
         <Button
-          variant="outline"
+          variant="default"
           onClick={() => router.push("/agent-leader/dashboard/my-agents/trash")}
-          className="group hover:cursor-pointer border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all duration-300"
+          className="group hover:cursor-pointer border-rose-600 text-white bg-rose-700 hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 transition-transform ease-in-out flex gap-2 items-center"
         >
-          <Trash2 className="mr-2 h-4 w-4 group-hover:rotate-6 transition-transform duration-300" />
+          <Trash2 className="h-4 w-4 group-hover:rotate-6 transition-transform duration-300" />
           Trash
         </Button>
         <CreateAgentModal onSuccess={refetch} />
