@@ -175,7 +175,13 @@ export default function ContactForm() {
 
             {/* Replace with an actual embedded Google Map (office coordinates) */}
             <div className="mt-6 flex h-56 items-center justify-center rounded-2xl border border-dashed border-slate-300 text-sm text-slate-400 dark:border-slate-700">
-              Embed Google Map here
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d206.45997676361523!2d90.36015113525936!3d23.806818398093768!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c13bf1b25cd9%3A0x337ad20eaa1a2578!2sBachelor%20corner!5e1!3m2!1sen!2sbd!4v1784112169335!5m2!1sen!2sbd"
+                className="w-full h-full border-0"
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
+              />
             </div>
           </div>
 

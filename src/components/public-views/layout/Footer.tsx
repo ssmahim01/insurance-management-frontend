@@ -27,26 +27,6 @@ const socialLinks = [
   },
 ];
 
-const paymentPartners = [
-  { id: 1, name: "bKash", logo: "/assets/payments/bkash.svg" },
-  { id: 2, name: "Nagad", logo: "/assets/payments/nagad.svg" },
-  { id: 3, name: "DBBL", logo: "/assets/payments/dbbl.svg" },
-  { id: 4, name: "Visa", logo: "/assets/payments/visa.svg" },
-  { id: 5, name: "Mastercard", logo: "/assets/payments/mastercard.svg" },
-  { id: 6, name: "DBBL Nexus", logo: "/assets/payments/dbbl-nexus.svg" },
-  { id: 7, name: "American Express", logo: "/assets/payments/amex.svg" },
-  { id: 8, name: "IDLC", logo: "/assets/payments/idlc.svg" },
-  { id: 9, name: "First Security Islami Bank", logo: "/assets/payments/fsibl.svg" },
-  { id: 10, name: "Bank Asia", logo: "/assets/payments/bank-asia.svg" },
-  { id: 11, name: "City Bank", logo: "/assets/payments/city-bank.svg" },
-  { id: 12, name: "BRAC Bank", logo: "/assets/payments/brac-bank.svg" },
-  { id: 13, name: "AB Bank", logo: "/assets/payments/ab-bank.svg" },
-  { id: 14, name: "IFIC Bank", logo: "/assets/payments/ific-bank.svg" },
-  { id: 15, name: "SSL Commerz", logo: "/assets/payments/ssl-commerz.svg" },
-  { id: 16, name: "MTB", logo: "/assets/payments/mtb.svg" },
-  { id: 17, name: "Modhumoti Bank", logo: "/assets/payments/modhumoti-bank.svg" },
-];
-
 export default function Footer() {
   return (
     <footer className="border-t border-black/5 bg-[#F7F9FC] dark:border-white/10 dark:bg-neutral-950">
@@ -68,25 +48,16 @@ export default function Footer() {
               </span>
             </Link>
 
-            <div className="mt-8 gap-4">
-              <div className="relative shrink-0">
-                <Image
-                  src="/assets/idra.png"
-                  alt="IDRA Bangladesh"
-                  // fill
-                  width={150}
-                  height={150}
-                  className="object-contain"
-                />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-[#0B1F3A] dark:text-white">
-                  Approved by
-                </p>
-                <p className="mt-1 text-sm uppercase leading-snug text-gray-500 dark:text-gray-400">
-                  Insurance Development and Regulatory Authority
-                </p>
-              </div>
+            <div className="mt-8">
+              <h3 className="text-sm font-bold text-[#0B1F3A] dark:text-white">
+                Your Trusted Health Insurance Partner
+              </h3>
+
+              <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-400">
+                Shurokka helps individuals and families access reliable health insurance
+                plans with transparent coverage, affordable premiums, and a seamless
+                digital experience.
+              </p>
             </div>
 
             <div className="mt-8 flex items-center gap-3">
@@ -182,30 +153,20 @@ export default function Footer() {
 
         {/* Payment partners — static wrapping grid */}
         <div className="mt-14 border-t border-black/5 pt-8 dark:border-white/10">
-          <div className="flex flex-wrap items-center gap-3">
-            {paymentPartners.map((partner) => (
-              <div
-                key={partner.id}
-                className="flex h-11 w-16 shrink-0 items-center justify-center rounded-md border border-black/5 bg-white p-1.5 dark:border-white/10"
-              >
-                <div className="relative h-full w-full">
-                  <Image
-                    src={partner.logo}
-                    alt={partner.name}
-                    fill
-                    sizes="64px"
-                    className="object-contain"
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+          <Image
+            src="/assets/payment/payment-logo.svg"
+            alt="Payment Gateway Logo"
+            width={620}
+            height={64}
+            priority
+            className="mx-auto h-auto w-full max-w-170 object-contain"
+          />
         </div>
 
         {/* Copyright */}
         <div className="mt-8 border-t border-black/5 pt-6 text-center dark:border-white/10">
-          <p className="text-sm text-gray-500 dark:text-gray-500">
-            © 2026 Shurokka Health. All Rights Reserved. Developed by <Link target="_blank" href={"https://dotskillsbd.com"}>Dotskills</Link>.
+          <p className="text-sm text-gray-900 dark:text-gray-100">
+            © 2026 Shurokka Health. All Rights Reserved. Developed by <Link target="_blank" href={"https://dotskillsbd.com"}><span className="font-bold text-[#0F467C] dark:text-[#43B748]">Dotskills</span> </Link>.
           </p>
         </div>
       </div>

@@ -17,7 +17,7 @@ export default function AnnouncementBar() {
         </p>
 
         <Link
-          href="/plans/health"
+          href="/products"
           className="shrink-0 rounded-full btn-bg px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-white transition-colors duration-300  sm:text-[13px]"
         >
           Click Here

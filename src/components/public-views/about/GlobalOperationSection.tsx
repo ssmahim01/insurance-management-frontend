@@ -40,16 +40,16 @@ export default function GlobalOperationSection() {
           className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2"
         >
           <div
-            className={`relative h-64 w-full overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5 transition-all duration-700 ease-out dark:bg-neutral-900 dark:ring-white/10 sm:h-80 ${
+            className={`relative h-64 w-full overflow-hidden rounded-2xl transition-all duration-700 ease-out sm:h-80 ${
               visible ? "opacity-100 scale-100" : "opacity-0 scale-95"
             }`}
           >
             <Image
-              src="/assets/global-operation-map.png"
+              src="https://t3.ftcdn.net/jpg/17/84/38/54/360_F_1784385429_9RYpwRgjCCFymVapZqwnfBldTNWPjzzd.jpg"
               alt="Shurokka global operation map across Ghana, Tanzania, Pakistan, Bangladesh, Sri Lanka, Cambodia, and Singapore"
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-contain p-6"
+              className="rounded-2xl object-cover"
             />
           </div>
 

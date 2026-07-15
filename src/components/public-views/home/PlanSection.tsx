@@ -17,8 +17,8 @@ interface Plan {
 const plans: Plan[] = [
   {
     id: 1,
-    title: "Milvik Health Plans",
-    image: "/assets/plan1.webp",
+    title: "Shurokkha Health Health Plans",
+    image: "/assets/plan1.1.webp",
     href: "/plans/health",
     price: "৳499/month",
     features: [
@@ -31,7 +31,7 @@ const plans: Plan[] = [
   {
     id: 2,
     title: "Wellness Plans",
-    image: "/assets/plan2.webp",
+    image: "/assets/plan1.2.webp",
     href: "/plans/wellness",
     price: "৳699/month",
     features: [
@@ -44,7 +44,7 @@ const plans: Plan[] = [
   {
     id: 3,
     title: "My Doctor Plans",
-    image: "/assets/plan3.webp",
+    image: "/assets/plan1.3.webp",
     href: "/plans/my-doctor",
     price: "৳999/month",
     features: [
@@ -140,13 +140,13 @@ export default function PlansSection() {
                   ))}
                 </ul>
 
-                <Link
+                {/* <Link
                   href={plan.href}
                   className="group/btn inline-flex items-center justify-center gap-2 rounded-full border-2 border-[#007A55] px-6 py-3 text-sm font-semibold text-[#007A55] transition-all duration-300 hover:bg-[#007A55] hover:text-white dark:border-[#00C896] dark:text-[#00C896] dark:hover:bg-[#00C896] dark:hover:text-neutral-950"
                 >
                   View Plan Details
                   <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
-                </Link>
+                </Link> */}
               </div>
             </div>
           ))}

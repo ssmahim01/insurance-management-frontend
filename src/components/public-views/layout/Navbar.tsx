@@ -297,7 +297,7 @@ export default function Navbar() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button className="cursor-pointer btn-bg text-white text-sm font-medium py-5 px-6 rounded-full shadow-md transition-transform duration-200 hover:scale-[1.03]">
+              <Button className="cursor-pointer btn-bg text-white text-md font-medium py-5 px-6 rounded-full shadow-md transition-transform duration-200 hover:scale-[1.03]">
                 <Link href="/login">Login/Claim</Link>
               </Button>
             )}

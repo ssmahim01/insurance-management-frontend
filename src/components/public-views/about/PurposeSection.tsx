@@ -13,28 +13,28 @@ interface PurposeItem {
 const purposeItems: PurposeItem[] = [
   {
     id: 1,
-    image: "/assets/purpose/serving-underserved.jpg",
+    image: "https://www.eagletelemedicine.com/wp-content/uploads/2022/11/serving.jpg",
     title: "Serving the underserved",
     description:
       "Over a decade ago, we created the concept of micro-insurance which could be accessed very easily, through mobile, and address the healthcare needs of the underserved.",
   },
   {
     id: 2,
-    image: "/assets/purpose/experience.jpg",
+    image: "https://electronichealthreporter.com/wp-content/uploads/2023/10/Medical-Staff-Team-1030x686-1.jpg",
     title: "Experience",
     description:
       "We put customer experience at the center and ensure that customers want Shurokka to be part of their lives. We pride ourselves on sharing these learnings across our markets globally, and continue to build on it to serve customers better.",
   },
   {
     id: 3,
-    image: "/assets/purpose/integrated-health.jpg",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQuVcQfb_xHqvSv6nqBEMFKvwPV826xtnzNx1FvW3qpQnMmibWGM04fDo1k&s=10",
     title: "Integrated health & insurance",
     description:
       "We create integrated health and insurance solutions and partner with leading financial service enablers to offer accessible and affordable solutions for underserved consumers.",
   },
   {
     id: 4,
-    image: "/assets/purpose/mobile-health.jpg",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS6TE--S0R-Y0-hIr3mfPzS_llvTyHgnKDdP_poCH0LCmcHqoE7DRDPkfu9&s=10",
     title: "Unlocking mobile for health",
     description:
       "By leveraging mobile technology to deliver health solutions, we are able to scale rapidly and serve millions of 'unreachable' customers.",

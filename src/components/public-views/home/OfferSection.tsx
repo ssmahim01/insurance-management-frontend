@@ -17,7 +17,7 @@ const benefits = [
     icon: Headset,
     title: "24/7 Telemedicine",
     description:
-      "Milvik Doctors are here for you 24/7, 365 days a year. Whenever you need it, get a callback from our doctors in 5 minutes (Audio/Video)",
+      "Shurokkha Health Doctors are here for you 24/7, 365 days a year. Whenever you need it, get a callback from our doctors in 5 minutes (Audio/Video)",
   },
   {
     id: 2,
@@ -86,7 +86,7 @@ export default function OfferSection() {
         >
           <h2 className="text-3xl font-bold">What SHUROKKA Offers</h2>
           <p>
-            Milvik Offers all that you need, for a comprehensive healthcare
+            Shurokkha Health Offers all that you need, for a comprehensive healthcare
             solution that you can access conveniently
           </p>
         </div>
