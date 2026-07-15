@@ -10,22 +10,30 @@ interface TeamMember {
   image: string;
 }
 
+const placeholderAvatar = "data:image/svg+xml;utf8," + encodeURIComponent(`
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="#E5E7EB"/>
+  <circle cx="100" cy="80" r="35" fill="#9CA3AF"/>
+  <path d="M40 190 C40 140 70 120 100 120 C130 120 160 140 160 190 Z" fill="#9CA3AF"/>
+</svg>
+`); 
+
 const globalTeam: TeamMember[] = [
-  { id: 1, name: "Gustaf Agartson", role: "CEO, Global", image: "/assets/team/gustaf-agartson.jpg" },
-  { id: 2, name: "Michelle Duan", role: "Chief Financial Officer", image: "/assets/team/michelle-duan.jpg" },
-  { id: 3, name: "Balaji Jayavelu", role: "Chief Technology Officer", image: "/assets/team/balaji-jayavelu.jpg" },
-  { id: 4, name: "Stewart Langdon", role: "Board Director", image: "/assets/team/stewart-langdon.jpg" },
-  { id: 5, name: "Suramya Gupta", role: "Board Director", image: "/assets/team/suramya-gupta.jpg" },
+  { id: 1, name: "Gustaf Agartson", role: "CEO, Global", image: placeholderAvatar },
+  { id: 2, name: "Michelle Duan", role: "Chief Financial Officer", image: placeholderAvatar },
+  { id: 3, name: "Balaji Jayavelu", role: "Chief Technology Officer", image: placeholderAvatar },
+  { id: 4, name: "Stewart Langdon", role: "Board Director", image: placeholderAvatar},
+  { id: 5, name: "Suramya Gupta", role: "Board Director", image: placeholderAvatar },
 ];
 
 const bangladeshTeam: TeamMember[] = [
-  { id: 1, name: "Muinur Rahman", role: "Chief Operating Officer (COO), Bangladesh", image: "/assets/team/muinur-rahman.jpg" },
-  { id: 2, name: "Riaz Mostofa", role: "Chief Financial Officer (CFO), Bangladesh", image: "/assets/team/riaz-mostofa.jpg" },
-  { id: 3, name: "Israt Mustafa", role: "Country Lead, Product", image: "/assets/team/israt-mustafa.jpg" },
-  { id: 4, name: "Shafiqul Islam Sutirtha", role: "Country Lead, People Operations & Experience", image: "/assets/team/shafiqul-islam-sutirtha.jpg" },
-  { id: 5, name: "M. Asif", role: "Country Lead, IT", image: "/assets/team/m-asif.jpg" },
-  { id: 6, name: "Rezaur Rahim", role: "Country Lead, Claims", image: "/assets/team/rezaur-rahim.jpg" },
-  { id: 7, name: "Rahat Ikbal", role: "Country Lead, Field Sales", image: "/assets/team/rahat-ikbal.jpg" },
+  { id: 1, name: "Muinur Rahman", role: "Chief Operating Officer (COO), Bangladesh", image: placeholderAvatar },
+  { id: 2, name: "Riaz Mostofa", role: "Chief Financial Officer (CFO), Bangladesh", image: placeholderAvatar },
+  { id: 3, name: "Israt Mustafa", role: "Country Lead, Product", image: placeholderAvatar },
+  { id: 4, name: "Shafiqul Islam Sutirtha", role: "Country Lead, People Operations & Experience", image:placeholderAvatar },
+  { id: 5, name: "M. Asif", role: "Country Lead, IT", image: placeholderAvatar },
+  { id: 6, name: "Rezaur Rahim", role: "Country Lead, Claims", image: placeholderAvatar },
+  { id: 7, name: "Rahat Ikbal", role: "Country Lead, Field Sales", image: placeholderAvatar },
 ];
 
 function TeamGrid({

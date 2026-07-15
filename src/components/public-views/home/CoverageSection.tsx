@@ -24,7 +24,7 @@ const coverageBlocks: CoverageBlock[] = [
     title: "Individuals & Families",
     description:
       "We understand the importance of safeguarding the financial security of individuals and families. We offer a comprehensive suite of plans designed to address a wide range of needs — protection against life and disability, health, wellness, and doctor service — ensuring peace of mind for our clients and their loved ones.",
-    image: "/assets/family1.webp",
+    image: "/assets/Cover1.webp",
     href: "/plans/individuals",
     reverse: false,
   },
@@ -35,7 +35,7 @@ const coverageBlocks: CoverageBlock[] = [
     title: "Corporates & Stakeholders",
     description:
       "In today's dynamic business environment, employee well-being is paramount. We partner with organisations to develop customised health solutions that safeguard their most valuable asset: their workforce. Our healthcare plans address health needs across the spectrum, tailored to the requirements of your employees or stakeholders, ensuring their wellbeing.",
-    image: "/assets/cover2.webp",
+    image: "/assets/Cover2.webp",
     href: "/plans/corporate",
     reverse: true,
   },

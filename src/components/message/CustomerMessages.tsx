@@ -112,6 +112,7 @@ export function CustomerMessages() {
 
         <div className="flex gap-2">
           <Select
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             value={typeFilter as any}
             onValueChange={(v) => setTypeFilter(v as "all" | MessageType)}
           >

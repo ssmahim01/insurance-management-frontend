@@ -59,7 +59,7 @@ export default function TrustedPartnersSection() {
           {partners.map((partner) => (
             <SwiperSlide key={partner.id} className="flex! items-center! justify-center!">
               <div className="group flex items-center justify-center">
-                <div className="relative h-10 w-32  transition-all duration-300 sm:h-12 sm:w-36">
+                <div className="relative h-10 w-32  transition-all duration-300 sm:h-20 sm:w-80">
                   <Image
                     src={partner.logo}
                     alt={partner.name}

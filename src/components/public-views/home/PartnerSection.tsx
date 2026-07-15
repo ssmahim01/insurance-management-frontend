@@ -55,7 +55,7 @@ export default function PartnerSection() {
           style={{ transitionDelay: visible ? "150ms" : "0ms" }}
         >
           <Image
-            src="/assets/10-50-Discount-1-1.webp"
+            src="/assets/hospital.webp"
             alt="500+ partner hospitals across Bangladesh offering 10-50% discount"
             fill
             sizes="(max-width: 768px) 100vw, 896px"

@@ -13,21 +13,21 @@ interface ValueItem {
 const values: ValueItem[] = [
   {
     id: 1,
-    image: "/assets/values/earn-give-respect.svg",
+    image: "https://media.licdn.com/dms/image/v2/D5612AQErCIkyK-NHvw/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1692075003840?e=2147483647&v=beta&t=sAg6C-Dgcjcfm6qQXlFARrb3QturoTA_bXXGYgN5-Jw",
     title: "Earn and Give Respect",
     description:
       "We show consideration for each other and for our customers. We celebrate diversity and are kind and sensitive when discussing ways in which we are different.",
   },
   {
     id: 2,
-    image: "/assets/values/think-big-start-small.svg",
+    image: "https://i0.wp.com/milvikbd.com/wp-content/uploads/2024/06/Think-big-start-small-1.jpg?w=480&ssl=1",
     title: "Think Big Start Small",
     description:
       "We imagine solutions that will challenge the status quo. We start small, take time to get it right, then let it fly. We empower our people to share and test their ideas. We believe in growing our people because every employee can have an impact on the business.",
   },
   {
     id: 3,
-    image: "/assets/values/take-ownership.svg",
+    image: "https://www.proofhub.com/articles/wp-content/uploads/2025/02/Taking-ownership-at-work.jpg",
     title: "Take Ownership",
     description:
       "Every one of our employees has a responsibility to our customers to deliver value and service. We recognise and reward people who take initiative, follow through on ideas with analysis and action, and go beyond their role to make Shurokka better.",

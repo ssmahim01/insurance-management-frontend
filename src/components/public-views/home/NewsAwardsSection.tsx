@@ -16,7 +16,7 @@ interface NewsItem {
 const newsItems: NewsItem[] = [
   {
     id: 1,
-    image: "/assets/WhatsApp-Image-2024-06-26-at-10.47.39_c251b883.webp",
+    image: "/assets/reword-bkash.webp",
     title: "Pay bill with bKash and get free healthcare from Shurokka",
     excerpt:
       "Amazing news for all bKash customers! Now if you pay your electricity bill (DESCO/DPDC) through bKash, Shurokka's special doctor's consultation is absolutely free…",
