@@ -32,7 +32,34 @@ export enum SubscribeFor {
   OTHER = "OTHER",
 }
 
+// Where the nominee's info is sourced from — only relevant when the
+// selected package is Joint (package.isJoint === true)
+export enum NomineeSource {
+  JOIN_MEMBER = "JOIN_MEMBER", // nominee is the same person as joinMember
+  OTHER = "OTHER",             // a completely separate person
+}
+
 export interface IBeneficiary {
+  name: string;
+  phone: string;
+  dateOfBirth?: string;
+  relationship: string;
+}
+
+// The 2nd covered person — only applicable when package.isJoint === true
+export interface IJoinMember {
+  name: string;
+  phone: string;
+  dateOfBirth?: string;
+  relationship: string;
+}
+
+// Subscription-level nominee (who receives the claim payout).
+// Nominee now belongs to the Subscription, not the User/Customer profile —
+// a customer can have a different nominee per subscription (e.g. the join
+// member on a Joint package).
+export interface ISubscriptionNominee {
+  source?: NomineeSource;
   name: string;
   phone: string;
   dateOfBirth?: string;
@@ -62,6 +89,12 @@ export interface ISubscription {
 
   subscribeFor?: SubscribeFor;
   beneficiary?: IBeneficiary;
+
+  // 2nd covered person — present only when the package is Joint
+  joinMember?: IJoinMember;
+
+  // nominee for this subscription — always required at creation
+  nominee?: ISubscriptionNominee;
 
   status: SubscriptionStatus;
 
@@ -115,13 +148,6 @@ export interface ICustomerAddress {
   street?: string;
 }
 
-export interface ICustomerNominee {
-  name?: string;
-  age?: number;
-  relationship?: string;
-  phone?: string;
-}
-
 export interface ICreateSubscriptionPayload {
   customer?: string;
   customerPayload?: {
@@ -133,7 +159,6 @@ export interface ICreateSubscriptionPayload {
     dateOfBirth?: string;
     gender?: "MALE" | "FEMALE" | "OTHER";
     address?: ICustomerAddress;
-    nominee?: ICustomerNominee;
   };
   package: string;
   planType: PlanType;
@@ -142,6 +167,21 @@ export interface ICreateSubscriptionPayload {
   autoRenew?: boolean;
   subscribeFor?: SubscribeFor;
   beneficiary?: {
+    name: string;
+    phone: string;
+    dateOfBirth?: string;
+    relationship: string;
+  };
+  // required when the selected package.isJoint === true
+  joinMember?: {
+    name: string;
+    phone: string;
+    dateOfBirth?: string;
+    relationship: string;
+  };
+  // required — subscription-level nominee
+  nominee: {
+    source?: NomineeSource;
     name: string;
     phone: string;
     dateOfBirth?: string;

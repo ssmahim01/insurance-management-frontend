@@ -1,3 +1,4 @@
+
 /* eslint-disable react-hooks/incompatible-library */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -22,6 +23,7 @@ import {
   ArrowLeft,
   ContactRound,
   HeartHandshake,
+  ShieldCheck,
 } from "lucide-react";
 
 import {
@@ -66,6 +68,8 @@ interface IPackageWithPlans {
   _id: string;
   name: string;
   plans: IPackagePlan[];
+  // true -> this package covers 2 persons; subscription needs a 2nd person's info
+  isJoint?: boolean;
 }
 
 const PLAN_LABELS: Record<PlanType, string> = {
@@ -109,12 +113,9 @@ const schema = z
     district: z.string().optional(),
     thana: z.string().optional(),
     street: z.string().optional(),
-    nomineeName: z.string().optional(),
-    nomineeAge: z.string().optional(),
-    nomineeRelationship: z.string().optional(),
-    nomineePhone: z.string().optional(),
 
-    // who the subscription actually covers
+    // who the subscription actually covers.
+    // Toggle is only shown for: mode === "existing" && !packageIsJoint
     subscribeFor: z.enum(["SELF", "OTHER"]),
     beneficiaryName: z.string().optional(),
     beneficiaryPhone: z.string().optional(),
@@ -125,6 +126,23 @@ const schema = z
     package: z.string().min(1, "Please select a package"),
     planType: z.nativeEnum(PlanType, { error: "Please select a plan" }),
     price: z.number().min(0),
+
+    // synced from the selected package (see useEffect below) — not user-editable
+    packageIsJoint: z.boolean().optional().default(false),
+
+    // 2nd covered person — required only when packageIsJoint === true
+    joinMemberName: z.string().optional(),
+    joinMemberPhone: z.string().optional(),
+    joinMemberDateOfBirth: z.string().optional(),
+    joinMemberRelationship: z.string().optional(),
+
+    // subscription-level nominee — always required.
+    // source === "JOIN_MEMBER" only possible when packageIsJoint === true
+    subscriptionNomineeSource: z.enum(["JOIN_MEMBER", "OTHER"]).default("OTHER"),
+    subscriptionNomineeName: z.string().optional(),
+    subscriptionNomineePhone: z.string().optional(),
+    subscriptionNomineeDateOfBirth: z.string().optional(),
+    subscriptionNomineeRelationship: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.mode === "existing") {
@@ -184,7 +202,9 @@ const schema = z
         });
     }
 
-    if (data.subscribeFor === "OTHER") {
+    // Self/Someone toggle is only ever meaningful for: existing customer + single package
+    const subscribeForApplies = data.mode === "existing" && !data.packageIsJoint;
+    if (subscribeForApplies && data.subscribeFor === "OTHER") {
       if (!data.beneficiaryName?.trim()) {
         ctx.addIssue({
           code: "custom",
@@ -210,6 +230,67 @@ const schema = z
         });
       }
     }
+
+    // Join Member — required whenever the selected package is Joint
+    if (data.packageIsJoint) {
+      if (!data.joinMemberName?.trim()) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["joinMemberName"],
+          message: "Join member name is required",
+        });
+      }
+      if (
+        !data.joinMemberPhone?.trim() ||
+        data.joinMemberPhone.length !== 11
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["joinMemberPhone"],
+          message: "Valid 11-digit phone required",
+        });
+      }
+      if (!data.joinMemberRelationship?.trim()) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["joinMemberRelationship"],
+          message: "Relationship is required",
+        });
+      }
+    }
+
+    // Nominee — always required.
+    // If Joint package AND nominee source is JOIN_MEMBER, info is copied
+    // from joinMember at submit time, so no separate fields needed here.
+    const nomineeUsesJoinMember =
+      data.packageIsJoint && data.subscriptionNomineeSource === "JOIN_MEMBER";
+
+    if (!nomineeUsesJoinMember) {
+      if (!data.subscriptionNomineeName?.trim()) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["subscriptionNomineeName"],
+          message: "Nominee name is required",
+        });
+      }
+      if (
+        !data.subscriptionNomineePhone?.trim() ||
+        data.subscriptionNomineePhone.length !== 11
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["subscriptionNomineePhone"],
+          message: "Valid 11-digit phone required",
+        });
+      }
+      if (!data.subscriptionNomineeRelationship?.trim()) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["subscriptionNomineeRelationship"],
+          message: "Relationship is required",
+        });
+      }
+    }
   });
 
 type FormValues = z.infer<typeof schema>;
@@ -227,10 +308,6 @@ const defaultValues: FormValues = {
   district: "",
   thana: "",
   street: "",
-  nomineeName: "",
-  nomineeAge: "",
-  nomineeRelationship: "",
-  nomineePhone: "",
   subscribeFor: "SELF",
   beneficiaryName: "",
   beneficiaryPhone: "",
@@ -239,6 +316,16 @@ const defaultValues: FormValues = {
   package: "",
   planType: undefined as any,
   price: 0,
+  packageIsJoint: false,
+  joinMemberName: "",
+  joinMemberPhone: "",
+  joinMemberDateOfBirth: "",
+  joinMemberRelationship: "",
+  subscriptionNomineeSource: "OTHER",
+  subscriptionNomineeName: "",
+  subscriptionNomineePhone: "",
+  subscriptionNomineeDateOfBirth: "",
+  subscriptionNomineeRelationship: "",
 };
 
 interface CreateSubscriptionModalProps {
@@ -300,7 +387,7 @@ export function CreateSubscriptionModal({
   }, [packagesData]);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema as any),
     defaultValues,
   });
 
@@ -312,6 +399,10 @@ export function CreateSubscriptionModal({
     () => packages.find((p) => p._id === selectedPackageId),
     [packages, selectedPackageId],
   );
+  const packageIsJoint = !!selectedPackage?.isJoint;
+
+  // self/someone toggle only makes sense for existing customer + single package
+  const showSubscribeForToggle = mode === "existing" && !packageIsJoint;
 
   const availablePlans = useMemo(
     () => selectedPackage?.plans ?? [],
@@ -335,7 +426,33 @@ export function CreateSubscriptionModal({
       form.setValue("planType", undefined as any);
       form.setValue("price", 0);
     }
-  }, [selectedPackageId, form]);
+
+    // sync the hidden packageIsJoint flag with the selected package
+    form.setValue("packageIsJoint", packageIsJoint, { shouldValidate: true });
+
+    if (!packageIsJoint) {
+      // clear join member data when switching away from a Joint package
+      form.setValue("joinMemberName", "");
+      form.setValue("joinMemberPhone", "");
+      form.setValue("joinMemberDateOfBirth", "");
+      form.setValue("joinMemberRelationship", "");
+      // "use join member as nominee" is impossible without a join member
+      if (form.getValues("subscriptionNomineeSource") === "JOIN_MEMBER") {
+        form.setValue("subscriptionNomineeSource", "OTHER");
+      }
+    }
+
+    // self/someone toggle only applies for existing + single package —
+    // reset it whenever that condition no longer holds
+    if (!(mode === "existing" && !packageIsJoint)) {
+      form.setValue("subscribeFor", "SELF");
+      form.setValue("beneficiaryName", "");
+      form.setValue("beneficiaryPhone", "");
+      form.setValue("beneficiaryDateOfBirth", "");
+      form.setValue("beneficiaryRelationship", "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPackageId, packageIsJoint, mode]);
 
   const resetAll = () => {
     form.reset(defaultValues);
@@ -460,22 +577,57 @@ export function CreateSubscriptionModal({
       return;
     }
 
+    const useJoinMemberAsNominee =
+      values.packageIsJoint && values.subscriptionNomineeSource === "JOIN_MEMBER";
+
+    const nomineePayload = useJoinMemberAsNominee
+      ? {
+          source: "JOIN_MEMBER" as const,
+          name: values.joinMemberName!.trim(),
+          phone: values.joinMemberPhone!.trim(),
+          relationship: values.joinMemberRelationship!.trim(),
+          ...(values.joinMemberDateOfBirth && {
+            dateOfBirth: values.joinMemberDateOfBirth,
+          }),
+        }
+      : {
+          source: "OTHER" as const,
+          name: values.subscriptionNomineeName!.trim(),
+          phone: values.subscriptionNomineePhone!.trim(),
+          relationship: values.subscriptionNomineeRelationship!.trim(),
+          ...(values.subscriptionNomineeDateOfBirth && {
+            dateOfBirth: values.subscriptionNomineeDateOfBirth,
+          }),
+        };
+
     const basePayload = {
       package: values.package,
       planType: values.planType,
       durationInMonths: selectedPlan.durationInMonths,
       price: values.price,
       subscribeFor: values.subscribeFor,
-      ...(values.subscribeFor === "OTHER" && {
-        beneficiary: {
-          name: values.beneficiaryName!.trim(),
-          phone: values.beneficiaryPhone!.trim(),
-          relationship: values.beneficiaryRelationship!.trim(),
-          ...(values.beneficiaryDateOfBirth && {
-            dateOfBirth: values.beneficiaryDateOfBirth,
+      ...(showSubscribeForToggle &&
+        values.subscribeFor === "OTHER" && {
+          beneficiary: {
+            name: values.beneficiaryName!.trim(),
+            phone: values.beneficiaryPhone!.trim(),
+            relationship: values.beneficiaryRelationship!.trim(),
+            ...(values.beneficiaryDateOfBirth && {
+              dateOfBirth: values.beneficiaryDateOfBirth,
+            }),
+          },
+        }),
+      ...(values.packageIsJoint && {
+        joinMember: {
+          name: values.joinMemberName!.trim(),
+          phone: values.joinMemberPhone!.trim(),
+          relationship: values.joinMemberRelationship!.trim(),
+          ...(values.joinMemberDateOfBirth && {
+            dateOfBirth: values.joinMemberDateOfBirth,
           }),
         },
       }),
+      nominee: nomineePayload,
     };
 
     let payload;
@@ -518,21 +670,6 @@ export function CreateSubscriptionModal({
               street: values.street.trim(),
             }),
           },
-
-          ...(values.nomineeName?.trim() && {
-            nominee: {
-              name: values.nomineeName.trim(),
-              ...(values.nomineeAge && {
-                age: Number(values.nomineeAge),
-              }),
-              ...(values.nomineeRelationship?.trim() && {
-                relationship: values.nomineeRelationship.trim(),
-              }),
-              ...(values.nomineePhone?.trim() && {
-                phone: values.nomineePhone.trim(),
-              }),
-            },
-          }),
         },
       };
     }
@@ -581,7 +718,7 @@ export function CreateSubscriptionModal({
 
         <ScrollArea className="max-h-[80vh] pr-2">
           <form
-            onSubmit={form.handleSubmit(onSubmit, onError)}
+            onSubmit={form.handleSubmit(onSubmit as any, onError)}
             className="space-y-5 pr-2"
           >
             {/* ── Mode Toggle (New Customer first) ── */}
@@ -652,7 +789,7 @@ export function CreateSubscriptionModal({
                   <span
                     className={`text-xs font-medium transition-colors duration-300 ${step === 2 ? "text-indigo-700 dark:text-indigo-400" : "text-slate-400"}`}
                   >
-                    Nominee & Plan
+                    Plan & Nominee
                   </span>
                 </div>
               </div>
@@ -749,8 +886,6 @@ export function CreateSubscriptionModal({
                 </div>
 
                 <Separator />
-                <SubscribeForBlock form={form} />
-                <Separator />
                 <PlanBlock
                   form={form}
                   packages={packages}
@@ -759,6 +894,16 @@ export function CreateSubscriptionModal({
                   availablePlans={availablePlans}
                   selectedPlan={selectedPlan}
                 />
+                <Separator />
+
+                {packageIsJoint ? (
+                  <JoinMemberBlock form={form} />
+                ) : (
+                  <SubscribeForBlock form={form} />
+                )}
+
+                <Separator />
+                <NomineeBlock form={form} packageIsJoint={packageIsJoint} />
 
                 <Button
                   type="submit"
@@ -975,34 +1120,6 @@ export function CreateSubscriptionModal({
 
                 {step === 2 && (
                   <div key="step2" className={`space-y-5 ${slideClass}`}>
-                    <div>
-                      <p className="text-[10px] font-bold tracking-widest uppercase text-slate-400 mb-2">
-                        Nominee (optional)
-                      </p>
-                      <div className="grid grid-cols-2 gap-3">
-                        <Input
-                          placeholder="Nominee Name"
-                          {...form.register("nomineeName")}
-                        />
-                        <Input
-                          placeholder="Nominee Age"
-                          type="number"
-                          {...form.register("nomineeAge")}
-                        />
-                        <Input
-                          placeholder="Relationship"
-                          {...form.register("nomineeRelationship")}
-                        />
-                        <Input
-                          placeholder="Nominee Phone"
-                          {...form.register("nomineePhone")}
-                        />
-                      </div>
-                    </div>
-
-                    <Separator />
-                    <SubscribeForBlock form={form} />
-                    <Separator />
                     <PlanBlock
                       form={form}
                       packages={packages}
@@ -1011,6 +1128,16 @@ export function CreateSubscriptionModal({
                       availablePlans={availablePlans}
                       selectedPlan={selectedPlan}
                     />
+
+                    {packageIsJoint && (
+                      <>
+                        <Separator />
+                        <JoinMemberBlock form={form} />
+                      </>
+                    )}
+
+                    <Separator />
+                    <NomineeBlock form={form} packageIsJoint={packageIsJoint} />
 
                     <div className="flex gap-2">
                       <Button
@@ -1051,8 +1178,9 @@ export function CreateSubscriptionModal({
   );
 }
 
-// ── shared blocks (used in both existing-single-step and new-step2) ──
+// ── shared blocks ──
 
+// Only rendered for: mode === "existing" && !packageIsJoint
 function SubscribeForBlock({ form }: { form: any }) {
   const subscribeFor = form.watch("subscribeFor");
   return (
@@ -1138,6 +1266,147 @@ function SubscribeForBlock({ form }: { form: any }) {
   );
 }
 
+// 2nd covered person — shown whenever the selected package is Joint
+// (both existing-customer and new-customer flows)
+function JoinMemberBlock({ form }: { form: any }) {
+  return (
+    <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-250">
+      <p className="text-[10px] font-bold tracking-widest uppercase text-slate-400 flex items-center gap-1.5">
+        <Users className="w-3.5 h-3.5" /> Join Member Info <span className="text-red-500">*</span>
+      </p>
+      <p className="text-[11px] text-slate-400 pb-1">
+        This package covers 2 persons. Please provide the 2nd person&apos;s info.
+      </p>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5 col-span-2">
+          <Input
+            placeholder="Join Member Name *"
+            {...form.register("joinMemberName")}
+          />
+          {form.formState.errors.joinMemberName && (
+            <p className="text-xs text-red-500">
+              {form.formState.errors.joinMemberName.message}
+            </p>
+          )}
+        </div>
+        <div className="space-y-1.5">
+          <Input
+            placeholder="Join Member Phone *"
+            {...form.register("joinMemberPhone")}
+          />
+          {form.formState.errors.joinMemberPhone && (
+            <p className="text-xs text-red-500">
+              {form.formState.errors.joinMemberPhone.message}
+            </p>
+          )}
+        </div>
+        <Input
+          type="date"
+          placeholder="Date of Birth"
+          {...form.register("joinMemberDateOfBirth")}
+        />
+        <div className="space-y-1.5 col-span-2">
+          <Input
+            placeholder="Relationship (e.g. Spouse, Son, Father) *"
+            {...form.register("joinMemberRelationship")}
+          />
+          {form.formState.errors.joinMemberRelationship && (
+            <p className="text-xs text-red-500">
+              {form.formState.errors.joinMemberRelationship.message}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Subscription-level nominee — always required.
+// When the package is Joint, offers a shortcut to reuse the Join Member's info.
+function NomineeBlock({
+  form,
+  packageIsJoint,
+}: {
+  form: any;
+  packageIsJoint: boolean;
+}) {
+  const source = form.watch("subscriptionNomineeSource");
+  const useJoinMemberAsNominee = packageIsJoint && source === "JOIN_MEMBER";
+
+  return (
+    <div className="space-y-3">
+      <p className="text-[10px] font-bold tracking-widest uppercase text-slate-400 flex items-center gap-1.5">
+        <ShieldCheck className="w-3.5 h-3.5" /> Nominee <span className="text-red-500">*</span>
+      </p>
+
+      {packageIsJoint && (
+        <label className="flex items-center gap-2 text-sm cursor-pointer select-none rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+          <input
+            type="checkbox"
+            checked={useJoinMemberAsNominee}
+            onChange={(e) =>
+              form.setValue(
+                "subscriptionNomineeSource",
+                e.target.checked ? "JOIN_MEMBER" : "OTHER",
+                { shouldValidate: true },
+              )
+            }
+            className="h-4 w-4 rounded border-slate-300"
+          />
+          Select the Join Person as Nominee
+        </label>
+      )}
+
+      {useJoinMemberAsNominee ? (
+        <p className="text-xs text-slate-400 italic px-1 animate-in fade-in duration-200">
+          Nominee will be set to the Join Member&apos;s information.
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 gap-3 animate-in fade-in slide-in-from-top-2 duration-250">
+          <div className="space-y-1.5 col-span-2">
+            <Input
+              placeholder="Nominee Name *"
+              {...form.register("subscriptionNomineeName")}
+            />
+            {form.formState.errors.subscriptionNomineeName && (
+              <p className="text-xs text-red-500">
+                {form.formState.errors.subscriptionNomineeName.message}
+              </p>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Input
+              placeholder="Nominee Phone *"
+              {...form.register("subscriptionNomineePhone")}
+            />
+            {form.formState.errors.subscriptionNomineePhone && (
+              <p className="text-xs text-red-500">
+                {form.formState.errors.subscriptionNomineePhone.message}
+              </p>
+            )}
+          </div>
+          <Input
+            type="date"
+            placeholder="Date of Birth"
+            {...form.register("subscriptionNomineeDateOfBirth")}
+          />
+          <div className="space-y-1.5 col-span-2">
+            <Input
+              placeholder="Relationship (e.g. Spouse, Son, Father) *"
+              {...form.register("subscriptionNomineeRelationship")}
+            />
+            {form.formState.errors.subscriptionNomineeRelationship && (
+              <p className="text-xs text-red-500">
+                {form.formState.errors.subscriptionNomineeRelationship.message}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PlanBlock({
   form,
   packages,
@@ -1168,14 +1437,26 @@ function PlanBlock({
             }
           >
             <SelectTrigger className="w-full">
-              <span>
+              <span className="flex items-center gap-1.5">
+                {selectedPackage?.isJoint ? (
+                  <Users className="w-3.5 h-3.5 text-slate-400" />
+                ) : selectedPackage ? (
+                  <User className="w-3.5 h-3.5 text-slate-400" />
+                ) : null}
                 {selectedPackage ? selectedPackage.name : "Select Package"}
               </span>
             </SelectTrigger>
             <SelectContent>
               {packages.map((pkg) => (
                 <SelectItem key={pkg._id} value={pkg._id}>
-                  {pkg.name}
+                  <span className="flex items-center gap-1.5">
+                    {pkg.isJoint ? (
+                      <Users className="w-3.5 h-3.5 text-slate-400" />
+                    ) : (
+                      <User className="w-3.5 h-3.5 text-slate-400" />
+                    )}
+                    {pkg.name}
+                  </span>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -1230,3 +1511,4 @@ function PlanBlock({
     </div>
   );
 }
+
