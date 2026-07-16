@@ -1,3 +1,4 @@
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 "use client";
@@ -10,8 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { User, Users } from "lucide-react";
-import { ISubscription, SubscribeFor } from "@/types/subscription.types";
+import { User, Users, ShieldCheck } from "lucide-react";
+import { ISubscription, SubscribeFor, NomineeSource } from "@/types/subscription.types";
 
 const formatDate = (iso?: string | null) => {
   if (!iso) return "—";
@@ -46,7 +47,9 @@ export function SubscriptionDetailsModal({
   onOpenChange: (v: boolean) => void;
   item: ISubscription;
 }) {
-  const isForOther = item.subscribeFor === SubscribeFor.OTHER && !!item.beneficiary;
+  const isJoint = !!item.joinMember;
+  const isForOther = !isJoint && item.subscribeFor === SubscribeFor.OTHER && !!item.beneficiary;
+  const nomineeIsJoinMember = item.nominee?.source === NomineeSource.JOIN_MEMBER;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -71,16 +74,24 @@ export function SubscriptionDetailsModal({
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-[10px] font-bold tracking-widest uppercase text-slate-400">Subscribed For</p>
+            <p className="text-[10px] font-bold tracking-widest uppercase text-slate-400">
+              {isJoint ? "Coverage Type" : "Subscribed For"}
+            </p>
             <Badge
               variant="outline"
               className={
-                isForOther
-                  ? "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-800 dark:bg-violet-900/20 dark:text-violet-400"
-                  : "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+                isJoint
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400"
+                  : isForOther
+                    ? "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-800 dark:bg-violet-900/20 dark:text-violet-400"
+                    : "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
               }
             >
-              {isForOther ? (
+              {isJoint ? (
+                <span className="inline-flex items-center gap-1">
+                  <Users className="w-3 h-3" /> Joint
+                </span>
+              ) : isForOther ? (
                 <span className="inline-flex items-center gap-1">
                   <Users className="w-3 h-3" /> Other
                 </span>
@@ -102,6 +113,54 @@ export function SubscriptionDetailsModal({
                 value={item.beneficiary?.dateOfBirth ? formatDate(item.beneficiary.dateOfBirth) : "—"}
               />
             </div>
+          )}
+
+          {isJoint && (
+            <div className="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-800/40 rounded-lg p-3">
+              <Field label="Join Member Name" value={item.joinMember?.name} />
+              <Field label="Relationship" value={item.joinMember?.relationship} />
+              <Field label="Phone" value={item.joinMember?.phone} />
+              <Field
+                label="Date of Birth"
+                value={item.joinMember?.dateOfBirth ? formatDate(item.joinMember.dateOfBirth) : "—"}
+              />
+            </div>
+          )}
+        </div>
+
+        <Separator />
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] font-bold tracking-widest uppercase text-slate-400 flex items-center gap-1.5">
+              <ShieldCheck className="w-3 h-3" /> Nominee
+            </p>
+            {item.nominee && (
+              <Badge
+                variant="outline"
+                className={
+                  nomineeIsJoinMember
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400"
+                    : "border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800/40 dark:text-slate-300"
+                }
+              >
+                {nomineeIsJoinMember ? "Same as Join Member" : "Separate"}
+              </Badge>
+            )}
+          </div>
+
+          {item.nominee ? (
+            <div className="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-800/40 rounded-lg p-3">
+              <Field label="Nominee Name" value={item.nominee.name} />
+              <Field label="Relationship" value={item.nominee.relationship} />
+              <Field label="Phone" value={item.nominee.phone} />
+              <Field
+                label="Date of Birth"
+                value={item.nominee.dateOfBirth ? formatDate(item.nominee.dateOfBirth) : "—"}
+              />
+            </div>
+          ) : (
+            <p className="text-sm text-slate-400 italic">No nominee information provided.</p>
           )}
         </div>
 
