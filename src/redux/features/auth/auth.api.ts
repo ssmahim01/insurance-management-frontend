@@ -16,6 +16,24 @@ interface IChangePasswordResponse {
   message: string;
   success: boolean;
 }
+
+// ================= OTP =================
+
+interface ISendOtpPayload {
+  phone: string;
+}
+
+interface IVerifyOtpPayload {
+  phone: string;
+  otp: string;
+}
+
+interface IVerifyOtpResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: IUserApiResponse["data"];
+}
+
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     register: builder.mutation<IResponse<IRegisterResponse>, IRegister>({
@@ -32,6 +50,28 @@ export const authApi = baseApi.injectEndpoints({
         data: userInfo,
       }),
     }),
+
+        // ================= SEND OTP =================
+
+    sendOtp: builder.mutation<IResponse<null>, ISendOtpPayload>({
+      query: (body) => ({
+        url: "/auth/send-otp",
+        method: "POST",
+        data: body,
+      }),
+    }),
+
+    // ================= VERIFY OTP =================
+
+    verifyOtp: builder.mutation<IResponse<IVerifyOtpResponse>,IVerifyOtpPayload>({
+      query: (body) => ({
+        url: "/auth/verify-otp",
+        method: "POST",
+        data: body,
+      }),
+    }),
+
+
     logout: builder.mutation({
       query: () => ({
         url: "/auth/logout",
@@ -75,4 +115,8 @@ export const {
   useUserInfoQuery,
   useChangePasswordMutation,
   useAdminChangePasswordMutation,
+
+  //otp sent and verification
+  useSendOtpMutation,
+  useVerifyOtpMutation,
 } = authApi;
