@@ -73,6 +73,7 @@ const MESSAGE_TYPE_LABELS: Record<MessageType, string> = {
   [MessageType.PROMOTIONAL]: "Promotional",
   [MessageType.GENERAL]: "General",
   [MessageType.OTP]: "OTP",
+  [MessageType.SMS]: "SMS",
 };
 
 const MESSAGE_TYPE_COLORS: Record<MessageType, string> = {
@@ -88,6 +89,8 @@ const MESSAGE_TYPE_COLORS: Record<MessageType, string> = {
     "border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
   [MessageType.OTP]:
     "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400",
+  [MessageType.SMS]:
+    "border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-800 dark:bg-indigo-900/20 dark:text-indigo-400",
 };
 
 // ─── Skeleton ────────────────────────────────────────────────────────────────

@@ -37,6 +37,7 @@ const MESSAGE_TYPE_LABELS: Record<MessageType, string> = {
   [MessageType.PROMOTIONAL]: "Promotional",
   [MessageType.GENERAL]: "General",
   [MessageType.OTP]: "OTP",
+  [MessageType.SMS]: "SMS",
 };
 
 const MESSAGE_TYPE_COLORS: Record<MessageType, string> = {
@@ -52,6 +53,8 @@ const MESSAGE_TYPE_COLORS: Record<MessageType, string> = {
     "border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
   [MessageType.OTP]:
     "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-900/20 dark:text-rose-400",
+    [MessageType.SMS]:
+    "border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-800 dark:bg-indigo-900/20 dark:text-indigo-400",
 };
 
 export function MessageTrashTable({
