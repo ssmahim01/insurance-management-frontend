@@ -204,7 +204,7 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
             )}
           >
             <Image
-              src={"/assets/shurokkha-logo-1.png"}
+              src="/assets/logo.svg"
               alt="Shurokkha Logo"
               fill
               quality={90}
