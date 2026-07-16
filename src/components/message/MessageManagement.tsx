@@ -113,33 +113,6 @@ const MESSAGE_TYPE_ICONS: Record<MessageType, React.ElementType> = {
     [MessageType.SMS]: KeyRound,
 };
 
-const MESSAGE_TYPE_ICON_COLORS: Record<MessageType, { bg: string; icon: string }> = {
-    [MessageType.SUBSCRIPTION]: {
-        bg: "bg-green-50 dark:bg-green-900/20",
-        icon: "text-green-600 dark:text-green-400",
-    },
-    [MessageType.PAYMENT]: {
-        bg: "bg-emerald-50 dark:bg-emerald-900/20",
-        icon: "text-emerald-600 dark:text-emerald-400",
-    },
-    [MessageType.CLAIM]: {
-        bg: "bg-purple-50 dark:bg-purple-900/20",
-        icon: "text-purple-600 dark:text-purple-400",
-    },
-    [MessageType.PROMOTIONAL]: {
-        bg: "bg-amber-50 dark:bg-amber-900/20",
-        icon: "text-amber-600 dark:text-amber-400",
-    },
-    [MessageType.GENERAL]: {
-        bg: "bg-slate-100 dark:bg-slate-800",
-        icon: "text-slate-500 dark:text-slate-400",
-    },
-    [MessageType.OTP]: {
-        bg: "bg-rose-50 dark:bg-rose-900/20",
-        icon: "text-rose-600 dark:text-rose-400",
-    },
-};
-
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function MessageRowSkeleton() {
