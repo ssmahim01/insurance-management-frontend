@@ -1,4 +1,3 @@
-
 import {
   GetUsersParams,
   IAllUsersResponse,
@@ -129,7 +128,10 @@ export const userApi = baseApi.injectEndpoints({
     }),
 
     // Super Admin — get all managers
-    getAllManagers: builder.query<IUserListResponse, GetUsersParams | undefined>({
+    getAllManagers: builder.query<
+      IUserListResponse,
+      GetUsersParams | undefined
+    >({
       query: (params) => ({
         url: "/user/all-managers",
         method: "GET",
@@ -139,7 +141,10 @@ export const userApi = baseApi.injectEndpoints({
     }),
 
     // Super Admin — get all soft-deleted managers
-    getAllTrashManagers: builder.query<IUserListResponse, GetUsersParams | undefined>({
+    getAllTrashManagers: builder.query<
+      IUserListResponse,
+      GetUsersParams | undefined
+    >({
       query: (params) => ({
         url: "/user/all-trash-managers",
         method: "GET",
@@ -212,28 +217,28 @@ export const userApi = baseApi.injectEndpoints({
     }),
 
     getMyLeaderBothCustomers: builder.query<
-  IUserListResponse,
-  GetUsersParams | undefined
->({
-  query: (params) => ({
-    url: "/user/my-team-customers",
-    method: "GET",
-    params,
-  }),
-  providesTags: ["USERS"],
-}),
+      IUserListResponse,
+      GetUsersParams | undefined
+    >({
+      query: (params) => ({
+        url: "/user/my-team-customers",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["USERS"],
+    }),
 
-getMyTrashCustomers: builder.query<
-  IUserListResponse,
-  GetUsersParams | undefined
->({
-  query: (params) => ({
-    url: "/user/my-trash-customers",
-    method: "GET",
-    params,
-  }),
-  providesTags: ["USERS"],
-}),
+    getMyTrashCustomers: builder.query<
+      IUserListResponse,
+      GetUsersParams | undefined
+    >({
+      query: (params) => ({
+        url: "/user/my-trash-customers",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["USERS"],
+    }),
 
     // ── AGENT — own resources ────────────────────────────────────────────────
 
@@ -352,7 +357,7 @@ export const {
   useGetMyAgentsQuery,
   useGetMyTrashAgentsQuery,
   useGetMyLeaderCustomersQuery,
-   useGetMyLeaderBothCustomersQuery,
+  useGetMyLeaderBothCustomersQuery,
   useGetMyTrashCustomersQuery,
   useGetAgentCustomersByLeaderQuery,
   // Agent — own resources

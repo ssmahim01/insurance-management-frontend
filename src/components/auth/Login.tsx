@@ -30,6 +30,30 @@ const benefits = [
   },
 ];
 
+// centralised so both password login and OTP login redirect the same way
+const redirectByRole = (
+  router: ReturnType<typeof useRouter>,
+  role?: string
+) => {
+  switch (role) {
+    case "SUPER_ADMIN":
+    case "ADMIN":
+      router.push("/admin/dashboard");
+      break;
+    case "Manager":
+      router.push("/manager/dashboard");
+      break;
+    case "AGENT_LEADER":
+      router.push("/agent-leader/dashboard");
+      break;
+    case "AGENT":
+      router.push("/agent/dashboard");
+      break;
+    default:
+      router.push("/customer/dashboard");
+  }
+};
+
 export default function Login() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -40,19 +64,7 @@ export default function Login() {
       const response = await loginUser(data);
       if (response.success) {
         toast.success("Login successful!");
-        if (response?.user?.user?.role === "SUPER_ADMIN") {
-          router.push("/admin/dashboard");
-        } else if (response?.user?.user?.role === "ADMIN") {
-          router.push("/admin/dashboard");
-        } else if (response?.user?.user?.role === "Manager") {
-          router.push("/manager/dashboard");
-        } else if (response?.user?.user?.role === "AGENT_LEADER") {
-          router.push("/agent-leader/dashboard");
-        } else if (response?.user?.user?.role === "AGENT") {
-          router.push("/agent/dashboard");
-        } else {
-          router.push("/customer/dashboard");
-        }
+        redirectByRole(router, response?.user?.user?.role);
       }
 
       if (!response.success) {
@@ -67,6 +79,26 @@ export default function Login() {
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // called by LoginForm's OTP tab after verify-otp succeeds
+  const handleOtpSuccess = async (data: {
+    accessToken: string;
+    refreshToken: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    user: any;
+  }) => {
+    try {
+      // TODO: persist tokens the same way loginUser() does for password login
+      // (cookies / localStorage / your auth store), e.g.:
+      // Cookies.set("accessToken", data.accessToken);
+      // Cookies.set("refreshToken", data.refreshToken);
+
+      redirectByRole(router, data?.user?.role);
+    } catch (error) {
+      console.error("OTP login error:", error);
+      toast.error("Something went wrong. Please try again.");
     }
   };
 
@@ -123,7 +155,11 @@ export default function Login() {
       }
     >
       <AuthCard>
-        <LoginForm onSubmit={handleLogin} isLoading={isLoading} />
+        <LoginForm
+          onSubmit={handleLogin}
+          isLoading={isLoading}
+          onOtpSuccess={handleOtpSuccess}
+        />
       </AuthCard>
     </AuthLayout>
   );
