@@ -31,6 +31,7 @@ const MESSAGE_TYPE_LABELS: Record<MessageType, string> = {
   [MessageType.PROMOTIONAL]: "Promotional",
   [MessageType.GENERAL]: "General",
   [MessageType.OTP]: "OTP",
+  [MessageType.SMS]: "SMS",
 };
 
 function StatCardSkeleton() {

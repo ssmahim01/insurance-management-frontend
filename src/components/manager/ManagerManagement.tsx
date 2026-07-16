@@ -60,6 +60,7 @@ import { useUser } from "@/context/UserContext";
 import { CreateManagerModal } from "./CreateManager";
 import { UpdateManagerModal } from "./UpdateManager";
 import { ManagerDetailsModal } from "./ManagerDetailsModal";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -175,31 +176,17 @@ const STAT_COLOR_MAP: Record<
   },
 };
 
-function StatCard({
-  label,
-  value,
-  sub,
-  icon: Icon,
-  color,
-}: {
-  label: string;
-  value: string | number;
-  sub?: string;
-  icon: React.ElementType;
-  color: StatColor;
+function StatCard({ label, value, sub, icon: Icon, color }: {
+  label: string; value: string | number; sub?: string; icon: React.ElementType; color: StatColor;
 }) {
   const c = STAT_COLOR_MAP[color];
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
       <div className="flex items-center justify-between mb-3">
         <p className="text-sm text-slate-500 dark:text-slate-400">{label}</p>
-        <div className={`p-2 rounded-lg ${c.bg}`}>
-          <Icon className={`w-5 h-5 ${c.icon}`} />
-        </div>
+        <div className={`p-2 rounded-lg ${c.bg}`}><Icon className={`w-5 h-5 ${c.icon}`} /></div>
       </div>
-      <p className="text-2xl font-semibold text-slate-900 dark:text-white">
-        {value}
-      </p>
+      <p className="text-2xl font-semibold text-slate-900 dark:text-white">{value}</p>
       {sub && <p className={`text-xs mt-1 ${c.text}`}>{sub}</p>}
     </div>
   );
@@ -529,167 +516,188 @@ export default function ManagerManagement() {
 
       {/* ── Table ── */}
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-slate-50 dark:bg-slate-800/50">
-                <SortableTh field="name" label="Manager" />
-                <SortableTh field="phone" label="Phone" />
-                <TableHead className="whitespace-nowrap">Created By</TableHead>
-                <SortableTh field="createdAt" label="Joined" />
-                <TableHead className="whitespace-nowrap">Last Login</TableHead>
-                <SortableTh field="isActive" label="Status" />
-                <TableHead className="text-right whitespace-nowrap">
-                  Actions
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {isLoading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <ManagerRowSkeleton key={i} />
-                ))
-              ) : sortedManagers.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7}>
-                    <div className="flex flex-col items-center justify-center py-16 text-slate-400">
-                      <ShieldCheck className="w-12 h-12 mb-4 opacity-30" />
-                      {searchTerm || hasActiveFilters ? (
-                        <>
-                          <p className="text-base font-medium">
-                            No results found
-                          </p>
-                          <p className="text-sm mt-1">
-                            Try adjusting your search or filters
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <p className="text-base font-medium">
-                            No managers added yet
-                          </p>
-                          <p className="text-sm mt-1">
-                            Click the Add Manager button to get started
-                          </p>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
+        <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+          <ScrollArea className="w-full whitespace-nowrap">
+            <Table className="min-w-[1100px]">
+              <TableHeader className="sticky top-0 z-10">
+                <TableRow className="border-none bg-gradient-to-r *:text-white from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
+                  <SortableTh field="name" label="Manager" />
+                  <SortableTh field="phone" label="Phone" />
+                  <TableHead className="whitespace-nowrap">
+                    Created By
+                  </TableHead>
+                  <SortableTh field="createdAt" label="Joined" />
+                  <TableHead className="whitespace-nowrap">
+                    Last Login
+                  </TableHead>
+                  <SortableTh field="isActive" label="Status" />
+                  <TableHead className="text-right whitespace-nowrap">
+                    Actions
+                  </TableHead>
                 </TableRow>
-              ) : (
-                sortedManagers.map((manager) => {
-                  const status = manager.isActive ?? IsActive.INACTIVE;
-                  return (
-                    <TableRow
-                      key={String(manager._id)}
-                      className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
-                    >
-                      {/* Name + phone */}
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          {manager.picture ? (
-                            <img
-                              src={manager.picture}
-                              alt={manager.name}
-                              className="w-9 h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 shrink-0"
-                            />
-                          ) : (
-                            <div className="w-9 h-9 rounded-full bg-linear-to-br from-indigo-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                              {manager.name?.charAt(0)?.toUpperCase() ?? "M"}
-                            </div>
-                          )}
-                          <div className="min-w-0">
-                            <p className="font-medium text-slate-900 dark:text-white truncate max-w-36">
-                              {manager.name ?? "—"}
+              </TableHeader>
+
+              <TableBody>
+                {isLoading ? (
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <ManagerRowSkeleton key={i} />
+                  ))
+                ) : sortedManagers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7}>
+                      <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+                        <ShieldCheck className="w-12 h-12 mb-4 opacity-30" />
+                        {searchTerm || hasActiveFilters ? (
+                          <>
+                            <p className="text-base font-medium">
+                              No results found
                             </p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate max-w-36">
-                              {manager.phone ?? "—"}
+                            <p className="text-sm mt-1">
+                              Try adjusting your search or filters
                             </p>
-                          </div>
-                        </div>
-                      </TableCell>
-
-                      {/* Phone */}
-                      <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
-                        {manager.phone ?? "—"}
-                      </TableCell>
-
-                      {/* Created By */}
-                      <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
-                        {getCreatedByName(manager)}
-                      </TableCell>
-
-                      {/* Joined */}
-                      <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
-                        {formatDate(manager.createdAt)}
-                      </TableCell>
-
-                      {/* Last Login */}
-                      <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
-                        {manager.lastLoginAt ? (
-                          formatDate(manager.lastLoginAt)
+                          </>
                         ) : (
-                          <span className="text-slate-300 dark:text-slate-600 italic text-xs">
-                            Never
-                          </span>
+                          <>
+                            <p className="text-base font-medium">
+                              No managers added yet
+                            </p>
+                            <p className="text-sm mt-1">
+                              Click the Add Manager button to get started
+                            </p>
+                          </>
                         )}
-                      </TableCell>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  sortedManagers.map((manager, index) => {
+                    const status = manager.isActive ?? IsActive.INACTIVE;
+                    return (
+                      <TableRow
+                        key={String(manager._id)}
+                        className={`
+border-b
+transition-all
+duration-300
+hover:shadow-sm
+hover:scale-[1.002]
+hover:bg-indigo-50
+dark:hover:bg-indigo-950/20
 
-                      {/* Status */}
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={
-                            STATUS_STYLES[status as IsActive] ??
-                            STATUS_STYLES[IsActive.INACTIVE]
-                          }
-                        >
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full mr-1.5 inline-block ${STATUS_DOT[status as IsActive] ?? STATUS_DOT[IsActive.INACTIVE]}`}
-                          />
-                          {STATUS_LABELS[status as IsActive] ?? "Unknown"}
-                        </Badge>
-                      </TableCell>
+${
+  index % 2 === 0
+    ? "bg-white dark:bg-background"
+    : "bg-gradient-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
+}
+`}
+                      >
+                        {/* Name + phone */}
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            {manager.picture ? (
+                              <img
+                                src={manager.picture}
+                                alt={manager.name}
+                                className="w-9 h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 shrink-0"
+                              />
+                            ) : (
+                              <div className="w-9 h-9 rounded-full bg-linear-to-br from-indigo-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                                {manager.name?.charAt(0)?.toUpperCase() ?? "M"}
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="font-medium text-slate-900 dark:text-white truncate max-w-36">
+                                {manager.name ?? "—"}
+                              </p>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate max-w-36">
+                                {manager.phone ?? "—"}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
 
-                      {/* Actions */}
-                      <TableCell>
-                        <div className="flex gap-1.5 justify-end">
-                          <Button
+                        {/* Phone */}
+                        <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
+                          {manager.phone ?? "—"}
+                        </TableCell>
+
+                        {/* Created By */}
+                        <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
+                          {getCreatedByName(manager)}
+                        </TableCell>
+
+                        {/* Joined */}
+                        <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
+                          {formatDate(manager.createdAt)}
+                        </TableCell>
+
+                        {/* Last Login */}
+                        <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
+                          {manager.lastLoginAt ? (
+                            formatDate(manager.lastLoginAt)
+                          ) : (
+                            <span className="text-slate-300 dark:text-slate-600 italic text-xs">
+                              Never
+                            </span>
+                          )}
+                        </TableCell>
+
+                        {/* Status */}
+                        <TableCell>
+                          <Badge
                             variant="outline"
-                            size="icon"
-                            className="h-8 w-8"
-                            title="View details"
-                            onClick={() => openDetailsDialog(manager)}
+                            className={
+                              STATUS_STYLES[status as IsActive] ??
+                              STATUS_STYLES[IsActive.INACTIVE]
+                            }
                           >
-                            <Eye className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8"
-                            title="Edit manager"
-                            onClick={() => openEditDialog(manager)}
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            className="h-8 w-8"
-                            title="Delete manager"
-                            onClick={() => openDeleteDialog(manager)}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
+                            <span
+                              className={`h-1.5 w-1.5 rounded-full mr-1.5 inline-block ${STATUS_DOT[status as IsActive] ?? STATUS_DOT[IsActive.INACTIVE]}`}
+                            />
+                            {STATUS_LABELS[status as IsActive] ?? "Unknown"}
+                          </Badge>
+                        </TableCell>
+
+                        {/* Actions */}
+                        <TableCell>
+                          <div className="flex gap-1.5 justify-end">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              title="View details"
+                              onClick={() => openDetailsDialog(manager)}
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              title="Edit manager"
+                              onClick={() => openEditDialog(manager)}
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="h-8 w-8"
+                              title="Delete manager"
+                              onClick={() => openDeleteDialog(manager)}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+            <ScrollBar />
+          </ScrollArea>
 
           <Pagination
             page={page}
