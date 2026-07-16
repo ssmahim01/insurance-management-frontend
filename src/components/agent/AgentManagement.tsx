@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
@@ -49,7 +50,6 @@ import {
   useGetAllAgentsQuery,
   useDeleteUserMutation,
   useGetAllAgentLeadersQuery,
-
 } from "@/redux/features/user/user.api";
 
 import { PageHeader } from "../shared/PageHeader";
@@ -59,6 +59,7 @@ import { AgentDetailsModal } from "./AgentDetailsModal";
 import { UpdateAgentModal } from "./UpdateAgent";
 import { IsActive, IUser } from "@/types/user.types";
 import Link from "next/link";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -150,27 +151,44 @@ type StatColor = "blue" | "emerald" | "slate" | "red";
 
 const STAT_COLOR_MAP: Record<
   StatColor,
-  { bg: string; icon: string; text: string }
+  {
+    card: string;
+    iconBg: string;
+    icon: string;
+    sub: string;
+    glow: string;
+  }
 > = {
   blue: {
-    bg: "bg-blue-50 dark:bg-blue-900/20",
-    icon: "text-blue-600 dark:text-blue-400",
-    text: "text-blue-600 dark:text-blue-400",
+    card: "bg-gradient-to-br from-blue-600 via-blue-700 to-cyan-700",
+    iconBg: "bg-white/15",
+    icon: "text-white",
+    sub: "text-blue-100",
+    glow: "hover:shadow-blue-500/30",
   },
+
   emerald: {
-    bg: "bg-emerald-50 dark:bg-emerald-900/20",
-    icon: "text-emerald-600 dark:text-emerald-400",
-    text: "text-emerald-600 dark:text-emerald-400",
+    card: "bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700",
+    iconBg: "bg-white/15",
+    icon: "text-white",
+    sub: "text-emerald-100",
+    glow: "hover:shadow-emerald-500/30",
   },
+
   slate: {
-    bg: "bg-slate-100 dark:bg-slate-800",
-    icon: "text-slate-500 dark:text-slate-400",
-    text: "text-slate-500 dark:text-slate-400",
+    card: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900",
+    iconBg: "bg-white/10",
+    icon: "text-white",
+    sub: "text-slate-200",
+    glow: "hover:shadow-slate-500/30",
   },
+
   red: {
-    bg: "bg-red-50 dark:bg-red-900/20",
-    icon: "text-red-500 dark:text-red-400",
-    text: "text-red-500 dark:text-red-400",
+    card: "bg-gradient-to-br from-rose-600 via-red-600 to-red-700",
+    iconBg: "bg-white/15",
+    icon: "text-white",
+    sub: "text-red-100",
+    glow: "hover:shadow-red-500/30",
   },
 };
 
@@ -188,18 +206,53 @@ function StatCard({
   color: StatColor;
 }) {
   const c = STAT_COLOR_MAP[color];
+
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-sm text-slate-500 dark:text-slate-400">{label}</p>
-        <div className={`p-2 rounded-lg ${c.bg}`}>
-          <Icon className={`w-5 h-5 ${c.icon}`} />
+    <div
+      className={`
+        group
+        relative
+        overflow-hidden
+        rounded-2xl
+        p-5
+        text-white
+        ${c.card}
+        shadow-lg
+        transition-all
+        duration-300
+        hover:-translate-y-1
+        hover:shadow-2xl
+        ${c.glow}
+      `}
+    >
+      {/* Decorative Glow */}
+      <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-white/10 blur-3xl transition-all duration-300 group-hover:bg-white/20" />
+
+      <div className="relative flex items-center justify-between mb-4">
+        <p className="text-xs font-semibold uppercase tracking-wider text-white/80">
+          {label}
+        </p>
+
+        <div
+          className={`
+            flex h-11 w-11 items-center justify-center
+            rounded-xl
+            ${c.iconBg}
+            backdrop-blur-sm
+            transition-transform
+            duration-300
+            group-hover:scale-110
+          `}
+        >
+          <Icon className={`h-5 w-5 ${c.icon}`} />
         </div>
       </div>
-      <p className="text-2xl font-semibold text-slate-900 dark:text-white">
+
+      <h3 className="relative text-3xl font-bold tracking-tight text-white">
         {value}
-      </p>
-      {sub && <p className={`text-xs mt-1 ${c.text}`}>{sub}</p>}
+      </h3>
+
+      {sub && <p className={`relative mt-2 text-sm ${c.sub}`}>{sub}</p>}
     </div>
   );
 }
@@ -249,7 +302,9 @@ export default function AgentManagement() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   // ── reset page on filter change ──
-  useEffect(() => { setPage(1); }, [searchTerm, leaderFilter, statusFilter]);
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, leaderFilter, statusFilter]);
 
   // ── API calls ──
   const { data, isLoading, refetch } = useGetAllAgentsQuery({
@@ -261,8 +316,7 @@ export default function AgentManagement() {
     ...(endDate && { endDate }),
   });
 
-
-  console.log("agents all ", data)
+  console.log("agents all ", data);
   const { data: leadersData } = useGetAllAgentLeadersQuery({ limit: 100 });
 
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
@@ -294,10 +348,22 @@ export default function AgentManagement() {
       let aVal: string = "";
       let bVal: string = "";
 
-      if (sortField === "name") { aVal = a.name ?? ""; bVal = b.name ?? ""; }
-      if (sortField === "phone") { aVal = a.phone ?? ""; bVal = b.phone ?? ""; }
-      if (sortField === "isActive") { aVal = a.isActive ?? ""; bVal = b.isActive ?? ""; }
-      if (sortField === "createdAt") { aVal = a.createdAt ?? ""; bVal = b.createdAt ?? ""; }
+      if (sortField === "name") {
+        aVal = a.name ?? "";
+        bVal = b.name ?? "";
+      }
+      if (sortField === "phone") {
+        aVal = a.phone ?? "";
+        bVal = b.phone ?? "";
+      }
+      if (sortField === "isActive") {
+        aVal = a.isActive ?? "";
+        bVal = b.isActive ?? "";
+      }
+      if (sortField === "createdAt") {
+        aVal = a.createdAt ?? "";
+        bVal = b.createdAt ?? "";
+      }
 
       return sortDir === "asc"
         ? aVal.localeCompare(bVal)
@@ -307,17 +373,40 @@ export default function AgentManagement() {
 
   // ── handlers ──
   const handleSort = (field: SortField) => {
-    if (sortField !== field) { setSortField(field); setSortDir("asc"); return; }
-    if (sortDir === "asc") { setSortDir("desc"); return; }
-    setSortField(null); setSortDir(null);
+    if (sortField !== field) {
+      setSortField(field);
+      setSortDir("asc");
+      return;
+    }
+    if (sortDir === "asc") {
+      setSortDir("desc");
+      return;
+    }
+    setSortField(null);
+    setSortDir(null);
   };
 
-  const clearFilters = () => { setLeaderFilter("all"); setStatusFilter("all"); };
-  const clearDateFilter = () => { setStartDate(""); setEndDate(""); };
+  const clearFilters = () => {
+    setLeaderFilter("all");
+    setStatusFilter("all");
+  };
+  const clearDateFilter = () => {
+    setStartDate("");
+    setEndDate("");
+  };
 
-  const openEditDialog = (a: IUser) => { setEditingAgent(a); setIsUpdateOpen(true); };
-  const openDetailsDialog = (a: IUser) => { setViewingAgent(a); setIsDetailsOpen(true); };
-  const openDeleteDialog = (a: IUser) => { setDeletingAgent(a); setIsDeleteOpen(true); };
+  const openEditDialog = (a: IUser) => {
+    setEditingAgent(a);
+    setIsUpdateOpen(true);
+  };
+  const openDetailsDialog = (a: IUser) => {
+    setViewingAgent(a);
+    setIsDetailsOpen(true);
+  };
+  const openDeleteDialog = (a: IUser) => {
+    setDeletingAgent(a);
+    setIsDeleteOpen(true);
+  };
 
   const handleDelete = async () => {
     if (!deletingAgent?._id) return;
@@ -380,16 +469,21 @@ export default function AgentManagement() {
           { label: "Agent Management" },
         ]}
         // action={<CreateAgentModal onSuccess={refetch} />}
-        action={<div className="flex items-center gap-2">
-          <Link href="/admin/dashboard/agents/trash">
-            <Button variant="outline" className="hover:cursor-pointer flex items-center">
-              <Trash2 className="mr-2 h-4 w-4" />
-              <span>Trash</span>
-            </Button>
-          </Link>
+        action={
+          <div className="flex items-center gap-2">
+            <Link href="/admin/dashboard/agents/trash">
+              <Button
+                variant="default"
+                className="group hover:cursor-pointer border-rose-600 text-white bg-rose-700 hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                <span>Trash</span>
+              </Button>
+            </Link>
 
-          <CreateAgentModal onSuccess={refetch} />
-        </div>}
+            <CreateAgentModal onSuccess={refetch} />
+          </div>
+        }
       />
 
       {/* ── Stat Cards ── */}
@@ -493,8 +587,8 @@ export default function AgentManagement() {
               {leaderFilter === "all"
                 ? "All Leaders"
                 : (leadersData?.data ?? []).find(
-                  (l: IUser) => String(l._id) === leaderFilter,
-                )?.name || "Select leader"}
+                    (l: IUser) => String(l._id) === leaderFilter,
+                  )?.name || "Select leader"}
             </span>
           </SelectTrigger>
           <SelectContent>
@@ -542,169 +636,205 @@ export default function AgentManagement() {
 
       {/* ── Table ── */}
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-slate-50 dark:bg-slate-800/50">
-                <SortableTh field="name" label="Agent" />
-                <SortableTh field="phone" label="Phone" />
-                <TableHead className="whitespace-nowrap">Agent ID</TableHead>
-                <TableHead className="whitespace-nowrap">Agent Leader</TableHead>
-                <TableHead className="whitespace-nowrap">Created By</TableHead>
-                <SortableTh field="createdAt" label="Joined" />
-                <TableHead className="whitespace-nowrap">Last Login</TableHead>
-                <SortableTh field="isActive" label="Status" />
-                <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {isLoading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <AgentRowSkeleton key={i} />
-                ))
-              ) : sortedAgents.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8}>
-                    <div className="flex flex-col items-center justify-center py-16 text-slate-400">
-                      <Users className="w-12 h-12 mb-4 opacity-30" />
-                      {searchTerm || hasActiveFilters ? (
-                        <>
-                          <p className="text-base font-medium">No results found</p>
-                          <p className="text-sm mt-1">
-                            Try adjusting your search or filters
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <p className="text-base font-medium">No agents added yet</p>
-                          <p className="text-sm mt-1">
-                            Click the Add Agent button to get started
-                          </p>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
+        <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+          <ScrollArea className="w-full whitespace-nowrap">
+            <Table className="min-w-[1100px]">
+              <TableHeader className="sticky top-0 z-10">
+                <TableRow className="border-none bg-gradient-to-r *:text-white from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
+                  <SortableTh field="name" label="Agent" />
+                  <SortableTh field="phone" label="Phone" />
+                  <TableHead className="whitespace-nowrap">Agent ID</TableHead>
+                  <TableHead className="whitespace-nowrap">
+                    Agent Leader
+                  </TableHead>
+                  <TableHead className="whitespace-nowrap">
+                    Created By
+                  </TableHead>
+                  <SortableTh field="createdAt" label="Joined" />
+                  <TableHead className="whitespace-nowrap">
+                    Last Login
+                  </TableHead>
+                  <SortableTh field="isActive" label="Status" />
+                  <TableHead className="text-right whitespace-nowrap">
+                    Actions
+                  </TableHead>
                 </TableRow>
-              ) : (
-                sortedAgents.map((agent) => {
-                  const status = agent.isActive ?? IsActive.INACTIVE;
-                  return (
-                    <TableRow
-                      key={String(agent._id)}
-                      className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
-                    >
-                      {/* Agent name + phone */}
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          {agent.picture ? (
-                            <img
-                              src={agent.picture}
-                              alt={agent.name}
-                              className="w-9 h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 shrink-0"
-                            />
-                          ) : (
-                            <div className="w-9 h-9 rounded-full bg-linear-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                              {agent.name?.charAt(0)?.toUpperCase() ?? "A"}
-                            </div>
-                          )}
-                          <div className="min-w-0">
-                            <p className="font-medium text-slate-900 dark:text-white truncate max-w-36">
-                              {agent.name ?? "—"}
+              </TableHeader>
+
+              <TableBody>
+                {isLoading ? (
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <AgentRowSkeleton key={i} />
+                  ))
+                ) : sortedAgents.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8}>
+                      <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+                        <Users className="w-12 h-12 mb-4 opacity-30" />
+                        {searchTerm || hasActiveFilters ? (
+                          <>
+                            <p className="text-base font-medium">
+                              No results found
                             </p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate max-w-36">
-                              {agent.phone ?? "—"}
+                            <p className="text-sm mt-1">
+                              Try adjusting your search or filters
                             </p>
-                          </div>
-                        </div>
-                      </TableCell>
-
-                      {/* Phone */}
-                      <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
-                        {agent.phone ?? "—"}
-                      </TableCell>
-
-                      {/* Agent Id  */}
-                      <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
-                        {agent.customId ?? "—"}
-                      </TableCell>
-
-                      {/* Agent Leader */}
-                      <TableCell>
-                        <span className="inline-flex items-center gap-1.5 text-sm text-slate-700 dark:text-slate-300">
-                          <UserCog className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          {getLeaderName(agent)}
-                        </span>
-                      </TableCell>
-
-                      {/* Created By */}
-                      <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
-                        {getCreatedByName(agent)}
-                      </TableCell>
-
-                      {/* Joined date */}
-                      <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
-                        {formatDate(agent.createdAt)}
-                      </TableCell>
-
-                      {/* Last login */}
-                      <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
-                        {agent.lastLoginAt ? formatDate(agent.lastLoginAt) : (
-                          <span className="text-slate-300 dark:text-slate-600 italic text-xs">Never</span>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-base font-medium">
+                              No agents added yet
+                            </p>
+                            <p className="text-sm mt-1">
+                              Click the Add Agent button to get started
+                            </p>
+                          </>
                         )}
-                      </TableCell>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  sortedAgents.map((agent, index) => {
+                    const status = agent.isActive ?? IsActive.INACTIVE;
+                    return (
+                      <TableRow
+                        key={String(agent._id)}
+                        className={`
+border-b
+transition-all
+duration-300
+hover:shadow-sm
+hover:scale-[1.002]
+hover:bg-indigo-50
+dark:hover:bg-indigo-950/20
 
-                      {/* Status badge */}
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={STATUS_STYLES[status as IsActive] ?? STATUS_STYLES[IsActive.INACTIVE]}
-                        >
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full mr-1.5 inline-block ${STATUS_DOT[status as IsActive] ?? STATUS_DOT[IsActive.INACTIVE]}`}
-                          />
-                          {STATUS_LABELS[status as IsActive] ?? "Unknown"}
-                        </Badge>
-                      </TableCell>
+${
+  index % 2 === 0
+    ? "bg-white dark:bg-background"
+    : "bg-gradient-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
+}
+`}
+                      >
+                        {/* Agent name + phone */}
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            {agent.picture ? (
+                              <img
+                                src={agent.picture}
+                                alt={agent.name}
+                                className="w-9 h-9 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 shrink-0"
+                              />
+                            ) : (
+                              <div className="w-9 h-9 rounded-full bg-linear-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                                {agent.name?.charAt(0)?.toUpperCase() ?? "A"}
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="font-medium text-slate-900 dark:text-white truncate max-w-36">
+                                {agent.name ?? "—"}
+                              </p>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate max-w-36">
+                                {agent.phone ?? "—"}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
 
-                      {/* Actions */}
-                      <TableCell>
-                        <div className="flex gap-1.5 justify-end">
-                          <Button
+                        {/* Phone */}
+                        <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
+                          {agent.phone ?? "—"}
+                        </TableCell>
+
+                        {/* Agent Id  */}
+                        <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
+                          {agent.customId ?? "—"}
+                        </TableCell>
+
+                        {/* Agent Leader */}
+                        <TableCell>
+                          <span className="inline-flex items-center gap-1.5 text-sm text-slate-700 dark:text-slate-300">
+                            <UserCog className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            {getLeaderName(agent)}
+                          </span>
+                        </TableCell>
+
+                        {/* Created By */}
+                        <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
+                          {getCreatedByName(agent)}
+                        </TableCell>
+
+                        {/* Joined date */}
+                        <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
+                          {formatDate(agent.createdAt)}
+                        </TableCell>
+
+                        {/* Last login */}
+                        <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
+                          {agent.lastLoginAt ? (
+                            formatDate(agent.lastLoginAt)
+                          ) : (
+                            <span className="text-slate-300 dark:text-slate-600 italic text-xs">
+                              Never
+                            </span>
+                          )}
+                        </TableCell>
+
+                        {/* Status badge */}
+                        <TableCell>
+                          <Badge
                             variant="outline"
-                            size="icon"
-                            className="h-8 w-8"
-                            title="View details"
-                            onClick={() => openDetailsDialog(agent)}
+                            className={
+                              STATUS_STYLES[status as IsActive] ??
+                              STATUS_STYLES[IsActive.INACTIVE]
+                            }
                           >
-                            <Eye className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8"
-                            title="Edit agent"
-                            onClick={() => openEditDialog(agent)}
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            className="h-8 w-8"
-                            title="Delete agent"
-                            onClick={() => openDeleteDialog(agent)}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
+                            <span
+                              className={`h-1.5 w-1.5 rounded-full mr-1.5 inline-block ${STATUS_DOT[status as IsActive] ?? STATUS_DOT[IsActive.INACTIVE]}`}
+                            />
+                            {STATUS_LABELS[status as IsActive] ?? "Unknown"}
+                          </Badge>
+                        </TableCell>
+
+                        {/* Actions */}
+                        <TableCell>
+                          <div className="flex gap-1.5 justify-end">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              title="View details"
+                              onClick={() => openDetailsDialog(agent)}
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              title="Edit agent"
+                              onClick={() => openEditDialog(agent)}
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="h-8 w-8"
+                              title="Delete agent"
+                              onClick={() => openDeleteDialog(agent)}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
 
           <Pagination
             page={page}

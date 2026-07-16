@@ -14,9 +14,15 @@ import { RecentCustomersTable } from "./RecentCustomersTable";
 import { DashboardSkeleton } from "./DashboardSkeleton";
 import { DashboardErrorState } from "./DashboardErrorState";
 import { DashboardHeader } from "./DashboardHeader";
+import { useGetMeQuery } from "@/redux/features/user/user.api";
 
 export function DashboardPageContent() {
   const { data, isLoading, isError, refetch } = useGetDashboardOverviewQuery();
+  const { data: me } = useGetMeQuery();
+
+  const role = me?.data.role;
+
+  const isCustomer = role === "CUSTOMER";
 
   if (isLoading) return <DashboardSkeleton />;
   if (isError || !data?.data) return <DashboardErrorState onRetry={refetch} />;
@@ -26,13 +32,15 @@ export function DashboardPageContent() {
   return (
     <div className="space-y-6">
       <DashboardHeader onRefresh={refetch} />
-      <KpiGrid summary={dashboard.summary} />
+      <KpiGrid summary={dashboard.summary} isCustomer={isCustomer} />
       <StatusBreakdownRow summary={dashboard.summary} />
-      <AverageRevenueBanner summary={dashboard.summary} />
+      {!isCustomer && <AverageRevenueBanner summary={dashboard.summary} />}
 
       <div>
-        <h2 className="text-xl font-bold text-foreground mb-4 uppercase tracking-wide">
-          Package Performance Overview
+        <h2 className="text-xl font-bold mb-4">
+          {isCustomer
+            ? "My Insurance Overview"
+            : "Package Performance Overview"}
         </h2>
         {/* Reused unmodified — IDashboardOverviewCard is structurally assignable to IOverviewCard */}
         <OverviewDashboard
@@ -63,7 +71,10 @@ export function DashboardPageContent() {
       </div>
 
       <RecentSubscriptionsTable items={dashboard.recentSubscriptions} />
-      <RecentCustomersTable items={dashboard.recentCustomers} />
+
+      {!isCustomer && (
+        <RecentCustomersTable items={dashboard.recentCustomers} />
+      )}
     </div>
   );
 }

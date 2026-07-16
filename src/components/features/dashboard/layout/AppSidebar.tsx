@@ -100,7 +100,7 @@ function NavItemRow({ item, isActive }: { item: NavItem; isActive: boolean }) {
                 "h-[18px] w-[18px] shrink-0 transition-transform duration-200 group-hover/nav:scale-110",
                 isActive
                   ? "text-white"
-                  : "text-gray-500 dark:text-gray-500 group-hover/nav:text-current",
+                  : "text-gray-500 group-hover/nav:text-current",
               )}
             />
           </span>

@@ -564,7 +564,7 @@ export function UpdateAgentLeaderModal({ open, onOpenChange, item, onSuccess }: 
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60"
+           className="group hover:cursor-pointer border-indigo-600 text-white bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white w-full duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
           >
             {isLoading ? (
               <span className="flex items-center gap-2">

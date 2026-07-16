@@ -16,6 +16,7 @@ import { useGetMeQuery } from "@/redux/features/user/user.api";
 
 interface KpiGridProps {
   summary: IDashboardSummary;
+  isCustomer?: boolean;
 }
 
 
@@ -27,33 +28,33 @@ type KpiCardColor =
   | "cyan"
   | "rose";
 
-export function KpiGrid({ summary }: KpiGridProps) {
+export function KpiGrid({ summary, isCustomer }: KpiGridProps) {
   const cards: Array<{
     label: string;
     value: string;
     icon: typeof Wallet;
     color: KpiCardColor;
   }> = [
-    {
-      label: "Total Revenue",
-      value: formatCurrency(summary.totalRevenue),
-      icon: Wallet,
-      color: "emerald",
-    },
+ {
+    label: isCustomer ? "My Spending" : "Total Revenue",
+    value: formatCurrency(summary.totalRevenue),
+    icon: Wallet,
+    color: "emerald",
+  },
 
-    {
-      label: "All Customers",
-      value: summary.totalCustomers.toLocaleString(),
-      icon: Users,
-      color: "blue",
-    },
+  {
+    label: isCustomer ? "My Policies" : "Customers",
+    value: summary.totalCustomers.toLocaleString(),
+    icon: Users,
+    color: "blue",
+  },
 
-    {
-      label: "Subscriptions",
-      value: summary.totalSubscriptions.toLocaleString(),
-      icon: ShieldCheck,
-      color: "violet",
-    },
+  {
+    label: isCustomer ? "My Subscriptions" : "Subscriptions",
+    value: summary.totalSubscriptions.toLocaleString(),
+    icon: ShieldCheck,
+    color: "violet",
+  },
 
     // {
     //   label: "Packages",
@@ -63,7 +64,7 @@ export function KpiGrid({ summary }: KpiGridProps) {
     // },
   ];
 
-  if (summary.totalAgents > 0) {
+  if (!isCustomer && summary.totalAgents > 0) {
     cards.push({
       label: "Agents",
       value: summary.totalAgents.toLocaleString(),
@@ -72,7 +73,7 @@ export function KpiGrid({ summary }: KpiGridProps) {
     });
   }
 
-  if (summary.totalAgentLeaders > 0) {
+  if (!isCustomer && summary.totalAgentLeaders > 0) {
     cards.push({
       label: "Agent Leaders",
       value: summary.totalAgentLeaders.toLocaleString(),

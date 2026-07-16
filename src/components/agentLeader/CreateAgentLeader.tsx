@@ -205,7 +205,7 @@ export function CreateAgentLeaderModal({ onSuccess }: Props) {
     <>
       <Button
         onClick={() => setOpen(true)}
-        className="bg-indigo-700 hover:bg-indigo-800 text-white gap-2 hover:cursor-pointer hover:scale-105 transition-transform duration-200 ease-in-out"
+        className="group hover:cursor-pointer border-indigo-600 text-white bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
       >
         <Plus className="h-4 w-4" />
         Add Agent Leader
@@ -593,7 +593,7 @@ export function CreateAgentLeaderModal({ onSuccess }: Props) {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60"
+               className="group hover:cursor-pointer border-indigo-600 text-white w-full bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
             >
               {isLoading ? (
                 <span className="flex items-center gap-2">

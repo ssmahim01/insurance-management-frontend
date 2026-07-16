@@ -62,12 +62,20 @@ import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { Role } from "@/types/user.types";
 import { UpdatePaymentModal } from "./UpdatePaymentModal";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type SortField = "transactionId" | "amount" | "status" | "createdAt";
 type SortDir = "asc" | "desc" | null;
-type StatusFilter = "all" | "UNPAID" | "PAID" | "COMPLETED" | "FAILED" | "CANCELLED" | "REFUNDED";
+type StatusFilter =
+  | "all"
+  | "UNPAID"
+  | "PAID"
+  | "COMPLETED"
+  | "FAILED"
+  | "CANCELLED"
+  | "REFUNDED";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -81,14 +89,19 @@ const formatDate = (iso?: string) => {
 };
 
 const formatAmount = (amount: number) =>
-  new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT" }).format(amount ?? 0);
+  new Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT" }).format(
+    amount ?? 0,
+  );
 
-const getCustomerInfo = (payment: IPayment): { name: string; phone: string } => {
+const getCustomerInfo = (
+  payment: IPayment,
+): { name: string; phone: string } => {
   const sub = payment.subscription;
   if (!sub || typeof sub === "string") return { name: "—", phone: "—" };
 
   const customer = (sub as any).customer;
-  if (!customer || typeof customer === "string") return { name: "—", phone: "—" };
+  if (!customer || typeof customer === "string")
+    return { name: "—", phone: "—" };
 
   return {
     name: customer.name ?? "—",
@@ -99,8 +112,7 @@ const getCustomerInfo = (payment: IPayment): { name: string; phone: string } => 
 const STATUS_STYLES: Record<string, string> = {
   UNPAID:
     "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400",
-  PAID:
-    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400",
+  PAID: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400",
   COMPLETED:
     "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400",
   FAILED:
@@ -122,8 +134,13 @@ const STATUS_DOT: Record<string, string> = {
 
 function StatusBadge({ status }: { status: string }) {
   return (
-    <Badge variant="outline" className={STATUS_STYLES[status] ?? STATUS_STYLES.UNPAID}>
-      <span className={`h-1.5 w-1.5 rounded-full mr-1.5 inline-block ${STATUS_DOT[status] ?? STATUS_DOT.UNPAID}`} />
+    <Badge
+      variant="outline"
+      className={STATUS_STYLES[status] ?? STATUS_STYLES.UNPAID}
+    >
+      <span
+        className={`h-1.5 w-1.5 rounded-full mr-1.5 inline-block ${STATUS_DOT[status] ?? STATUS_DOT.UNPAID}`}
+      />
       {status}
     </Badge>
   );
@@ -172,38 +189,62 @@ function StatCardSkeleton() {
   );
 }
 
-type StatColor = "violet" | "emerald" | "amber" | "red" | "blue" | "slate";
+type StatColor = "blue" | "emerald" | "slate" | "red" | "amber" | "violet";
 
-const STAT_COLOR_MAP: Record<StatColor, { bg: string; icon: string; text: string }> = {
-  violet: {
-    bg: "bg-violet-50 dark:bg-violet-900/20",
-    icon: "text-violet-600 dark:text-violet-400",
-    text: "text-violet-600 dark:text-violet-400",
+const STAT_COLOR_MAP: Record<
+  StatColor,
+  {
+    card: string;
+    iconBg: string;
+    icon: string;
+    sub: string;
+    glow: string;
+  }
+> = {
+  blue: {
+    card: "bg-gradient-to-br from-blue-600 via-blue-700 to-cyan-700",
+    iconBg: "bg-white/15",
+    icon: "text-white",
+    sub: "text-blue-100",
+    glow: "hover:shadow-blue-500/30",
   },
+
   emerald: {
-    bg: "bg-emerald-50 dark:bg-emerald-900/20",
-    icon: "text-emerald-600 dark:text-emerald-400",
-    text: "text-emerald-600 dark:text-emerald-400",
+    card: "bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700",
+    iconBg: "bg-white/15",
+    icon: "text-white",
+    sub: "text-emerald-100",
+    glow: "hover:shadow-emerald-500/30",
+  },
+
+  slate: {
+    card: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900",
+    iconBg: "bg-white/10",
+    icon: "text-white",
+    sub: "text-slate-200",
+    glow: "hover:shadow-slate-500/30",
+  },
+
+  red: {
+    card: "bg-gradient-to-br from-rose-600 via-red-600 to-red-700",
+    iconBg: "bg-white/15",
+    icon: "text-white",
+    sub: "text-red-100",
+    glow: "hover:shadow-red-500/30",
   },
   amber: {
-    bg: "bg-amber-50 dark:bg-amber-900/20",
-    icon: "text-amber-600 dark:text-amber-400",
-    text: "text-amber-600 dark:text-amber-400",
+    card: "bg-gradient-to-br from-amber-600 via-orange-600 to-orange-700",
+    iconBg: "bg-white/15",
+    icon: "text-white",
+    sub: "text-orange-100",
+    glow: "hover:shadow-orange-500/30",
   },
-  red: {
-    bg: "bg-red-50 dark:bg-red-900/20",
-    icon: "text-red-600 dark:text-red-400",
-    text: "text-red-600 dark:text-red-400",
-  },
-  blue: {
-    bg: "bg-blue-50 dark:bg-blue-900/20",
-    icon: "text-blue-600 dark:text-blue-400",
-    text: "text-blue-600 dark:text-blue-400",
-  },
-  slate: {
-    bg: "bg-slate-100 dark:bg-slate-800",
-    icon: "text-slate-500 dark:text-slate-400",
-    text: "text-slate-500 dark:text-slate-400",
+  violet: {
+    card: "bg-gradient-to-br from-violet-600 via-purple-600 to-purple-700",
+    iconBg: "bg-white/15",
+    icon: "text-white",
+    sub: "text-purple-100",
+    glow: "hover:shadow-purple-500/30",
   },
 };
 
@@ -221,16 +262,53 @@ function StatCard({
   color: StatColor;
 }) {
   const c = STAT_COLOR_MAP[color];
+
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-sm text-slate-500 dark:text-slate-400">{label}</p>
-        <div className={`p-2 rounded-lg ${c.bg}`}>
-          <Icon className={`w-5 h-5 ${c.icon}`} />
+    <div
+      className={`
+        group
+        relative
+        overflow-hidden
+        rounded-2xl
+        p-5
+        text-white
+        ${c.card}
+        shadow-lg
+        transition-all
+        duration-300
+        hover:-translate-y-1
+        hover:shadow-2xl
+        ${c.glow}
+      `}
+    >
+      {/* Decorative Glow */}
+      <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-white/10 blur-3xl transition-all duration-300 group-hover:bg-white/20" />
+
+      <div className="relative flex items-center justify-between mb-4">
+        <p className="text-xs font-semibold uppercase tracking-wider text-white/80">
+          {label}
+        </p>
+
+        <div
+          className={`
+            flex h-11 w-11 items-center justify-center
+            rounded-xl
+            ${c.iconBg}
+            backdrop-blur-sm
+            transition-transform
+            duration-300
+            group-hover:scale-110
+          `}
+        >
+          <Icon className={`h-5 w-5 ${c.icon}`} />
         </div>
       </div>
-      <p className="text-2xl font-semibold text-slate-900 dark:text-white">{value}</p>
-      {sub && <p className={`text-xs mt-1 ${c.text}`}>{sub}</p>}
+
+      <h3 className="relative text-3xl font-bold tracking-tight text-white">
+        {value}
+      </h3>
+
+      {sub && <p className={`relative mt-2 text-sm ${c.sub}`}>{sub}</p>}
     </div>
   );
 }
@@ -280,7 +358,9 @@ export default function PaymentManagement() {
 
   const { user } = useUser();
 
-  useEffect(() => { setPage(1); }, [searchTerm, statusFilter]);
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, statusFilter]);
 
   // ── API ──
   const { data, isLoading, refetch } = useGetAllPaymentsQuery({
@@ -292,7 +372,8 @@ export default function PaymentManagement() {
     ...(endDate && { endDate }),
   });
 
-  const [softDeletePayment, { isLoading: isDeleting }] = useSoftDeletePaymentMutation();
+  const [softDeletePayment, { isLoading: isDeleting }] =
+    useSoftDeletePaymentMutation();
 
   // ── derived ──
   const payments: IPayment[] = data?.data ?? [];
@@ -312,26 +393,59 @@ export default function PaymentManagement() {
       }
       let aVal = "";
       let bVal = "";
-      if (sortField === "transactionId") { aVal = a.transactionId ?? ""; bVal = b.transactionId ?? ""; }
-      if (sortField === "status") { aVal = a.status ?? ""; bVal = b.status ?? ""; }
-      if (sortField === "createdAt") { aVal = a.createdAt ?? ""; bVal = b.createdAt ?? ""; }
-      return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      if (sortField === "transactionId") {
+        aVal = a.transactionId ?? "";
+        bVal = b.transactionId ?? "";
+      }
+      if (sortField === "status") {
+        aVal = a.status ?? "";
+        bVal = b.status ?? "";
+      }
+      if (sortField === "createdAt") {
+        aVal = a.createdAt ?? "";
+        bVal = b.createdAt ?? "";
+      }
+      return sortDir === "asc"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
     });
   }, [payments, sortField, sortDir]);
 
   // ── handlers ──
   const handleSort = (field: SortField) => {
-    if (sortField !== field) { setSortField(field); setSortDir("asc"); return; }
-    if (sortDir === "asc") { setSortDir("desc"); return; }
-    setSortField(null); setSortDir(null);
+    if (sortField !== field) {
+      setSortField(field);
+      setSortDir("asc");
+      return;
+    }
+    if (sortDir === "asc") {
+      setSortDir("desc");
+      return;
+    }
+    setSortField(null);
+    setSortDir(null);
   };
 
-  const clearFilters = () => { setStatusFilter("all"); };
-  const clearDateFilter = () => { setStartDate(""); setEndDate(""); };
+  const clearFilters = () => {
+    setStatusFilter("all");
+  };
+  const clearDateFilter = () => {
+    setStartDate("");
+    setEndDate("");
+  };
 
-  const openDetailsDialog = (p: IPayment) => { setViewingPayment(p); setIsDetailsOpen(true); };
-  const openEditDialog = (p: IPayment) => { setEditingPayment(p); setIsUpdateOpen(true); };
-  const openDeleteDialog = (p: IPayment) => { setDeletingPayment(p); setIsDeleteOpen(true); };
+  const openDetailsDialog = (p: IPayment) => {
+    setViewingPayment(p);
+    setIsDetailsOpen(true);
+  };
+  const openEditDialog = (p: IPayment) => {
+    setEditingPayment(p);
+    setIsUpdateOpen(true);
+  };
+  const openDeleteDialog = (p: IPayment) => {
+    setDeletingPayment(p);
+    setIsDeleteOpen(true);
+  };
 
   const handleDelete = async () => {
     if (!deletingPayment?._id) return;
@@ -347,7 +461,13 @@ export default function PaymentManagement() {
   };
 
   // ── sortable header ──
-  const SortableTh = ({ field, label }: { field: SortField; label: string }) => (
+  const SortableTh = ({
+    field,
+    label,
+  }: {
+    field: SortField;
+    label: string;
+  }) => (
     <TableHead
       className="cursor-pointer select-none whitespace-nowrap"
       onClick={() => handleSort(field)}
@@ -371,12 +491,10 @@ export default function PaymentManagement() {
         ]}
         action={
           <div className="flex items-center gap-2">
-            <Link
-              href="/admin/dashboard/payments/trash"
-            >
+            <Link href="/admin/dashboard/payments/trash">
               <Button
-                variant="outline"
-                className="hover:cursor-pointer flex items-center"
+                variant="default"
+                className="group hover:cursor-pointer border-rose-600 text-white bg-rose-700 hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 <span>Trash</span>
@@ -478,7 +596,9 @@ export default function PaymentManagement() {
               <Wallet className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Total Revenue</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Total Revenue
+              </p>
               <p className="text-xs text-slate-400">from completed payments</p>
             </div>
           </div>
@@ -533,140 +653,170 @@ export default function PaymentManagement() {
 
       {/* ── Table ── */}
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-slate-50 dark:bg-slate-800/50">
-                <SortableTh field="transactionId" label="Transaction" />
-                <TableHead className="whitespace-nowrap">Customer</TableHead>
-                <TableHead className="whitespace-nowrap">Subscription Plan</TableHead>
-                <SortableTh field="amount" label="Amount" />
-                <SortableTh field="createdAt" label="Date" />
-                <SortableTh field="status" label="Status" />
-                <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {isLoading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <PaymentRowSkeleton key={i} />
-                ))
-              ) : sortedPayments.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7}>
-                    <div className="flex flex-col items-center justify-center py-16 text-slate-400">
-                      <CreditCard className="w-12 h-12 mb-4 opacity-30" />
-                      {searchTerm || hasActiveFilters ? (
-                        <>
-                          <p className="text-base font-medium">No results found</p>
-                          <p className="text-sm mt-1">Try adjusting your search or filters</p>
-                        </>
-                      ) : (
-                        <>
-                          <p className="text-base font-medium">No payments yet</p>
-                          <p className="text-sm mt-1">Payments will appear here once transactions occur</p>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
+        <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+          <ScrollArea className="w-full whitespace-nowrap">
+            <Table className="min-w-[1100px]">
+              <TableHeader className="sticky top-0 z-10">
+                <TableRow className="border-none bg-gradient-to-r *:text-white from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
+                  <SortableTh field="transactionId" label="Transaction" />
+                  <TableHead className="whitespace-nowrap">Customer</TableHead>
+                  <TableHead className="whitespace-nowrap">
+                    Subscription Plan
+                  </TableHead>
+                  <SortableTh field="amount" label="Amount" />
+                  <SortableTh field="createdAt" label="Date" />
+                  <SortableTh field="status" label="Status" />
+                  <TableHead className="text-right whitespace-nowrap">
+                    Actions
+                  </TableHead>
                 </TableRow>
-              ) : (
-                sortedPayments.map((payment) => {
-                  const planType =
-                    typeof payment.subscription === "string"
-                      ? undefined
-                      : payment.subscription?.planType;
+              </TableHeader>
 
-                  const { name: customerName, phone: customerPhone } = getCustomerInfo(payment);
+              <TableBody>
+                {isLoading ? (
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <PaymentRowSkeleton key={i} />
+                  ))
+                ) : sortedPayments.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7}>
+                      <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+                        <CreditCard className="w-12 h-12 mb-4 opacity-30" />
+                        {searchTerm || hasActiveFilters ? (
+                          <>
+                            <p className="text-base font-medium">
+                              No results found
+                            </p>
+                            <p className="text-sm mt-1">
+                              Try adjusting your search or filters
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-base font-medium">
+                              No payments yet
+                            </p>
+                            <p className="text-sm mt-1">
+                              Payments will appear here once transactions occur
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  sortedPayments.map((payment, index) => {
+                    const planType =
+                      typeof payment.subscription === "string"
+                        ? undefined
+                        : payment.subscription?.planType;
 
-                  return (
-                    <TableRow
-                      key={payment._id}
-                      className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
-                    >
-                      {/* Transaction */}
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-linear-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white shrink-0">
-                            <CreditCard className="w-4 h-4" />
+                    const { name: customerName, phone: customerPhone } =
+                      getCustomerInfo(payment);
+
+                    return (
+                      <TableRow
+                        key={payment._id}
+                        className={`
+border-b
+transition-all
+duration-300
+hover:shadow-sm
+hover:scale-[1.002]
+hover:bg-indigo-50
+dark:hover:bg-indigo-950/20
+
+${
+  index % 2 === 0
+    ? "bg-white dark:bg-background"
+    : "bg-gradient-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
+}
+`}
+                      >
+                        {/* Transaction */}
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-linear-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white shrink-0">
+                              <CreditCard className="w-4 h-4" />
+                            </div>
+                            <p className="font-medium text-slate-900 dark:text-white font-mono text-sm truncate max-w-40">
+                              {payment.transactionId}
+                            </p>
                           </div>
-                          <p className="font-medium text-slate-900 dark:text-white font-mono text-sm truncate max-w-40">
-                            {payment.transactionId}
-                          </p>
-                        </div>
-                      </TableCell>
+                        </TableCell>
 
-                      {/* Customer */}
-                      <TableCell>
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-slate-900 dark:text-white truncate max-w-32">
-                            {customerName}
-                          </p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate max-w-32">
-                            {customerPhone}
-                          </p>
-                        </div>
-                      </TableCell>
+                        {/* Customer */}
+                        <TableCell>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-slate-900 dark:text-white truncate max-w-32">
+                              {customerName}
+                            </p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate max-w-32">
+                              {customerPhone}
+                            </p>
+                          </div>
+                        </TableCell>
 
-                      {/* Subscription plan */}
-                      <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
-                        {planType ?? "—"}
-                      </TableCell>
+                        {/* Subscription plan */}
+                        <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
+                          {planType ?? "—"}
+                        </TableCell>
 
-                      {/* Amount */}
-                      <TableCell className="text-slate-700 dark:text-slate-300 text-sm font-medium">
-                        {formatAmount(payment.amount)}
-                      </TableCell>
+                        {/* Amount */}
+                        <TableCell className="text-slate-700 dark:text-slate-300 text-sm font-medium">
+                          {formatAmount(payment.amount)}
+                        </TableCell>
 
-                      {/* Date */}
-                      <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
-                        {formatDate(payment.createdAt)}
-                      </TableCell>
+                        {/* Date */}
+                        <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
+                          {formatDate(payment.createdAt)}
+                        </TableCell>
 
-                      {/* Status */}
-                      <TableCell>
-                        <StatusBadge status={payment.status} />
-                      </TableCell>
+                        {/* Status */}
+                        <TableCell>
+                          <StatusBadge status={payment.status} />
+                        </TableCell>
 
-                      {/* Actions */}
-                      <TableCell>
-                        <div className="flex gap-1.5 justify-end">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8"
-                            title="View details"
-                            onClick={() => openDetailsDialog(payment)}
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8"
-                            title="Update status"
-                            onClick={() => openEditDialog(payment)}
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            className="h-8 w-8"
-                            title="Delete payment"
-                            onClick={() => openDeleteDialog(payment)}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
+                        {/* Actions */}
+                        <TableCell>
+                          <div className="flex gap-1.5 justify-end">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              title="View details"
+                              onClick={() => openDetailsDialog(payment)}
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              title="Update status"
+                              onClick={() => openEditDialog(payment)}
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="h-8 w-8"
+                              title="Delete payment"
+                              onClick={() => openDeleteDialog(payment)}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
 
           <Pagination
             page={page}
@@ -720,8 +870,8 @@ export default function PaymentManagement() {
             <AlertDialogTitle>Move to Trash</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to move payment{" "}
-              <strong>{deletingPayment?.transactionId}</strong> to trash? This can be
-              restored later.
+              <strong>{deletingPayment?.transactionId}</strong> to trash? This
+              can be restored later.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex gap-2">

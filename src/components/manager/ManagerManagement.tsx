@@ -148,46 +148,120 @@ function StatCardSkeleton() {
   );
 }
 
-type StatColor = "blue" | "emerald" | "slate" | "red";
+type StatColor =
+  | "blue"
+  | "emerald"
+  | "slate"
+  | "red";
 
 const STAT_COLOR_MAP: Record<
   StatColor,
-  { bg: string; icon: string; text: string }
+  {
+    card: string;
+    iconBg: string;
+    icon: string;
+    sub: string;
+    glow: string;
+  }
 > = {
   blue: {
-    bg: "bg-blue-50 dark:bg-blue-900/20",
-    icon: "text-blue-600 dark:text-blue-400",
-    text: "text-blue-600 dark:text-blue-400",
+    card: "bg-gradient-to-br from-blue-600 via-blue-700 to-cyan-700",
+    iconBg: "bg-white/15",
+    icon: "text-white",
+    sub: "text-blue-100",
+    glow: "hover:shadow-blue-500/30",
   },
+
   emerald: {
-    bg: "bg-emerald-50 dark:bg-emerald-900/20",
-    icon: "text-emerald-600 dark:text-emerald-400",
-    text: "text-emerald-600 dark:text-emerald-400",
+    card: "bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700",
+    iconBg: "bg-white/15",
+    icon: "text-white",
+    sub: "text-emerald-100",
+    glow: "hover:shadow-emerald-500/30",
   },
+
   slate: {
-    bg: "bg-slate-100 dark:bg-slate-800",
-    icon: "text-slate-500 dark:text-slate-400",
-    text: "text-slate-500 dark:text-slate-400",
+    card: "bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900",
+    iconBg: "bg-white/10",
+    icon: "text-white",
+    sub: "text-slate-200",
+    glow: "hover:shadow-slate-500/30",
   },
+
   red: {
-    bg: "bg-red-50 dark:bg-red-900/20",
-    icon: "text-red-500 dark:text-red-400",
-    text: "text-red-500 dark:text-red-400",
+    card: "bg-gradient-to-br from-rose-600 via-red-600 to-red-700",
+    iconBg: "bg-white/15",
+    icon: "text-white",
+    sub: "text-red-100",
+    glow: "hover:shadow-red-500/30",
   },
 };
 
-function StatCard({ label, value, sub, icon: Icon, color }: {
-  label: string; value: string | number; sub?: string; icon: React.ElementType; color: StatColor;
+function StatCard({
+  label,
+  value,
+  sub,
+  icon: Icon,
+  color,
+}: {
+  label: string;
+  value: string | number;
+  sub?: string;
+  icon: React.ElementType;
+  color: StatColor;
 }) {
   const c = STAT_COLOR_MAP[color];
+
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-sm text-slate-500 dark:text-slate-400">{label}</p>
-        <div className={`p-2 rounded-lg ${c.bg}`}><Icon className={`w-5 h-5 ${c.icon}`} /></div>
+    <div
+      className={`
+        group
+        relative
+        overflow-hidden
+        rounded-2xl
+        p-5
+        text-white
+        ${c.card}
+        shadow-lg
+        transition-all
+        duration-300
+        hover:-translate-y-1
+        hover:shadow-2xl
+        ${c.glow}
+      `}
+    >
+      {/* Decorative Glow */}
+      <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-white/10 blur-3xl transition-all duration-300 group-hover:bg-white/20" />
+
+      <div className="relative flex items-center justify-between mb-4">
+        <p className="text-xs font-semibold uppercase tracking-wider text-white/80">
+          {label}
+        </p>
+
+        <div
+          className={`
+            flex h-11 w-11 items-center justify-center
+            rounded-xl
+            ${c.iconBg}
+            backdrop-blur-sm
+            transition-transform
+            duration-300
+            group-hover:scale-110
+          `}
+        >
+          <Icon className={`h-5 w-5 ${c.icon}`} />
+        </div>
       </div>
-      <p className="text-2xl font-semibold text-slate-900 dark:text-white">{value}</p>
-      {sub && <p className={`text-xs mt-1 ${c.text}`}>{sub}</p>}
+
+      <h3 className="relative text-3xl font-bold tracking-tight text-white">
+        {value}
+      </h3>
+
+      {sub && (
+        <p className={`relative mt-2 text-sm ${c.sub}`}>
+          {sub}
+        </p>
+      )}
     </div>
   );
 }
@@ -381,8 +455,8 @@ export default function ManagerManagement() {
           <div className="flex items-center gap-2">
             <Link href="/admin/dashboard/managers/trash">
               <Button
-                variant="outline"
-                className="hover:cursor-pointer flex items-center"
+                variant="default"
+               className="group hover:cursor-pointer border-rose-600 text-white bg-rose-700 hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 <span>Trash</span>
