@@ -1,4 +1,3 @@
-
 import jwt, { JwtPayload } from "jsonwebtoken";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -20,7 +19,7 @@ export async function proxy(request: NextRequest) {
     try {
       const decoded = jwt.verify(
         accessToken,
-        process.env.JWT_ACCESS_SECRET as string
+        process.env.JWT_ACCESS_SECRET as string,
       ) as JwtPayload;
 
       userRole = decoded.role as UserRole;
@@ -44,10 +43,28 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
+  try {
+    const decoded = jwt.verify(
+      accessToken,
+      process.env.JWT_ACCESS_SECRET as string,
+    ) as JwtPayload;
+
+    userRole = decoded.role as UserRole;
+  } catch {
+    const res = NextResponse.redirect(
+      new URL("/error?reason=session-expired", request.url),
+    );
+
+    res.cookies.delete("accessToken");
+    res.cookies.delete("refreshToken");
+
+    return res;
+  }
+
   // 🔹 Role mismatch → nijer dashboard e redirect
   if (!isValidRouteForRole(pathname, userRole)) {
     return NextResponse.redirect(
-      new URL(getDefaultDashboardRoute(userRole), request.url)
+      new URL(getDefaultDashboardRoute(userRole), request.url),
     );
   }
 
