@@ -14,7 +14,7 @@ export function TopPackagesList({ items }: TopPackagesListProps) {
   const maxRevenue = Math.max(...items.map((i) => i.totalRevenue), 1);
 
   return (
-    <DashboardSectionCard title="Top Packages" icon={Trophy}>
+    <DashboardSectionCard title="Top Packages" icon={Trophy} className="bg-gray-100 border border-border dark:bg-slate-950 p-6 pt-8 shadow-sm hover:shadow-xl hover:scale-105 ease-in-out transform transition-transform duration-500">
       {items.length === 0 ? (
         <SectionEmptyState message="No package revenue yet." />
       ) : (

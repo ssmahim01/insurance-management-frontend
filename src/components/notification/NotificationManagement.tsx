@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -59,6 +60,7 @@ import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { Role } from "@/types/user.types";
 import { NotificationDetailsModal } from "./NotificationDetailsModal";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -105,7 +107,7 @@ const NOTIFICATION_TYPE_COLORS: Record<NotificationType, string> = {
     "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-800 dark:bg-orange-900/20 dark:text-orange-400",
   [NotificationType.GENERAL]:
     "border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
-    [NotificationType.CLAIM]:
+  [NotificationType.CLAIM]:
     "border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-700 dark:bg-blue-800 dark:text-blue-400",
 };
 
@@ -155,21 +157,24 @@ function StatCardSkeleton() {
 
 type StatColor = "violet" | "emerald" | "slate";
 
-const STAT_COLOR_MAP: Record<StatColor, { bg: string; icon: string; text: string }> = {
+const STAT_COLOR_MAP: Record<
+  StatColor,
+  { gradient: string; iconWrap: string; shadow: string }
+> = {
   violet: {
-    bg: "bg-violet-50 dark:bg-violet-900/20",
-    icon: "text-violet-600 dark:text-violet-400",
-    text: "text-violet-600 dark:text-violet-400",
+    gradient: "from-violet-600 to-violet-700",
+    iconWrap: "bg-white/15",
+    shadow: "shadow-violet-900/25",
   },
   emerald: {
-    bg: "bg-emerald-50 dark:bg-emerald-900/20",
-    icon: "text-emerald-600 dark:text-emerald-400",
-    text: "text-emerald-600 dark:text-emerald-400",
+    gradient: "from-emerald-600 to-emerald-700",
+    iconWrap: "bg-white/15",
+    shadow: "shadow-emerald-900/25",
   },
   slate: {
-    bg: "bg-slate-100 dark:bg-slate-800",
-    icon: "text-slate-500 dark:text-slate-400",
-    text: "text-slate-500 dark:text-slate-400",
+    gradient: "from-slate-600 to-slate-700",
+    iconWrap: "bg-white/15",
+    shadow: "shadow-slate-900/25",
   },
 };
 
@@ -188,15 +193,23 @@ function StatCard({
 }) {
   const c = STAT_COLOR_MAP[color];
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-sm text-slate-500 dark:text-slate-400">{label}</p>
-        <div className={`p-2 rounded-lg ${c.bg}`}>
-          <Icon className={`w-5 h-5 ${c.icon}`} />
+    <div
+      className={`group relative overflow-hidden rounded-xl bg-gradient-to-br ${c.gradient} p-5 shadow-lg ${c.shadow} transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5`}
+    >
+      <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-xl transition-opacity duration-300 group-hover:opacity-80" />
+
+      <div className="relative flex items-center justify-between mb-3">
+        <p className="text-sm font-medium text-white/80">{label}</p>
+        <div
+          className={`p-2 rounded-lg ${c.iconWrap} backdrop-blur-sm transition-transform duration-300 group-hover:scale-110`}
+        >
+          <Icon className="w-5 h-5 text-white" />
         </div>
       </div>
-      <p className="text-2xl font-semibold text-slate-900 dark:text-white">{value}</p>
-      {sub && <p className={`text-xs mt-1 ${c.text}`}>{sub}</p>}
+      <p className="relative text-2xl font-bold text-white tabular-nums">
+        {value}
+      </p>
+      {sub && <p className="relative text-xs mt-1 text-white/70">{sub}</p>}
     </div>
   );
 }
@@ -226,7 +239,9 @@ function SortIcon({
 export default function NotificationManagement() {
   // ── filters ──
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "true" | "false">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "true" | "false">(
+    "all",
+  );
   const [typeFilter, setTypeFilter] = useState<"all" | NotificationType>("all");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -238,14 +253,18 @@ export default function NotificationManagement() {
   const [sortDir, setSortDir] = useState<SortDir>(null);
 
   // ── modals ──
-  const [viewingNotification, setViewingNotification] = useState<INotification | null>(null);
+  const [viewingNotification, setViewingNotification] =
+    useState<INotification | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [deletingNotification, setDeletingNotification] = useState<INotification | null>(null);
+  const [deletingNotification, setDeletingNotification] =
+    useState<INotification | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const { user } = useUser();
 
-  useEffect(() => { setPage(1); }, [searchTerm, statusFilter, typeFilter]);
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, statusFilter, typeFilter]);
 
   // ── API ──
   const { data, isLoading, refetch } = useGetAllNotificationsQuery({
@@ -258,7 +277,8 @@ export default function NotificationManagement() {
     ...(endDate && { endDate }),
   });
 
-  const [softDeleteNotification, { isLoading: isDeleting }] = useSoftDeleteNotificationMutation();
+  const [softDeleteNotification, { isLoading: isDeleting }] =
+    useSoftDeleteNotificationMutation();
   const [markAsRead, { isLoading: isMarking }] = useMarkAsReadMutation();
 
   // ── derived ──
@@ -276,25 +296,56 @@ export default function NotificationManagement() {
     return [...notifications].sort((a, b) => {
       let aVal = "";
       let bVal = "";
-      if (sortField === "title") { aVal = a.title ?? ""; bVal = b.title ?? ""; }
-      if (sortField === "isRead") { aVal = String(a.isRead); bVal = String(b.isRead); }
-      if (sortField === "createdAt") { aVal = a.createdAt ?? ""; bVal = b.createdAt ?? ""; }
-      return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      if (sortField === "title") {
+        aVal = a.title ?? "";
+        bVal = b.title ?? "";
+      }
+      if (sortField === "isRead") {
+        aVal = String(a.isRead);
+        bVal = String(b.isRead);
+      }
+      if (sortField === "createdAt") {
+        aVal = a.createdAt ?? "";
+        bVal = b.createdAt ?? "";
+      }
+      return sortDir === "asc"
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
     });
   }, [notifications, sortField, sortDir]);
 
   // ── handlers ──
   const handleSort = (field: SortField) => {
-    if (sortField !== field) { setSortField(field); setSortDir("asc"); return; }
-    if (sortDir === "asc") { setSortDir("desc"); return; }
-    setSortField(null); setSortDir(null);
+    if (sortField !== field) {
+      setSortField(field);
+      setSortDir("asc");
+      return;
+    }
+    if (sortDir === "asc") {
+      setSortDir("desc");
+      return;
+    }
+    setSortField(null);
+    setSortDir(null);
   };
 
-  const clearFilters = () => { setStatusFilter("all"); setTypeFilter("all"); };
-  const clearDateFilter = () => { setStartDate(""); setEndDate(""); };
+  const clearFilters = () => {
+    setStatusFilter("all");
+    setTypeFilter("all");
+  };
+  const clearDateFilter = () => {
+    setStartDate("");
+    setEndDate("");
+  };
 
-  const openDetailsDialog = (n: INotification) => { setViewingNotification(n); setIsDetailsOpen(true); };
-  const openDeleteDialog = (n: INotification) => { setDeletingNotification(n); setIsDeleteOpen(true); };
+  const openDetailsDialog = (n: INotification) => {
+    setViewingNotification(n);
+    setIsDetailsOpen(true);
+  };
+  const openDeleteDialog = (n: INotification) => {
+    setDeletingNotification(n);
+    setIsDeleteOpen(true);
+  };
 
   const handleDelete = async () => {
     if (!deletingNotification?._id) return;
@@ -320,7 +371,13 @@ export default function NotificationManagement() {
   };
 
   // ── sortable header ──
-  const SortableTh = ({ field, label }: { field: SortField; label: string }) => (
+  const SortableTh = ({
+    field,
+    label,
+  }: {
+    field: SortField;
+    label: string;
+  }) => (
     <TableHead
       className="cursor-pointer select-none whitespace-nowrap"
       onClick={() => handleSort(field)}
@@ -344,13 +401,11 @@ export default function NotificationManagement() {
         ]}
         action={
           <div className="flex items-center gap-2">
-            <Link
-              href="/admin/dashboard/notifications/trash"
-            >
+            <Link href="/admin/dashboard/notifications/trash">
               <Button
-                variant="outline"
-                className="hover:cursor-pointer flex items-center"
-              >
+                variant="default"
+               className="group hover:cursor-pointer border-rose-600 text-white bg-rose-700 hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out">
+              
                 <Trash2 className="mr-2 h-4 w-4" />
                 <span>Trash</span>
               </Button>
@@ -465,7 +520,9 @@ export default function NotificationManagement() {
         >
           <SelectTrigger className="w-48 h-9 text-sm">
             <span>
-              {typeFilter === "all" ? "All Types" : NOTIFICATION_TYPE_LABELS[typeFilter]}
+              {typeFilter === "all"
+                ? "All Types"
+                : NOTIFICATION_TYPE_LABELS[typeFilter]}
             </span>
           </SelectTrigger>
           <SelectContent>
@@ -493,157 +550,184 @@ export default function NotificationManagement() {
 
       {/* ── Table ── */}
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-slate-50 dark:bg-slate-800/50">
-                <SortableTh field="title" label="Notification" />
-                <TableHead className="whitespace-nowrap">Type</TableHead>
-                <TableHead className="whitespace-nowrap">User</TableHead>
-                <TableHead className="whitespace-nowrap">Phone</TableHead>
-                <SortableTh field="createdAt" label="Sent" />
-                <SortableTh field="isRead" label="Status" />
-                <TableHead className="text-right whitespace-nowrap">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {isLoading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <NotificationRowSkeleton key={i} />
-                ))
-              ) : sortedNotifications.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7}>
-                    <div className="flex flex-col items-center justify-center py-16 text-slate-400">
-                      <Bell className="w-12 h-12 mb-4 opacity-30" />
-                      {searchTerm || hasActiveFilters ? (
-                        <>
-                          <p className="text-base font-medium">No results found</p>
-                          <p className="text-sm mt-1">Try adjusting your search or filters</p>
-                        </>
-                      ) : (
-                        <>
-                          <p className="text-base font-medium">No notifications yet</p>
-                          <p className="text-sm mt-1">Notifications sent to users will appear here</p>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
+        <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+          <ScrollArea className="w-full whitespace-nowrap">
+            <Table className="min-w-[1100px]">
+              <TableHeader className="sticky top-0 z-10">
+                <TableRow className="border-none bg-gradient-to-r *:text-white from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
+                  <SortableTh field="title" label="Notification" />
+                  <TableHead className="whitespace-nowrap">Type</TableHead>
+                  <TableHead className="whitespace-nowrap">User</TableHead>
+                  <TableHead className="whitespace-nowrap">Phone</TableHead>
+                  <SortableTh field="createdAt" label="Sent" />
+                  <SortableTh field="isRead" label="Status" />
+                  <TableHead className="text-right whitespace-nowrap">
+                    Actions
+                  </TableHead>
                 </TableRow>
-              ) : (
-                sortedNotifications.map((notification) => (
-                  <TableRow
-                    key={notification._id}
-                    className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
-                  >
-                    {/* Title + message */}
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-linear-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white shrink-0">
-                          <Bell className="w-4 h-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-medium text-slate-900 dark:text-white truncate max-w-52">
-                            {notification.title}
-                          </p>
-                          <p className="text-xs text-slate-400 truncate max-w-52">
-                            {notification.message}
-                          </p>
-                        </div>
+              </TableHeader>
+
+              <TableBody>
+                {isLoading ? (
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <NotificationRowSkeleton key={i} />
+                  ))
+                ) : sortedNotifications.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7}>
+                      <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+                        <Bell className="w-12 h-12 mb-4 opacity-30" />
+                        {searchTerm || hasActiveFilters ? (
+                          <>
+                            <p className="text-base font-medium">
+                              No results found
+                            </p>
+                            <p className="text-sm mt-1">
+                              Try adjusting your search or filters
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-base font-medium">
+                              No notifications yet
+                            </p>
+                            <p className="text-sm mt-1">
+                              Notifications sent to users will appear here
+                            </p>
+                          </>
+                        )}
                       </div>
                     </TableCell>
+                  </TableRow>
+                ) : (
+                  sortedNotifications.map((notification, index) => (
+                    <TableRow
+                      key={notification._id}
+                      className={`
+border-b
+transition-all
+duration-300
+hover:shadow-sm
+hover:scale-[1.002]
+hover:bg-indigo-50
+dark:hover:bg-indigo-950/20
 
-                    {/* Type */}
-                    <TableCell>
-                      {notification.type ? (
-                        <Badge
-                          variant="outline"
-                          className={`whitespace-nowrap ${NOTIFICATION_TYPE_COLORS[notification.type]}`}
-                        >
-                          {NOTIFICATION_TYPE_LABELS[notification.type]}
-                        </Badge>
-                      ) : (
-                        "—"
-                      )}
-                    </TableCell>
+${
+  index % 2 === 0
+    ? "bg-white dark:bg-background"
+    : "bg-gradient-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
+}
+`}
+                    >
+                      {/* Title + message */}
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-linear-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white shrink-0">
+                            <Bell className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium text-slate-900 dark:text-white truncate max-w-52">
+                              {notification.title}
+                            </p>
+                            <p className="text-xs text-slate-400 truncate max-w-52">
+                              {notification.message}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
 
-                    {/* User */}
-                    <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
-                      {getUserName(notification.user) ?? "—"}
-                    </TableCell>
+                      {/* Type */}
+                      <TableCell>
+                        {notification.type ? (
+                          <Badge
+                            variant="outline"
+                            className={`whitespace-nowrap ${NOTIFICATION_TYPE_COLORS[notification.type]}`}
+                          >
+                            {NOTIFICATION_TYPE_LABELS[notification.type]}
+                          </Badge>
+                        ) : (
+                          "—"
+                        )}
+                      </TableCell>
 
-                    {/* Phone */}
-                    <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
-                      {getUserPhone(notification.user) ?? "—"}
-                    </TableCell>
+                      {/* User */}
+                      <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
+                        {getUserName(notification.user) ?? "—"}
+                      </TableCell>
 
-                    {/* Sent date */}
-                    <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
-                      {formatDate(notification.createdAt)}
-                    </TableCell>
+                      {/* Phone */}
+                      <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
+                        {getUserPhone(notification.user) ?? "—"}
+                      </TableCell>
 
-                    {/* Status */}
-                    <TableCell>
-                      {notification.isRead ? (
-                        <Badge
-                          variant="outline"
-                          className="border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400"
-                        >
-                          <span className="h-1.5 w-1.5 rounded-full mr-1.5 inline-block bg-emerald-500" />
-                          Read
-                        </Badge>
-                      ) : (
-                        <Badge
-                          variant="outline"
-                          className="border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
-                        >
-                          <span className="h-1.5 w-1.5 rounded-full mr-1.5 inline-block bg-slate-400" />
-                          Unread
-                        </Badge>
-                      )}
-                    </TableCell>
+                      {/* Sent date */}
+                      <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
+                        {formatDate(notification.createdAt)}
+                      </TableCell>
 
-                    {/* Actions */}
-                    <TableCell>
-                      <div className="flex gap-1.5 justify-end">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8"
-                          title="View details"
-                          onClick={() => openDetailsDialog(notification)}
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                        </Button>
-                        {!notification.isRead && (
+                      {/* Status */}
+                      <TableCell>
+                        {notification.isRead ? (
+                          <Badge
+                            variant="outline"
+                            className="border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400"
+                          >
+                            <span className="h-1.5 w-1.5 rounded-full mr-1.5 inline-block bg-emerald-500" />
+                            Read
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant="outline"
+                            className="border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
+                          >
+                            <span className="h-1.5 w-1.5 rounded-full mr-1.5 inline-block bg-slate-400" />
+                            Unread
+                          </Badge>
+                        )}
+                      </TableCell>
+
+                      {/* Actions */}
+                      <TableCell>
+                        <div className="flex gap-1.5 justify-end">
                           <Button
                             variant="outline"
                             size="icon"
                             className="h-8 w-8"
-                            title="Mark as read"
-                            disabled={isMarking}
-                            onClick={() => handleMarkAsRead(notification)}
+                            title="View details"
+                            onClick={() => openDetailsDialog(notification)}
                           >
-                            <Check className="w-3.5 h-3.5" />
+                            <Eye className="w-3.5 h-3.5" />
                           </Button>
-                        )}
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          className="h-8 w-8"
-                          title="Delete notification"
-                          onClick={() => openDeleteDialog(notification)}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                          {!notification.isRead && (
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              title="Mark as read"
+                              disabled={isMarking}
+                              onClick={() => handleMarkAsRead(notification)}
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            className="h-8 w-8"
+                            title="Delete notification"
+                            onClick={() => openDeleteDialog(notification)}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
 
           <Pagination
             page={page}
@@ -688,8 +772,8 @@ export default function NotificationManagement() {
             <AlertDialogTitle>Move to Trash</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to move{" "}
-              <strong>{deletingNotification?.title}</strong> to trash? This can be
-              restored later.
+              <strong>{deletingNotification?.title}</strong> to trash? This can
+              be restored later.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex gap-2">

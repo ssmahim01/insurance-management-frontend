@@ -141,35 +141,35 @@ function LiveClock() {
     <div
       className={cn(
         "hidden md:flex items-center gap-2.5 rounded-full px-3.5 py-1.5",
-        "bg-linear-to-r from-emerald-50 via-cyan-50 to-blue-50",
+        "bg-linear-to-r from-emerald-600 via-green-600 to-indigo-700",
         "dark:from-emerald-950/40 dark:via-cyan-950/30 dark:to-blue-950/30",
         "shadow-sm",
         "transition-all duration-300",
       )}
     >
       <span className="relative flex h-2 w-2">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-60" />
         <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
       </span>
 
-      <Clock className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+      <Clock className="h-3.5 w-3.5 text-emerald-100 dark:text-emerald-400" />
 
       <div className="flex items-baseline gap-1">
-        <span className="text-[13px] font-bold tabular-nums text-gray-800 dark:text-gray-100">
+        <span className="text-[13px] font-bold tabular-nums text-gray-100">
           {time}
         </span>
-        <span className="text-[11px] font-semibold tabular-nums text-emerald-500/80 dark:text-emerald-500/90">
+        <span className="text-[11px] font-semibold tabular-nums text-emerald-100 dark:text-emerald-500/90">
           :{seconds}
         </span>
       </div>
 
       <span className="h-3.5 w-px bg-emerald-200 dark:bg-emerald-800" />
 
-      <span className="text-[11.5px] font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">
+      <span className="text-[11.5px] font-medium text-gray-100 dark:text-gray-400 whitespace-nowrap">
         {date}
       </span>
 
-      <span className="hidden lg:inline text-[10px] font-semibold text-blue-500/80 dark:text-blue-400/80">
+      <span className="hidden lg:inline text-[10px] font-semibold text-blue-100 dark:text-blue-400/80">
         {offsetLabel}
       </span>
     </div>

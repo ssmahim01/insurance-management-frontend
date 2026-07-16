@@ -56,8 +56,8 @@ export function Pagination({
               <Button
                 key={pageNum}
                 size="sm"
+                className={`w-9 ${pageNum === page ? "group hover:cursor-pointer border-indigo-600 text-white bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out" : ""}`}
                 variant={pageNum === page ? "default" : "outline"}
-                className="w-9"
                 onClick={() => onPageChange(pageNum)}
               >
                 {pageNum}

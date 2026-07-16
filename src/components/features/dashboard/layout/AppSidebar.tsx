@@ -70,22 +70,19 @@ function NavItemRow({ item, isActive }: { item: NavItem; isActive: boolean }) {
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
-        
         isActive={isActive}
         tooltip={isCollapsed ? item.label : undefined}
         className={cn(
-          "group/nav relative h-10 gap-3 rounded-xl px-2.5 text-[14px] font-medium",
+          "group/nav relative h-10 gap-3 mb-2 rounded-xl px-2.5 text-lg font-semibold",
           "transition-all duration-200 ease-out",
           isActive
             ? cn(
-                "bg-linear-to-r from-emerald-500/12 via-emerald-500/8 to-blue-500/10",
-                "text-emerald-700 font-semibold shadow-sm ring-1 ring-emerald-500/15",
-                "dark:from-emerald-400/15 dark:via-emerald-400/10 dark:to-blue-400/10",
-                "dark:text-emerald-400 dark:ring-emerald-400/20",
+                "bg-linear-to-r from-emerald-500 to-green-600 *:text-white font-bold shadow-md shadow-emerald-900/20",
+                "hover:from-emerald-600 hover:to-green-700 hover:text-white",
               )
             : cn(
-                "text-gray-600 hover:bg-gray-100/80 hover:text-gray-900 hover:shadow-sm",
-                "dark:text-gray-400 dark:hover:bg-gray-800/60 dark:hover:text-gray-100",
+                "text-gray-600 hover:bg-green-600 hover:text-white hover:shadow-sm",
+                "dark:text-gray-400 dark:hover:bg-green-600 dark:hover:text-gray-100",
               ),
         )}
       >
@@ -96,25 +93,13 @@ function NavItemRow({ item, isActive }: { item: NavItem; isActive: boolean }) {
             "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0",
           )}
         >
-          {/* active accent bar — hidden in icon-only mode to avoid edge clipping */}
-          {isActive && (
-            <span
-              className={cn(
-                "absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full",
-                "bg-linear-to-b from-emerald-500 via-emerald-500 to-blue-500",
-                "shadow-[0_0_10px_rgba(16,185,129,0.55)]",
-                "group-data-[collapsible=icon]:hidden",
-              )}
-            />
-          )}
-
           {/* fixed-size icon box: icon never shifts between collapsed/expanded */}
           <span className="flex h-5 w-5 shrink-0 items-center justify-center">
             <Icon
               className={cn(
                 "h-[18px] w-[18px] shrink-0 transition-transform duration-200 group-hover/nav:scale-110",
                 isActive
-                  ? "text-emerald-600 dark:text-emerald-400"
+                  ? "text-white"
                   : "text-gray-500 dark:text-gray-500 group-hover/nav:text-current",
               )}
             />
@@ -206,16 +191,16 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
   return (
     <Sidebar
       collapsible="icon"
-      className="border-r border-gray-200/80 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-950/50"
+      className="border-r border-gray-200/80 dark:border-gray-800"
     >
       {/* ── Header / Logo ── */}
-      <SidebarHeader className="border-b mb-2 border-gray-200/80 dark:border-gray-800">
+      <SidebarHeader className="border-b border-gray-200/80 dark:border-gray-800 bg-gray-100 dark:bg-gray-950">
         <Link href={"/"} className="flex items-center py-1 group-data-[collapsible=icon]:justify-center">
           <div
             className={cn(
               "relative rounded-xl ring-1 ring-emerald-500/10 transition-all duration-200",
               "bg-linear-to-br from-emerald-50 via-white to-blue-50 dark:from-emerald-950/30 dark:via-gray-900 dark:to-blue-950/20",
-              isCollapsed ? "h-9 w-9 ml-1" : "h-12 w-12 ml-2",
+              isCollapsed ? "h-9 w-9 ml-1" : "h-12 w-60 ml-2",
             )}
           >
             <Image
@@ -231,7 +216,7 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
       </SidebarHeader>
 
       {/* ── Navigation ── */}
-      <SidebarContent className="py-1 bg-gray-50/50 dark:bg-gray-950/50">
+      <SidebarContent className="bg-gray-100 dark:bg-gray-950">
         <ScrollArea className="h-full px-2">
           <div className="py-2">
             {navigation.map((group) => (
@@ -259,7 +244,7 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
 
       {/* ── Footer / User ── */}
       {user && (
-        <SidebarFooter className="border-t border-gray-200/80 bg-gray-50/50 dark:bg-gray-950/50 dark:border-gray-800 p-2">
+        <SidebarFooter className="border-t border-gray-200/80 bg-gray-100 dark:bg-gray-950 dark:border-gray-800 p-2">
           <SidebarMenu>
             <SidebarMenuItem>
               <DropdownMenu>

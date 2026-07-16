@@ -11,7 +11,7 @@ interface OverviewPanelProps {
 
 export function OverviewPanel({ label, data }: OverviewPanelProps) {
   return (
-    <div className="relative rounded-2xl border border-border bg-background p-6 pt-8 shadow-sm transition-all duration-300 hover:shadow-md">
+    <div className="relative rounded-2xl bg-gray-100 border border-border dark:bg-slate-950 p-6 pt-8 shadow-sm hover:shadow-xl hover:scale-105 ease-in-out transform transition-transform duration-500">
       <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-linear-to-r from-slate-900 to-cyan-700 px-4 py-1 text-[11px] font-bold uppercase tracking-widest text-white shadow-sm">
         {label}
       </span>

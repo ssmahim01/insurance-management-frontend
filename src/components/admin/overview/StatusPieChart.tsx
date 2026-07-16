@@ -17,7 +17,7 @@ const FALLBACK_COLORS = ["#0891b2", "#2563eb", "#64748b", "#f59e0b", "#ef4444"];
 
 export function StatusPieChart({ title, icon, data }: StatusPieChartProps) {
   return (
-    <DashboardSectionCard title={title} icon={icon}>
+    <DashboardSectionCard title={title} icon={icon} className="bg-gray-100 border border-border dark:bg-slate-950 p-6 pt-8 shadow-sm hover:shadow-xl hover:scale-105 ease-in-out transform transition-transform duration-500">
       {data.length === 0 ? (
         <SectionEmptyState message="No data for this period." />
       ) : (

@@ -44,7 +44,7 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
 
 export function RevenueChart({ data }: RevenueChartProps) {
   return (
-    <DashboardSectionCard title="Monthly Revenue & Subscriptions" icon={TrendingUp}>
+    <DashboardSectionCard title="Monthly Revenue & Subscriptions" icon={TrendingUp} className="bg-gray-100 border border-border dark:bg-slate-950 p-6 pt-8 shadow-sm hover:shadow-xl hover:scale-105 ease-in-out transform transition-transform duration-500">
       {data.length === 0 ? (
         <SectionEmptyState message="No revenue data yet." />
       ) : (

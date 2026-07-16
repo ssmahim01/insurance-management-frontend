@@ -53,7 +53,7 @@ export function PackagePerformanceTable({ items }: PackagePerformanceTableProps)
   );
 
   return (
-    <DashboardSectionCard title="Package Performance" icon={LayoutGrid}>
+    <DashboardSectionCard title="Package Performance" icon={LayoutGrid} className="bg-gray-100 border border-border dark:bg-slate-950 p-6 pt-8 shadow-sm hover:shadow-xl hover:scale-105 ease-in-out transform transition-transform duration-500">
       {items.length === 0 ? (
         <SectionEmptyState message="No packages to display." />
       ) : (

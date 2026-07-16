@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 // "use client";
 
@@ -681,7 +682,7 @@ export function CreatePackageModal({ onSuccess }: CreatePackageModalProps) {
 };
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
+      <Button onClick={() => setOpen(true)} className={"group hover:cursor-pointer border-indigo-600 text-white bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"}>
         <Plus className="h-4 w-4" />
         Create Package
       </Button>
@@ -1035,7 +1036,7 @@ export function CreatePackageModal({ onSuccess }: CreatePackageModalProps) {
             </div>
 
             {/* ── Submit ── */}
-            <Button type="submit" disabled={isLoading} className="w-full mt-2 font-bold tracking-widest uppercase disabled:opacity-60">
+            <Button type="submit" disabled={isLoading} className="group w-full hover:cursor-pointer border-indigo-600 text-white bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out">
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />

@@ -58,6 +58,7 @@ import {
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { MessageDetailsModal } from "./MessageDetailsModal";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -82,6 +83,7 @@ const MESSAGE_TYPE_LABELS: Record<MessageType, string> = {
     [MessageType.PROMOTIONAL]: "Promotional",
     [MessageType.GENERAL]: "General",
     [MessageType.OTP]: "OTP",
+    [MessageType.SMS]: "SMS",
 };
 
 const MESSAGE_TYPE_COLORS: Record<MessageType, string> = {
@@ -97,6 +99,8 @@ const MESSAGE_TYPE_COLORS: Record<MessageType, string> = {
         "border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
     [MessageType.OTP]:
         "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-900/20 dark:text-rose-400",
+    [MessageType.SMS]:
+        "border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400",
 };
 
 const MESSAGE_TYPE_ICONS: Record<MessageType, React.ElementType> = {
@@ -106,6 +110,7 @@ const MESSAGE_TYPE_ICONS: Record<MessageType, React.ElementType> = {
     [MessageType.PROMOTIONAL]: Megaphone,
     [MessageType.GENERAL]: MessageSquare,
     [MessageType.OTP]: KeyRound,
+    [MessageType.SMS]: KeyRound,
 };
 
 const MESSAGE_TYPE_ICON_COLORS: Record<MessageType, { bg: string; icon: string }> = {
@@ -256,6 +261,23 @@ export default function MessageManagement() {
         });
     }, [messages, sortField, sortDir]);
 
+                   const TOTAL_CARD_STYLE = {
+  gradient: "from-violet-600 to-purple-700",
+  iconWrap: "bg-white/15",
+  shadow: "shadow-violet-900/25",
+};
+
+const MESSAGE_TYPE_CARD_STYLES: Record<MessageType, { gradient: string; iconWrap: string; shadow: string }> = {
+  // example — adjust keys/colors to match your actual MessageType members
+  SUBSCRIPTION: { gradient: "from-blue-600 to-blue-700", iconWrap: "bg-white/15", shadow: "shadow-blue-900/25" },
+  PAYMENT: { gradient: "from-emerald-600 to-emerald-700", iconWrap: "bg-white/15", shadow: "shadow-emerald-900/25" },
+  CLAIM: { gradient: "from-amber-500 to-amber-600", iconWrap: "bg-white/15", shadow: "shadow-amber-900/25" },
+  PROMOTIONAL: { gradient: "from-indigo-500 to-indigo-600", iconWrap: "bg-white/15", shadow: "shadow-indigo-900/25" },
+  OTP: { gradient: "from-green-500 to-green-600", iconWrap: "bg-white/15", shadow: "shadow-green-900/25" },
+  SMS: { gradient: "from-yellow-500 to-yellow-600", iconWrap: "bg-white/15", shadow: "shadow-yellow-900/25" },
+  GENERAL: { gradient: "from-slate-500 to-slate-600", iconWrap: "bg-white/15", shadow: "shadow-slate-900/25" },
+};
+
     // ── handlers ──
     const handleSort = (field: SortField) => {
         if (sortField !== field) { setSortField(field); setSortDir("asc"); return; }
@@ -311,8 +333,8 @@ export default function MessageManagement() {
                             href="/admin/dashboard/messages/trash"
                         >
                             <Button
-                                variant="outline"
-                                className="hover:cursor-pointer flex items-center"
+                                variant="default"
+                                className="group hover:cursor-pointer border-rose-600 text-white bg-rose-700 hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
                             >
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 <span>Trash</span>
@@ -357,57 +379,57 @@ export default function MessageManagement() {
                     </div>
                 </div>
 
-                {isLoading ? (
-                    <>
-                        <StatCardSkeleton />
-                        <StatCardSkeleton />
-                        <StatCardSkeleton />
-                        <StatCardSkeleton />
-                        <StatCardSkeleton />
-                        <StatCardSkeleton />
-                        <StatCardSkeleton />
-                    </>
-                ) : (
-                    <>
-                        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
-                            <div className="flex items-center justify-between mb-3">
-                                <p className="text-sm text-slate-500 dark:text-slate-400">Total</p>
-                                <div className="p-2 rounded-lg bg-violet-50 dark:bg-violet-900/20">
-                                    <LayoutGrid className="w-5 h-5 text-violet-600 dark:text-violet-400" />
-                                </div>
-                            </div>
-                            <p className="text-2xl font-semibold text-slate-900 dark:text-white">
-                                {stats?.total ?? 0}
-                            </p>
-                            <p className="text-xs mt-1 text-violet-600 dark:text-violet-400">
-                                sent messages
-                            </p>
-                        </div>
 
-                        {Object.values(MessageType).map((type) => {
-                            const Icon = MESSAGE_TYPE_ICONS[type];
-                            const colors = MESSAGE_TYPE_ICON_COLORS[type];
-                            return (
-                                <div
-                                    key={type}
-                                    className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5"
-                                >
-                                    <div className="flex items-center justify-between mb-3">
-                                        <p className="text-sm text-slate-500 dark:text-slate-400">
-                                            {MESSAGE_TYPE_LABELS[type]}
-                                        </p>
-                                        <div className={`p-2 rounded-lg ${colors.bg}`}>
-                                            <Icon className={`w-5 h-5 ${colors.icon}`} />
-                                        </div>
-                                    </div>
-                                    <p className="text-2xl font-semibold text-slate-900 dark:text-white">
-                                        {stats?.byType?.[type] ?? 0}
-                                    </p>
-                                </div>
-                            );
-                        })}
-                    </>
-                )}
+
+{isLoading ? (
+  <>
+    <StatCardSkeleton />
+    <StatCardSkeleton />
+    <StatCardSkeleton />
+    <StatCardSkeleton />
+    <StatCardSkeleton />
+    <StatCardSkeleton />
+    <StatCardSkeleton />
+  </>
+) : (
+  <>
+    <div
+      className={`group relative overflow-hidden rounded-xl bg-gradient-to-br ${TOTAL_CARD_STYLE.gradient} p-5 shadow-lg ${TOTAL_CARD_STYLE.shadow} transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5`}
+    >
+      <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-xl transition-opacity duration-300 group-hover:opacity-80" />
+      <div className="relative flex items-center justify-between mb-3">
+        <p className="text-sm font-medium text-white/80">Total</p>
+        <div className={`p-2 rounded-lg ${TOTAL_CARD_STYLE.iconWrap} backdrop-blur-sm transition-transform duration-300 group-hover:scale-110`}>
+          <LayoutGrid className="w-5 h-5 text-white" />
+        </div>
+      </div>
+      <p className="relative text-2xl font-bold text-white tabular-nums">{stats?.total ?? 0}</p>
+      <p className="relative text-xs mt-1 text-white/70">sent messages</p>
+    </div>
+
+    {Object.values(MessageType).map((type) => {
+      const Icon = MESSAGE_TYPE_ICONS[type];
+      const c = MESSAGE_TYPE_CARD_STYLES[type];
+      return (
+        <div
+          key={type}
+          className={`group relative overflow-hidden rounded-xl bg-gradient-to-br ${c.gradient} p-5 shadow-lg ${c.shadow} transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5`}
+        >
+          <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-xl transition-opacity duration-300 group-hover:opacity-80" />
+          <div className="relative flex items-center justify-between mb-3">
+            <p className="text-sm font-medium text-white/80">{MESSAGE_TYPE_LABELS[type]}</p>
+            <div className={`p-2 rounded-lg ${c.iconWrap} backdrop-blur-sm transition-transform duration-300 group-hover:scale-110`}>
+              <Icon className="w-5 h-5 text-white" />
+            </div>
+          </div>
+          <p className="relative text-2xl font-bold text-white tabular-nums">
+            {stats?.byType?.[type] ?? 0}
+          </p>
+        </div>
+      );
+    })}
+  </>
+)}
             </div>
 
             {/* ── Search & Filters ── */}
@@ -456,10 +478,11 @@ export default function MessageManagement() {
 
             {/* ── Table ── */}
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-                <div className="overflow-x-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow className="bg-slate-50 dark:bg-slate-800/50">
+                 <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+          <ScrollArea className="w-full whitespace-nowrap">
+            <Table className="min-w-[1100px]">
+              <TableHeader className="sticky top-0 z-10">
+                <TableRow className="border-none bg-gradient-to-r *:text-white from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
                                 <TableHead className="whitespace-nowrap">Message</TableHead>
                                 <TableHead className="whitespace-nowrap">Type</TableHead>
                                 <SortableTh field="phone" label="Phone" />
@@ -493,10 +516,24 @@ export default function MessageManagement() {
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                sortedMessages.map((msg) => (
+                                sortedMessages.map((msg, index) => (
                                     <TableRow
                                         key={msg._id}
-                                        className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+                                         className={`
+border-b
+transition-all
+duration-300
+hover:shadow-sm
+hover:scale-[1.002]
+hover:bg-indigo-50
+dark:hover:bg-indigo-950/20
+
+${
+  index % 2 === 0
+    ? "bg-white dark:bg-background"
+    : "bg-gradient-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
+}
+`}
                                     >
                                         {/* Message */}
                                         <TableCell>
@@ -562,6 +599,8 @@ export default function MessageManagement() {
                             )}
                         </TableBody>
                     </Table>
+                    <ScrollBar orientation="horizontal" />
+                    </ScrollArea>
 
                     <Pagination
                         page={page}

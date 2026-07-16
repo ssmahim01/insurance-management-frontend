@@ -18,11 +18,11 @@ export function OverviewDashboard({ data, isLoading, isError, onRetry }: Overvie
 
   return (
     <div className="space-y-6 pt-3">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <OverviewPanel label="Today" data={data.today} />
         <OverviewPanel label="This Month" data={data.month} />
-      </div>
       <OverviewPanel label="Lifetime" data={data.lifetime} />
+      </div>
     </div>
   );
 }

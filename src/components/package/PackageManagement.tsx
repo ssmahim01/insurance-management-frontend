@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
 import {
   Edit2, Trash2, Search, Eye, ChevronUp, ChevronDown, ChevronsUpDown,
-  X, Package, PackageCheck, PackageX, TrendingUp, BarChart3, DollarSign, Users,
+  X, Package, PackageCheck, PackageX, DollarSign, Users,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -33,6 +34,7 @@ import { IInsurancePackage, PlanType } from "@/types/package.types";
 import { CreatePackageModal } from "./CreatePackage";
 import { UpdatePackageModal } from "./UpdatePackage";
 import { PackageDetailsModal } from "./PackageDetails";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -103,28 +105,69 @@ function StatCardSkeleton() {
   );
 }
 
-type StatColor = "blue" | "emerald" | "slate" | "violet" | "amber";
+type StatColor = "blue" | "emerald" | "slate" | "amber" | "red" | "violet";
 
-const STAT_COLOR_MAP: Record<StatColor, { bg: string; icon: string; text: string }> = {
-  blue: { bg: "bg-blue-50 dark:bg-blue-900/20", icon: "text-blue-600 dark:text-blue-400", text: "text-blue-600 dark:text-blue-400" },
-  emerald: { bg: "bg-emerald-50 dark:bg-emerald-900/20", icon: "text-emerald-600 dark:text-emerald-400", text: "text-emerald-600 dark:text-emerald-400" },
-  slate: { bg: "bg-slate-100 dark:bg-slate-800", icon: "text-slate-500 dark:text-slate-400", text: "text-slate-500 dark:text-slate-400" },
-  violet: { bg: "bg-violet-50 dark:bg-violet-900/20", icon: "text-violet-600 dark:text-violet-400", text: "text-violet-600 dark:text-violet-400" },
-  amber: { bg: "bg-amber-50 dark:bg-amber-900/20", icon: "text-amber-600 dark:text-amber-400", text: "text-amber-600 dark:text-amber-400" },
+const STAT_COLOR_MAP: Record<StatColor, { gradient: string; iconWrap: string; shadow: string }> = {
+  blue: {
+    gradient: "from-blue-600 to-blue-700",
+    iconWrap: "bg-white/15",
+    shadow: "shadow-blue-900/25",
+  },
+  emerald: {
+    gradient: "from-emerald-600 to-emerald-700",
+    iconWrap: "bg-white/15",
+    shadow: "shadow-emerald-900/25",
+  },
+  slate: {
+    gradient: "from-slate-700 to-slate-800",
+    iconWrap: "bg-white/10",
+    shadow: "shadow-slate-900/25",
+  },
+  amber: {
+    gradient: "from-amber-500 to-amber-600",
+    iconWrap: "bg-white/15",
+    shadow: "shadow-amber-900/25",
+  },
+  red: {
+    gradient: "from-red-600 to-red-700",
+    iconWrap: "bg-white/15",
+    shadow: "shadow-red-900/25",
+  },
+  violet: {
+    gradient: "from-violet-600 to-violet-700",
+    iconWrap: "bg-white/15",
+    shadow: "shadow-violet-900/25",
+  },
 };
 
-function StatCard({ label, value, sub, icon: Icon, color }: {
-  label: string; value: string | number; sub?: string; icon: React.ElementType; color: StatColor;
+function StatCard({
+  label,
+  value,
+  sub,
+  icon: Icon,
+  color,
+}: {
+  label: string;
+  value: string | number;
+  sub?: string;
+  icon: React.ElementType;
+  color: StatColor;
 }) {
   const c = STAT_COLOR_MAP[color];
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-sm text-slate-500 dark:text-slate-400">{label}</p>
-        <div className={`p-2 rounded-lg ${c.bg}`}><Icon className={`w-5 h-5 ${c.icon}`} /></div>
+    <div
+      className={`group relative overflow-hidden rounded-xl bg-gradient-to-br ${c.gradient} p-5 shadow-lg ${c.shadow} transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5`}
+    >
+      <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-xl transition-opacity duration-300 group-hover:opacity-80" />
+
+      <div className="relative flex items-center justify-between mb-3">
+        <p className="text-sm font-medium text-white/80">{label}</p>
+        <div className={`p-2 rounded-lg ${c.iconWrap} backdrop-blur-sm transition-transform duration-300 group-hover:scale-110`}>
+          <Icon className="w-5 h-5 text-white" />
+        </div>
       </div>
-      <p className="text-2xl font-semibold text-slate-900 dark:text-white">{value}</p>
-      {sub && <p className={`text-xs mt-1 ${c.text}`}>{sub}</p>}
+      <p className="relative text-2xl font-bold text-white tabular-nums">{value}</p>
+      {sub && <p className="relative text-xs mt-1 text-white/70">{sub}</p>}
     </div>
   );
 }
@@ -294,10 +337,11 @@ export default function PackageManagement() {
 
       {/* ── Table ── */}
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-slate-50 dark:bg-slate-800/50">
+         <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+          <ScrollArea className="w-full whitespace-nowrap">
+            <Table className="min-w-[1100px]">
+              <TableHeader className="sticky top-0 z-10">
+                <TableRow className="border-none bg-gradient-to-r *:text-white from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
                 <SortableTh field="name" label="Package Name" />
                 <SortableTh field="coverageAmount" label="Coverage" />
                 <TableHead className="whitespace-nowrap">Plans</TableHead>
@@ -327,11 +371,25 @@ export default function PackageManagement() {
                   </TableCell>
                 </TableRow>
               ) : (
-                sortedPackages.map((pkg) => {
+                sortedPackages.map((pkg, index) => {
                   const lowestPrice = getLowestPlanPrice(pkg);
                   const analytics = (pkg as any).analytics;
                   return (
-                    <TableRow key={String(pkg._id)} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                    <TableRow key={String(pkg._id)}   className={`
+border-b
+transition-all
+duration-300
+hover:shadow-sm
+hover:scale-[1.002]
+hover:bg-indigo-50
+dark:hover:bg-indigo-950/20
+
+${
+  index % 2 === 0
+    ? "bg-white dark:bg-background"
+    : "bg-gradient-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
+}
+`}>
                       {/* Name */}
                       <TableCell>
                         <div className="flex items-center gap-3">
@@ -417,6 +475,9 @@ export default function PackageManagement() {
               )}
             </TableBody>
           </Table>
+
+          <ScrollBar orientation="horizontal" />
+          </ScrollArea>
 
           <Pagination page={page} totalPage={totalPage} onPageChange={setPage} />
         </div>

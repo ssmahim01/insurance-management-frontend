@@ -7,6 +7,7 @@ export enum MessageType {
   PROMOTIONAL = "PROMOTIONAL",
   GENERAL = "GENERAL",
   OTP = "OTP",
+SMS = "SMS",
 }
 
 export interface IMessage {
