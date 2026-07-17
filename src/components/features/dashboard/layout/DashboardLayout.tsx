@@ -328,9 +328,9 @@ export function DashboardHeader({
               <DropdownMenuItem className="gap-2 cursor-pointer text-sm">
                 <User className="h-3.5 w-3.5" /> Profile
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 cursor-pointer text-sm">
+              {/* <DropdownMenuItem className="gap-2 cursor-pointer text-sm">
                 <Settings className="h-3.5 w-3.5" /> Settings
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={onLogout}

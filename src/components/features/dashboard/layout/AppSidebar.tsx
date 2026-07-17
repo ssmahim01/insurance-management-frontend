@@ -307,12 +307,12 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
                       Profile
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="gap-2 cursor-pointer text-sm">
+                  {/* <DropdownMenuItem className="gap-2 cursor-pointer text-sm">
                     <Link href={`${dashboardRoot}/settings`} className="flex items-center gap-2">
                       <Settings className="h-3.5 w-3.5" />
                       Settings
                     </Link>
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={onLogout}

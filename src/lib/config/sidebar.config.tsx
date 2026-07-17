@@ -38,11 +38,11 @@ export const sidebarConfig = {
       href: "/dashboard/users",
       icon: <Users className="w-5 h-5" />,
     },
-    {
-      label: "Settings",
-      href: "/dashboard/settings",
-      icon: <Settings className="w-5 h-5" />,
-    },
+    // {
+    //   label: "Settings",
+    //   href: "/dashboard/settings",
+    //   icon: <Settings className="w-5 h-5" />,
+    // },
   ],
 
   OWNER: [

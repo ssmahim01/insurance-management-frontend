@@ -74,12 +74,12 @@ export const dashboardNavigation: NavGroup[] = [
         icon: UserCircle,
         href: '/dashboard/profile',
       },
-      {
-        id: 'settings',
-        label: 'Settings',
-        icon: Settings,
-        href: '/dashboard/settings',
-      },
+      // {
+      //   id: 'settings',
+      //   label: 'Settings',
+      //   icon: Settings,
+      //   href: '/dashboard/settings',
+      // },
     ],
   },
 ];
