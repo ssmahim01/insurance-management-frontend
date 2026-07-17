@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -48,24 +49,13 @@ const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
     [NotificationType.CLAIM]: "Claim",
 };
 
-type StatColor = "violet" | "emerald" | "slate";
+type StatColor = "violet" | "emerald" | "blue";
 
-const STAT_COLOR_MAP: Record<StatColor, { bg: string; icon: string; text: string }> = {
-    violet: {
-        bg: "bg-violet-50 dark:bg-violet-900/20",
-        icon: "text-violet-600 dark:text-violet-400",
-        text: "text-violet-600 dark:text-violet-400",
-    },
-    emerald: {
-        bg: "bg-emerald-50 dark:bg-emerald-900/20",
-        icon: "text-emerald-600 dark:text-emerald-400",
-        text: "text-emerald-600 dark:text-emerald-400",
-    },
-    slate: {
-        bg: "bg-slate-100 dark:bg-slate-800",
-        icon: "text-slate-500 dark:text-slate-400",
-        text: "text-slate-500 dark:text-slate-400",
-    },
+// ── deep, brand-consistent gradients (unconditional — not dark:-only) ──
+const STAT_COLOR_MAP: Record<StatColor, string> = {
+    violet: "from-indigo-600 via-violet-700 to-purple-900",
+    emerald: "from-emerald-600 via-emerald-700 to-teal-900",
+    blue: "from-blue-600 via-blue-700 to-indigo-900",
 };
 
 function StatCardSkeleton() {
@@ -91,16 +81,20 @@ function StatCard({
     icon: React.ElementType;
     color: StatColor;
 }) {
-    const c = STAT_COLOR_MAP[color];
+    const gradient = STAT_COLOR_MAP[color];
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4">
-            <div className="flex items-center justify-between mb-2">
-                <p className="text-xs text-slate-500 dark:text-slate-400">{label}</p>
-                <div className={`p-1.5 rounded-lg ${c.bg}`}>
-                    <Icon className={`w-4 h-4 ${c.icon}`} />
+        <div
+            className={`group relative overflow-hidden rounded-xl bg-linear-to-br ${gradient} p-4 shadow-sm ring-1 ring-white/10 transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/20 hover:ring-white/25`}
+        >
+            <div className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/10 blur-xl transition-transform duration-500 group-hover:scale-125" />
+
+            <div className="relative flex items-center justify-between mb-2">
+                <p className="text-xs text-white/75">{label}</p>
+                <div className="p-1.5 rounded-lg bg-white/15 backdrop-blur-sm ring-1 ring-white/20 transition-transform duration-300 group-hover:scale-110">
+                    <Icon className="w-4 h-4 text-white" />
                 </div>
             </div>
-            <p className="text-xl font-semibold text-slate-900 dark:text-white">{value}</p>
+            <p className="relative text-xl font-semibold text-white tracking-tight">{value}</p>
         </div>
     );
 }
@@ -198,7 +192,7 @@ export function CustomerNotifications() {
                     <>
                         <StatCard label="Total" value={stats?.total ?? 0} icon={Bell} color="violet" />
                         <StatCard label="Read" value={stats?.read ?? 0} icon={CheckCircle2} color="emerald" />
-                        <StatCard label="Unread" value={stats?.unread ?? 0} icon={MailOpen} color="slate" />
+                        <StatCard label="Unread" value={stats?.unread ?? 0} icon={MailOpen} color="blue" />
                     </>
                 )}
             </div>

@@ -87,14 +87,14 @@ export function CustomerMessages() {
         {isLoading ? (
           <StatCardSkeleton />
         ) : (
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4">
+          <div className="bg-indigo-800 rounded-xl border border-slate-200 dark:border-slate-800 p-4">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs text-slate-500 dark:text-slate-400">Total Messages</p>
+              <p className="text-xs text-slate-100">Total Messages</p>
               <div className="p-1.5 rounded-lg bg-green-50 dark:bg-green-900/20">
                 <LayoutGrid className="w-4 h-4 text-green-600 dark:text-green-400" />
               </div>
             </div>
-            <p className="text-xl font-semibold text-slate-900 dark:text-white">{stats?.total ?? 0}</p>
+            <p className="text-xl font-semibold text-slate-200">{stats?.total ?? 0}</p>
           </div>
         )}
       </div>

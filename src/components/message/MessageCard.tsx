@@ -168,7 +168,7 @@ interface MessageCardProps {
 function MessageCard({ message, onViewDetails }: MessageCardProps) {
   return (
     <div
-      className="relative bg-white dark:bg-slate-900 rounded-2xl ring-1 ring-black/5 dark:ring-white/10 shadow-sm hover:shadow-md transition-all duration-200 p-4"
+      className="relative bg-gray-100 dark:bg-slate-950 rounded-2xl ring-1 ring-black/5 dark:ring-white/10 shadow-sm hover:shadow-md transition-all duration-200 p-4"
       onClick={() => onViewDetails(message)}
       role="button"
     >

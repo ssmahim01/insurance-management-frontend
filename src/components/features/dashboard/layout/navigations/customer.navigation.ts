@@ -1,10 +1,12 @@
 import {
   BaggageClaim,
   Bell,
+  Building2,
   LayoutDashboard,
   MessageSquare,
   Settings,
   ShieldCheck,
+  User,
 } from "lucide-react";
 import { NavGroup } from "@/types/dashboard";
 
@@ -38,6 +40,18 @@ export const customerNavigation: NavGroup[] = [
       },
     ],
   },
+   {
+      label: "Team Management",
+      items: [
+        
+        {
+          id: "branches",
+          label: "Nearby Branches",
+          href: "/customer/dashboard/nearby-branches",
+          icon: Building2,
+        },
+      ],
+    },
 
   {
     label: "Support",
@@ -53,7 +67,18 @@ export const customerNavigation: NavGroup[] = [
         label: "Messages",
         href: "/customer/dashboard/messages",
         icon: MessageSquare,
-      }
+      },
+    ],
+  },
+  {
+    label: "Account",
+    items: [
+      {
+        id: "profile",
+        label: "Profile",
+        href: "/customer/dashboard/profile",
+        icon: User,
+      },
     ],
   },
 ];

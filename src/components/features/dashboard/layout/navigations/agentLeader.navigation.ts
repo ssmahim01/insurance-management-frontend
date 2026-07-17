@@ -64,15 +64,10 @@ export const agentLeaderNavigation: NavGroup[] = [
       {
         id: "profile",
         label: "Profile",
-        href: "/dashboard/profile",
+        href: "/agent-leader/dashboard/profile",
         icon: User,
       },
-      {
-        id: "settings",
-        label: "Settings",
-        href: "/dashboard/settings",
-        icon: Settings,
-      },
+     
     ],
   },
 ];

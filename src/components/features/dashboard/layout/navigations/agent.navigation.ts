@@ -45,4 +45,16 @@ export const agentNavigation: NavGroup[] = [
       // },
     ],
   },
+   {
+      label: "Account",
+      items: [
+        {
+          id: "profile",
+          label: "Profile",
+          href: "/agent/dashboard/profile",
+          icon: User,
+        },
+       
+      ],
+    },
 ];

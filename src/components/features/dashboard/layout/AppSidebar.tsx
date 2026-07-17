@@ -100,7 +100,7 @@ function NavItemRow({ item, isActive }: { item: NavItem; isActive: boolean }) {
                 "h-[18px] w-[18px] shrink-0 transition-transform duration-200 group-hover/nav:scale-110",
                 isActive
                   ? "text-white"
-                  : "text-gray-500 group-hover/nav:text-current",
+                  : "text-gray-600 group-hover/nav:text-current",
               )}
             />
           </span>
@@ -223,7 +223,7 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
               <SidebarGroup key={group.label} className="px-1 py-1.5">
                 <SidebarGroupLabel
                   className={cn(
-                    "font-bold uppercase tracking-widest text-[10.5px] text-gray-400 dark:text-gray-500 px-2 pb-1.5",
+                    "font-bold uppercase tracking-widest text-[10.5px] text-gray-600 dark:text-gray-300 px-2 pb-1.5",
                     "transition-all duration-200",
                     "group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:h-0 group-data-[collapsible=icon]:overflow-hidden group-data-[collapsible=icon]:py-0",
                   )}

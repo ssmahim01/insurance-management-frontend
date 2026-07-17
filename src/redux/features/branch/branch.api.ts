@@ -16,31 +16,40 @@ interface IBranchListResponse {
   };
 }
 
+interface INearbyBranchesResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: IPartnerBranch[];
+}
+
 interface ISingleBranchResponse {
   data: IPartnerBranch;
 }
 
 interface GetBranchesParams {
   searchTerm?: string;
-  isActive?:   string;
-  partner?:    string;
-  page?:       number;
-  limit?:      number;
-  startDate?:  string;
-  endDate?:    string;
-  sort?:       string;
+  isActive?: string;
+  partner?: string;
+  page?: number;
+  limit?: number;
+  startDate?: string;
+  endDate?: string;
+  sort?: string;
 }
 
 interface IGetNearbyBranchesPayload {
-  latitude:   number;
-  longitude:  number;
+  latitude: number;
+  longitude: number;
   partnerIds: string[];
 }
 
 export const branchApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-
-    createBranch: builder.mutation<ISingleBranchResponse, Partial<IPartnerBranch>>({
+    createBranch: builder.mutation<
+      ISingleBranchResponse,
+      Partial<IPartnerBranch>
+    >({
       query: (data) => ({
         url: "/branch/create-branch",
         method: "POST",
@@ -49,7 +58,10 @@ export const branchApi = baseApi.injectEndpoints({
       invalidatesTags: ["BRANCHES"],
     }),
 
-    getAllBranches: builder.query<IBranchListResponse, GetBranchesParams | undefined>({
+    getAllBranches: builder.query<
+      IBranchListResponse,
+      GetBranchesParams | undefined
+    >({
       query: (params) => ({
         url: "/branch/all-branches",
         method: "GET",
@@ -58,7 +70,10 @@ export const branchApi = baseApi.injectEndpoints({
       providesTags: ["BRANCHES"],
     }),
 
-    getAllTrashBranches: builder.query<IBranchListResponse, GetBranchesParams | undefined>({
+    getAllTrashBranches: builder.query<
+      IBranchListResponse,
+      GetBranchesParams | undefined
+    >({
       query: (params) => ({
         url: "/branch/all-trash-branches",
         method: "GET",
@@ -75,7 +90,10 @@ export const branchApi = baseApi.injectEndpoints({
       providesTags: ["BRANCHES"],
     }),
 
-    updateBranch: builder.mutation<ISingleBranchResponse, { id: string; data: Partial<IPartnerBranch> }>({
+    updateBranch: builder.mutation<
+      ISingleBranchResponse,
+      { id: string; data: Partial<IPartnerBranch> }
+    >({
       query: ({ id, data }) => ({
         url: `/branch/${id}`,
         method: "PATCH",
@@ -108,11 +126,18 @@ export const branchApi = baseApi.injectEndpoints({
       invalidatesTags: ["BRANCHES"],
     }),
 
-    getNearbyBranches: builder.mutation<{ data: IPartnerBranch[] }, IGetNearbyBranchesPayload>({
-      query: (data) => ({
+    getNearbyBranches: builder.query<
+      INearbyBranchesResponse,
+      IGetNearbyBranchesPayload
+    >({
+      query: ({ latitude, longitude, partnerIds }) => ({
         url: "/branch/nearby/search",
         method: "GET",
-        data,
+        params: {
+          latitude,
+          longitude,
+          partnerIds: partnerIds.join(","),
+        },
       }),
     }),
   }),
@@ -127,5 +152,5 @@ export const {
   useSoftDeleteBranchMutation,
   useRestoreBranchMutation,
   useDeleteBranchMutation,
-  useGetNearbyBranchesMutation,
+  useGetNearbyBranchesQuery,
 } = branchApi;

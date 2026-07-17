@@ -131,7 +131,7 @@ function SubscriptionCard({
   const subscribedFor = getSubscribedForLabel(sub);
 
   return (
-    <div className="group bg-white dark:bg-slate-900 rounded-2xl ring-1 ring-black/5 dark:ring-white/10 shadow-sm hover:shadow-md transition-all duration-200 p-4 sm:p-5">
+    <div className="group bg-gray-100 dark:bg-slate-950 rounded-2xl ring-1 ring-black/5 dark:ring-white/10 shadow-sm hover:shadow-md transition-all duration-200 p-4 sm:p-5">
       {/* Header: package + status */}
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex items-center gap-3 min-w-0">
