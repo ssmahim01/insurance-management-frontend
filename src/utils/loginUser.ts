@@ -22,7 +22,7 @@ export const loginUser = async (data: any): Promise<any> => {
         const result = await res.json();
 
         // console.log(result)
- 
+
         if (!result.success) {
             return {
                 success: false,
@@ -81,3 +81,37 @@ export const loginUser = async (data: any): Promise<any> => {
         return { success: false, message: e.message };
     }
 }
+
+export const otpLogin = async (data: any): Promise<any> => {
+    try {
+        if (!data?.accessToken || !data?.refreshToken) {
+            throw new Error("Tokens not found");
+        }
+
+        await setCookie("accessToken", data.accessToken, {
+            secure: true,
+            httpOnly: true,
+            maxAge: 60 * 60 * 24, // 1 day (seconds)
+            path: "/",
+            sameSite: "none",
+        });
+
+        await setCookie("refreshToken", data.refreshToken, {
+            secure: true,
+            httpOnly: true,
+            maxAge: 60 * 60 * 24 * 30, // 30 days (seconds)
+            path: "/",
+            sameSite: "none",
+        });
+
+        return {
+            success: true,
+            user: data.user,
+        };
+    } catch (e: any) {
+        return {
+            success: false,
+            message: e.message,
+        };
+    }
+};

@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { LoginFormData } from "@/schemas/auth";
 import { Shield, CheckCircle, TrendingUp } from "lucide-react";
-import { loginUser } from "@/utils/loginUser";
+import { loginUser, otpLogin } from "@/utils/loginUser";
 
 const benefits = [
   {
@@ -82,22 +82,42 @@ export default function Login() {
     }
   };
 
-  // called by LoginForm's OTP tab after verify-otp succeeds
+  // // called by LoginForm's OTP tab after verify-otp succeeds
+  // const handleOtpSuccess = async (data: {
+  //   accessToken: string;
+  //   refreshToken: string;
+  //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //   user: any;
+  // }) => {
+  //   try {
+  //     // TODO: persist tokens the same way loginUser() does for password login
+  //     // (cookies / localStorage / your auth store), e.g.:
+  //     // Cookies.set("accessToken", data.accessToken);
+  //     // Cookies.set("refreshToken", data.refreshToken);
+
+  //     redirectByRole(router, data?.user?.role);
+  //   } catch (error) {
+  //     console.error("OTP login error:", error);
+  //     toast.error("Something went wrong. Please try again.");
+  //   }
+  // };
+
   const handleOtpSuccess = async (data: {
     accessToken: string;
     refreshToken: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     user: any;
   }) => {
     try {
-      // TODO: persist tokens the same way loginUser() does for password login
-      // (cookies / localStorage / your auth store), e.g.:
-      // Cookies.set("accessToken", data.accessToken);
-      // Cookies.set("refreshToken", data.refreshToken);
+      const response = await otpLogin(data);
 
-      redirectByRole(router, data?.user?.role);
+      if (response.success) {
+        toast.success("Login successful!");
+        redirectByRole(router, response.user.role);
+      } else {
+        toast.error(response.message);
+      }
     } catch (error) {
-      console.error("OTP login error:", error);
+      console.error(error);
       toast.error("Something went wrong. Please try again.");
     }
   };
