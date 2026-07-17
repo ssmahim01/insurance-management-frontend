@@ -97,7 +97,7 @@ function NavItemRow({ item, isActive }: { item: NavItem; isActive: boolean }) {
           <span className="flex h-5 w-5 shrink-0 items-center justify-center">
             <Icon
               className={cn(
-                "h-[18px] w-[18px] shrink-0 transition-transform duration-200 group-hover/nav:scale-110",
+                "h-4.5 w-4.5 shrink-0 transition-transform duration-200 group-hover/nav:scale-110",
                 isActive
                   ? "text-white"
                   : "text-gray-600 group-hover/nav:text-current",

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import type { LoginFormData } from "@/schemas/auth";
 import { Shield, CheckCircle, TrendingUp } from "lucide-react";
 import { loginUser, otpLogin } from "@/utils/loginUser";
+import { useUser } from "@/context/UserContext";
 
 const benefits = [
   {
@@ -56,6 +57,7 @@ const redirectByRole = (
 
 export default function Login() {
   const router = useRouter();
+  const { refreshUser } = useUser();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (data: LoginFormData) => {
@@ -64,6 +66,7 @@ export default function Login() {
       const response = await loginUser(data);
       if (response.success) {
         toast.success("Login successful!");
+        await refreshUser();
         redirectByRole(router, response?.user?.user?.role);
       }
 
@@ -111,7 +114,8 @@ export default function Login() {
       const response = await otpLogin(data);
 
       if (response.success) {
-        toast.success("Login successful!");
+        // toast.success("Login successful!");
+        await refreshUser();
         redirectByRole(router, response.user.role);
       } else {
         toast.error(response.message);

@@ -16,7 +16,9 @@ type UserContextType = {
   user: User | null;
   login: (user: User) => void;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 };
+
 
 const UserContext = createContext<UserContextType | null>(null);
 
@@ -39,8 +41,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   };
 
+  const refreshUser = async () => {
+    const currentUser = await getCurrentUser();
+    setUser(currentUser);
+  };
+
   return (
-    <UserContext.Provider value={{ user, login, logout }}>
+    <UserContext.Provider value={{ user, login, logout, refreshUser }}>
       {!loading && children}
     </UserContext.Provider>
   );
