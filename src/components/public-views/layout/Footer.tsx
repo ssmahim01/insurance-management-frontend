@@ -10,7 +10,6 @@ const companyLinks = [
   { label: "About Us", href: "/about" },
   { label: "Privacy Policy", href: "/privacy-policy" },
   { label: "Terms & Conditions", href: "/term-of-service" },
-  { label: "Delivery Policy", href: "/delivery-policy" },
 ];
 
 const socialLinks = [
@@ -121,7 +120,7 @@ export default function Footer() {
                   href="mailto:info@shurokka.com"
                   className="mt-1 block text-[15px] text-[#0B1F3A] hover:text-[#00A67E] dark:text-gray-300 dark:hover:text-[#00E0AE]"
                 >
-                  info@shurokka.com
+                  info@surokkha.com
                 </Link>
               </div>
 
@@ -159,14 +158,14 @@ export default function Footer() {
             width={620}
             height={64}
             priority
-            className="mx-auto h-auto w-full max-w-170 object-contain"
+            className="mx-auto h-auto w-full max-w-350 object-contain"
           />
         </div>
 
         {/* Copyright */}
         <div className="mt-8 border-t border-black/5 pt-6 text-center dark:border-white/10">
           <p className="text-sm text-gray-900 dark:text-gray-100">
-            © 2026 Shurokka Health. All Rights Reserved. Developed by <Link target="_blank" href={"https://dotskillsbd.com"}><span className="font-bold text-[#0F467C] dark:text-[#43B748]">Dotskills</span> </Link>.
+            © {new Date().getFullYear()} Surokkha Health. All Rights Reserved. Developed by <Link target="_blank" href={"https://dotskillsbd.com"}><span className="font-bold text-[#0F467C] dark:text-[#43B748]">Dotskills</span> </Link>.
           </p>
         </div>
       </div>

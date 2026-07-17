@@ -231,15 +231,15 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/90 backdrop-blur">
-      <div className="mx-auto flex h-17 max-w-7xl items-center justify-between px-5">
+      <div className="mx-auto flex h-auto py-2 max-w-7xl items-center justify-between px-5">
         {/* Logo */}
         <Link href="/" className="group flex shrink-0 items-center text-xl font-bold tracking-wide">
           <Image
             className="cursor-pointer transition-transform duration-300 ease-out group-hover:scale-105"
             src="/assets/logo.svg"
             alt="Logo"
-            width={65}
-            height={65}
+            width={90}
+            height={70}
             priority
           />
         </Link>

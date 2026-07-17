@@ -24,7 +24,7 @@ const newsItems: NewsItem[] = [
   },
   {
     id: 2,
-    image: "/assets/Untitled-Facebook-Post-1-1.webp",
+    image: "https://africahealthcollaborative.org/wp-content/uploads/2025/11/go-760x367.jpg",
     title: "STAR Offer with Shurokka Bangladesh Ltd",
     excerpt:
       "Any GP Star customer can get a FREE Doctor Consultation with Shurokka and get up to 25% Cashback on purchasing any Shurokka Health Plans. With a Shurokka subscription, users will be able to access and get discount…",
@@ -32,7 +32,7 @@ const newsItems: NewsItem[] = [
   },
   {
     id: 3,
-    image: "/assets/Nari-2.webp",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSx7kKU9KQ4lG6GtHqA6CRb70CgG8scdXc-MMbfRX0b35eoiYmJBbLvOag&s=10",
     title:
       "Shurokka Nari: Harnessing technology to enable better access to healthcare",
     excerpt:
@@ -62,7 +62,7 @@ export default function NewsAwardsSection() {
   }, []);
 
   return (
-    <section className="bg-[#EFF4FA] py-16 dark:bg-neutral-950 sm:py-20">
+    <section className="bg-gray-50 py-16 dark:bg-neutral-950 sm:py-20">
       <div className="mx-auto max-w-7xl px-6">
         <div
           className={`mx-auto mb-14 max-w-2xl text-center transition-all duration-700 ease-out ${
@@ -110,13 +110,13 @@ export default function NewsAwardsSection() {
                   {item.excerpt}
                 </p>
 
-                <Link
+                {/* <Link
                   href={item.href}
                   className="group/btn inline-flex w-fit items-center gap-2 rounded-full bg-[#00C896] px-5 py-2.5 text-xs font-semibold uppercase tracking-wide text-white transition-all duration-300 hover:bg-[#F97316]"
                 >
                   Read More
                   <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/btn:translate-x-1" />
-                </Link>
+                </Link> */}
               </div>
             </article>
           ))}

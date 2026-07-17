@@ -13,6 +13,7 @@ import { ChevronRight, Home } from "lucide-react";
 import { toast } from "sonner";
 import { useCreateContactMutation } from "@/redux/features/contact/contact.api";
 import { siteConfig } from "@/lib/sideConfig";
+import Image from "next/image";
 
 
 
@@ -48,23 +49,81 @@ const contactFormSchema = z.object({
 
 export type ContactFormValues = z.infer<typeof contactFormSchema>;
 
+// function ContactMiniHero() {
+//   return (
+//     <section className="relative overflow-hidden border-b border-black/5 bg-linear-to-b from-emerald-50 to-white dark:border-white/5 dark:from-emerald-950/20 dark:to-[#0B1220]">
+//       {/* subtle accent shape */}
+//       <div
+//         aria-hidden
+//         className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-emerald-500/10 blur-2xl dark:bg-emerald-500/10"
+//       />
+
+//       <div className="mx-auto max-w-7xl px-5 py-10 sm:py-14">
+//         {/* breadcrumb */}
+//         <nav aria-label="Breadcrumb">
+//           <ol className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+//             <li className="flex items-center gap-1.5">
+//               <Link
+//                 href="/"
+//                 className="flex items-center gap-1 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
+//               >
+//                 <Home className="h-3.5 w-3.5" />
+//                 Home
+//               </Link>
+//             </li>
+//             <li className="flex items-center gap-1.5">
+//               <ChevronRight className="h-3.5 w-3.5" />
+//               <span className="font-medium text-emerald-700 dark:text-emerald-400">
+//                 Contact
+//               </span>
+//             </li>
+//           </ol>
+//         </nav>
+
+//         {/* mini hero content */}
+//         <div className="mt-4 mx-auto text-center max-w-2xl">
+//           <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
+//             We&apos;re here to help
+//           </h1>
+//           <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base dark:text-slate-400">
+//             Questions about a policy, a claim, or getting started with{" "}
+//             {siteConfig.name}? Reach our advisors directly or send a message
+//             below — we typically reply within one business day.
+//           </p>
+//         </div>
+//       </div>
+//     </section>
+//   );
+// }
 function ContactMiniHero() {
   return (
-    <section className="relative overflow-hidden border-b border-black/5 bg-linear-to-b from-emerald-50 to-white dark:border-white/5 dark:from-emerald-950/20 dark:to-[#0B1220]">
-      {/* subtle accent shape */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-emerald-500/10 blur-2xl dark:bg-emerald-500/10"
+    <section className="relative isolate overflow-hidden border-b border-black/5 dark:border-white/5">
+      {/* full-bleed background image */}
+      <Image
+        src="/assets/conact-hero.png"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover"
       />
 
-      <div className="mx-auto max-w-7xl px-5 py-10 sm:py-14">
+      {/* readability overlay — darker in dark mode, softer gradient in light */}
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-linear-to-b from-black/70 via-black/55 to-black/80
+                   dark:from-black/95 dark:via-black/65 dark:to-[#0B1220]/90"
+      />
+
+      {/* content sits above the image */}
+      <div className="relative z-10 mx-auto max-w-7xl px-5 py-14 sm:py-20">
         {/* breadcrumb */}
         <nav aria-label="Breadcrumb">
-          <ol className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+          <ol className="flex items-center gap-1.5 text-xs text-white/70">
             <li className="flex items-center gap-1.5">
               <Link
                 href="/"
-                className="flex items-center gap-1 transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
+                className="flex items-center gap-1 transition-colors hover:text-emerald-300"
               >
                 <Home className="h-3.5 w-3.5" />
                 Home
@@ -72,19 +131,17 @@ function ContactMiniHero() {
             </li>
             <li className="flex items-center gap-1.5">
               <ChevronRight className="h-3.5 w-3.5" />
-              <span className="font-medium text-emerald-700 dark:text-emerald-400">
-                Contact
-              </span>
+              <span className="font-medium text-emerald-300">Contact</span>
             </li>
           </ol>
         </nav>
 
-        {/* mini hero content */}
-        <div className="mt-4 mx-auto text-center max-w-2xl">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
+        {/* hero content */}
+        <div className="mt-6 mx-auto text-center max-w-2xl">
+          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
             We&apos;re here to help
           </h1>
-          <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base dark:text-slate-400">
+          <p className="mt-3 text-sm leading-relaxed text-white/80 sm:text-base">
             Questions about a policy, a claim, or getting started with{" "}
             {siteConfig.name}? Reach our advisors directly or send a message
             below — we typically reply within one business day.
@@ -144,7 +201,7 @@ export default function ContactForm() {
       <ContactMiniHero />
       <div className="mx-auto max-w-7xl px-5">
         <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-2">
-          <div>
+          <div className="">
             <h1 className="text-4xl font-bold">Contact Us</h1>
             <p className="mt-3 text-slate-600 dark:text-slate-400">
               Have a question about a policy or claim? Reach us directly or fill

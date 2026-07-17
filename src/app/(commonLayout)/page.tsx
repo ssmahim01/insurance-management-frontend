@@ -2,6 +2,7 @@
 import CallSection from '@/components/public-views/home/CallSection'
 import ClaimProcessSection from '@/components/public-views/home/ClaimProcessSection'
 import CoverageSection from '@/components/public-views/home/CoverageSection'
+import FindPlanSection from '@/components/public-views/home/FindPlanSection'
 import HeroSection from '@/components/public-views/home/HeroSection'
 import NewsAwardsSection from '@/components/public-views/home/NewsAwardsSection'
 import OfferSection from '@/components/public-views/home/OfferSection'
@@ -23,6 +24,7 @@ function HomePage() {
         <WhyChooseUsSection />
         <ClaimProcessSection />
         <TrustedPartnersSection />
+        <FindPlanSection />
         <NewsAwardsSection />
     </div>
   )
