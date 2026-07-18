@@ -141,7 +141,7 @@ function LiveClock() {
     <div
       className={cn(
         "hidden md:flex items-center gap-2.5 rounded-full px-3.5 py-1.5",
-        "bg-linear-to-r from-emerald-600 via-green-600 to-indigo-700",
+        "bg-linear-to-r from-blue-600 via-green-600 to-indigo-700",
         "dark:from-emerald-950/40 dark:via-cyan-950/30 dark:to-blue-950/30",
         "shadow-sm",
         "transition-all duration-300",
