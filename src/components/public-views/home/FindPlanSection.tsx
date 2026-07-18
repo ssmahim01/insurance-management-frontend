@@ -7,9 +7,9 @@ export default function FindPlanSection() {
       {/* signature: concentric protection rings */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-0 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/3 rounded-full
-                   bg-[radial-gradient(circle,_rgba(15,70,124,0.08)_0%,_transparent_70%)]
-                   dark:bg-[radial-gradient(circle,_rgba(240,169,58,0.12)_0%,_transparent_70%)]"
+        className="pointer-events-none absolute left-1/2 top-0 h-150 w-150 -translate-x-1/2 -translate-y-1/3 rounded-full
+                   bg-[radial-gradient(circle,rgba(15,70,124,0.08)_0%,transparent_70%)]
+                   dark:bg-[radial-gradient(circle,rgba(240,169,58,0.12)_0%,transparent_70%)]"
       />
 
       <div className="relative w-full max-w-7xl mx-auto px-5 py-20">

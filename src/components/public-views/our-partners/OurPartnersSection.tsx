@@ -124,7 +124,7 @@ export default function OurPartnersSection() {
             className="mx-auto mt-4 max-w-sm text-[15px] leading-relaxed"
             style={{ color: "var(--muted)", fontFamily: "var(--font-body, ui-sans-serif, sans-serif)" }}
           >
-            With a Milvik subscription, unlock savings and cashless care at
+            With a Surokkha Health subscription, unlock savings and cashless care at
             500+ hospitals and pharmacies nationwide.
           </p>
         </div>
@@ -140,7 +140,7 @@ export default function OurPartnersSection() {
               className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em]"
               style={{ color: "var(--muted2)" }}
             >
-              Milvik Coverage Card
+              Surokkha Health Coverage Card
             </span>
             <span
               className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em]"

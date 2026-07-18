@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { HeartPulse, Shield, Sparkles, Stethoscope } from "lucide-react";
+import { HeartPulse, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Accordion,
@@ -13,8 +13,8 @@ import {
 // ---- Data (swap with real content / i18n strings) -------------------------
 
 const PRODUCTS = [
-  { id: "health", label: "Milvik Health", icon: HeartPulse },
-  { id: "wellness", label: "Milvik Wellness", icon: Sparkles },
+  { id: "health", label: "Surokkha Health", icon: HeartPulse },
+  { id: "wellness", label: "Surokkha Wellness", icon: Sparkles },
 ] as const;
 
 type ProductId = (typeof PRODUCTS)[number]["id"];
@@ -120,7 +120,7 @@ export default function FaqComponent() {
 
       {/* FAQ accordion */}
       <div className="mx-auto max-w-3xl px-4 py-12">
-        <Accordion  className="space-y-3">
+        <Accordion className="space-y-3">
           {FAQS[active].map((faq, i) => (
             <AccordionItem
               key={`${active}-${i}`}
