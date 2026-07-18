@@ -17,15 +17,15 @@ import "swiper/css/pagination";
 const slides = [
   {
     id: 1,
-    image: "/assets/hero1.webp",
+    image: "/assets/hero/hero1.jpeg",
   },
   {
     id: 2,
-    image: "/assets/hero2.png",
+    image: "/assets/hero/hero2.jpeg",
   },
   {
     id: 3,
-    image: "/assets/hero3.webp",
+    image: "/assets/hero/hero3.jpeg",
   },
 ];
 

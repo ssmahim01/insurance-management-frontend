@@ -1,105 +1,68 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Building2, Users, MessageCircleMore, HandCoins } from "lucide-react";
+import {
+  Wallet,
+  HandCoins,
+  Stethoscope,
+  ShieldCheck,
+  HeartPulse,
+  Smartphone,
+} from "lucide-react";
 
-interface Stat {
+interface Benefit {
   id: number;
-  icon: typeof Building2;
-  value: number;
-  prefix?: string;
-  suffix: string;
-  label: string;
+  icon: typeof Wallet;
+  title: string;
+  description: string;
 }
 
-const stats: Stat[] = [
+const benefits: Benefit[] = [
   {
     id: 1,
-    icon: Building2,
-    value: 1,
-    suffix: "",
-    label: "A Swedish Multinational",
+    icon: Wallet,
+    title: "Affordable Protection",
+    description:
+      "Quality healthcare shouldn't be expensive. Our plans are designed to provide meaningful protection at an affordable cost.",
   },
   {
     id: 2,
-    icon: Users,
-    value: 1,
-    suffix: " Crore+",
-    label: "Customers Served in Bangladesh",
+    icon: HandCoins,
+    title: "Cash Support During Hospitalization",
+    description:
+      "Receive financial assistance while admitted to the hospital, helping you focus on recovery instead of expenses.",
   },
   {
     id: 3,
-    icon: MessageCircleMore,
-    value: 16,
-    suffix: " Lakh+",
-    label: "Teleconsultations",
+    icon: Stethoscope,
+    title: "Access to Trusted Healthcare",
+    description:
+      "Enjoy consultations with qualified doctors along with exclusive discounts at selected hospitals and pharmacies.",
   },
   {
     id: 4,
-    icon: HandCoins,
-    value: 35,
-    prefix: "৳",
-    suffix: " Crore+",
-    label: "Successfully Paid Claims",
+    icon: ShieldCheck,
+    title: "Protection Beyond Hospitalization",
+    description:
+      "Our plans include benefits for accidental death, disability and selected critical illnesses — offering financial security when it matters most.",
+  },
+  {
+    id: 5,
+    icon: HeartPulse,
+    title: "Wellness-Focused Care",
+    description:
+      "Selected plans include preventive health benefits, encouraging early detection and healthier living.",
+  },
+  {
+    id: 6,
+    icon: Smartphone,
+    title: "Simple & Digital Experience",
+    description:
+      "From enrollment to support, Surokkha provides a fast, secure and hassle-free digital experience.",
   },
 ];
 
-function useCountUp(target: number, active: boolean, duration = 1500) {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (!active) return;
-    let startTime: number | null = null;
-    let frameId: number;
-
-    const step = (timestamp: number) => {
-      if (startTime === null) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.floor(eased * target));
-      if (progress < 1) {
-        frameId = requestAnimationFrame(step);
-      } else {
-        setCount(target);
-      }
-    };
-
-    frameId = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frameId);
-  }, [active, target, duration]);
-
-  return count;
-}
-
-function StatCard({ stat, active, delay }: { stat: Stat; active: boolean; delay: number }) {
-  const Icon = stat.icon;
-  const count = useCountUp(stat.value, active);
-
-  return (
-    <div
-      className={`flex flex-col items-center text-center transition-all duration-700 ease-out ${
-        active ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-      }`}
-      style={{ transitionDelay: active ? `${delay}ms` : "0ms" }}
-    >
-      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[#00C896]/10">
-        <Icon className="h-6 w-6 text-[#00E0AE]" strokeWidth={1.75} />
-      </div>
-
-      <p className="mb-1.5 text-2xl font-extrabold text-white sm:text-3xl">
-        {stat.prefix}
-        {count}
-        {stat.suffix}
-      </p>
-
-      <p className="max-w-[160px] text-sm font-medium leading-snug text-white/70">
-        {stat.label}
-      </p>
-    </div>
-  );
-}
-
-export default function WhyChooseUsSection() {
+export default function WhyChooseBenefitsSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -113,7 +76,7 @@ export default function WhyChooseUsSection() {
           observer.disconnect();
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.15 }
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -131,23 +94,39 @@ export default function WhyChooseUsSection() {
           }`}
         >
           <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
-            Why Choose Us?
+            Why Choose Surokkha?
           </h2>
           <p className="mt-3 text-sm font-medium text-[#00E0AE] sm:text-base">
-            Shurokka: 11+ Years of delivering affordable healthcare solutions
-            in Bangladesh
+            11+ Years of delivering affordable healthcare solutions in
+            Bangladesh
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-y-10 gap-x-6 sm:grid-cols-4 sm:gap-x-8">
-          {stats.map((stat, index) => (
-            <StatCard
-              key={stat.id}
-              stat={stat}
-              active={visible}
-              delay={index * 150}
-            />
-          ))}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {benefits.map((benefit, index) => {
+            const Icon = benefit.icon;
+            return (
+              <div
+                key={benefit.id}
+                style={{ transitionDelay: visible ? `${index * 100}ms` : "0ms" }}
+                className={`group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all duration-700 ease-out hover:-translate-y-1 hover:border-[#00C896]/40 hover:bg-white/[0.06] ${
+                  visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+                }`}
+              >
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#00C896]/10 transition-colors duration-300 group-hover:bg-[#00C896]/20">
+                  <Icon className="h-6 w-6 text-[#00E0AE]" strokeWidth={1.75} />
+                </div>
+
+                <h3 className="mb-2 text-lg font-bold text-white">
+                  {benefit.title}
+                </h3>
+
+                <p className="text-sm leading-relaxed text-white/70">
+                  {benefit.description}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

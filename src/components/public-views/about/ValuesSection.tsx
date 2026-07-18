@@ -20,7 +20,7 @@ const values: ValueItem[] = [
   },
   {
     id: 2,
-    image: "https://i0.wp.com/milvikbd.com/wp-content/uploads/2024/06/Think-big-start-small-1.jpg?w=480&ssl=1",
+    image: "https://imageio.forbes.com/blogs-images/chunkamui/files/2016/01/Devils-Advocate-Vector-Banner-700x400.png?height=400&width=700&fit=bounds",
     title: "Think Big Start Small",
     description:
       "We imagine solutions that will challenge the status quo. We start small, take time to get it right, then let it fly. We empower our people to share and test their ideas. We believe in growing our people because every employee can have an impact on the business.",

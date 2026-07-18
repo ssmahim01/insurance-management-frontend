@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { HeartPulse, Shield, Sparkles, Stethoscope } from "lucide-react";
+import { HeartPulse, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Accordion,
@@ -13,10 +13,8 @@ import {
 // ---- Data (swap with real content / i18n strings) -------------------------
 
 const PRODUCTS = [
-  { id: "health", label: "Milvik Health", icon: HeartPulse },
-  { id: "life", label: "Milvik Life", icon: Shield },
-  { id: "wellness", label: "Milvik Wellness", icon: Sparkles },
-  { id: "doctor", label: "My Doctor", icon: Stethoscope },
+  { id: "health", label: "Surokkha Health", icon: HeartPulse },
+  { id: "wellness", label: "Surokkha Wellness", icon: Sparkles },
 ] as const;
 
 type ProductId = (typeof PRODUCTS)[number]["id"];
@@ -24,45 +22,34 @@ type ProductId = (typeof PRODUCTS)[number]["id"];
 const FAQS: Record<ProductId, { question: string; answer: string }[]> = {
   health: [
     {
-      question: "What are the services offered by MILVIK?",
+      question: "Affordable Protection?",
       answer:
-        "MILVIK offers a range of digital health and insurance services including Milvik Health, Milvik Life, Milvik Wellness, and My Doctor — designed to make coverage and care accessible from your phone.",
+        "Quality healthcare shouldn’t be expensive. Our plans are designed to provide meaningful protection at an affordable cost.",
     },
     {
-      question: "What is Milvik Health Service?",
+      question: "What isCash Support During Hospitalization?",
       answer:
-        "Milvik Health is a micro health insurance product that covers hospitalization and related medical expenses, built for affordability and quick claims.",
+        "Receive financial assistance while admitted to the hospital, helping you focus on recovery instead of expenses.",
     },
     {
-      question: "What are the mHealth services offered by MILVIK?",
-      answer:
-        "Our mHealth services include teleconsultations, health tips via SMS, and access to a network of doctors — all reachable directly from your mobile device.",
-    },
-  ],
-  life: [
-    {
-      question: "What are the services offered by MILVIK?",
-      answer:
-        "MILVIK offers Milvik Health, Milvik Life, Milvik Wellness, and My Doctor as part of its digital insurance suite.",
+      question: "Access to Trusted Healthcare?",
+      answer:"Enjoy consultations with qualified doctors along with exclusive discounts at selected hospitals and pharmacies.",
     },
     {
-      question: "What is Milvik Life Service?",
-      answer:
-        "Milvik Life provides affordable life insurance coverage with simple enrollment and mobile-based premium payments.",
-    },
-  ],
+      question: "Protection Beyond Hospitalization?",
+      answer:"Our plans include benefits for accidental death, disability and selected critical illnesses—offering financial security when it matters most.",
+    },  ],
+  
   wellness: [
     {
-      question: "What is Milvik Wellness?",
+      question: "Wellness-Focused Care?",
       answer:
-        "Milvik Wellness focuses on preventive care, offering health check-up reminders, wellness tips, and discounted diagnostics.",
+        "Selected plans include preventive health benefits, encouraging early detection and healthier living.",
     },
-  ],
-  doctor: [
     {
-      question: "What is My Doctor?",
+      question: "Simple & Digital Experience?",
       answer:
-        "My Doctor connects you with licensed physicians for teleconsultations anytime, anywhere.",
+        "From enrollment to support, Surokkha provides a fast, secure and hassle-free digital experience.",
     },
   ],
 };
@@ -133,7 +120,7 @@ export default function FaqComponent() {
 
       {/* FAQ accordion */}
       <div className="mx-auto max-w-3xl px-4 py-12">
-        <Accordion  className="space-y-3">
+        <Accordion className="space-y-3">
           {FAQS[active].map((faq, i) => (
             <AccordionItem
               key={`${active}-${i}`}

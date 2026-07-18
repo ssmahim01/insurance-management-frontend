@@ -37,7 +37,7 @@ type Plan = {
 const plans: Plan[] = [
   {
     id: "health",
-    name: "Milvik Health",
+    name: "Surokkha Health",
     tagline: "Hospitalization & outpatient cashback cover",
     underwriter: "Meghna Life Insurance Limited",
     sections: [
@@ -82,9 +82,9 @@ const plans: Plan[] = [
           { text: "Not covered: hospitalization from war, civil unrest, riot, rebellion, coup, self-inflicted injury, or attempted suicide." },
           { text: "Not covered: hospitalization or OPD care for congenital diseases." },
           { text: "Maximum 10 nights per hospitalization, per claim." },
-          { text: "OPD cashback (doctor visits, diagnostics, medicine) requires a referral from MILVIK's internal doctors via mHealth, plus the service fee receipt." },
+          { text: "OPD cashback (doctor visits, diagnostics, medicine) requires a referral from Surokkha's internal doctors via mHealth, plus the service fee receipt." },
           { text: "No cashback for laser treatment, cosmetic surgery (unless accidental), or dental and eye treatment." },
-          { text: "Notify MILVIK of a hospital cashback claim within 90 days of admission." },
+          { text: "Notify Surokkha of a hospital cashback claim within 90 days of admission." },
           { text: "One claim per event, from one plan only. If you're covered under multiple plans, the plan with the highest coverage applies." },
         ],
       },
@@ -113,15 +113,15 @@ const plans: Plan[] = [
           { text: "90/180/yearly plans: points accrue in equal installments across the term and are usable as soon as they're earned." },
           { text: "You must be Active to use HealthPoints or receive cashback against them." },
           { text: "An item reimbursed via HealthPoints can't also be claimed under another benefit category." },
-          { text: "MILVIK sets point allocation, minimum/maximum eligible transaction amounts, and the earning/claiming methodology at its sole discretion, and may change, pause, or end the program anytime without notice." },
-          { text: "Suspicious activity or system abuse is investigated and may result in being barred from MILVIK services, with law enforcement involved where warranted." },
+          { text: "Surokkha Health sets point allocation, minimum/maximum eligible transaction amounts, and the earning/claiming methodology at its sole discretion, and may change, pause, or end the program anytime without notice." },
+          { text: "Suspicious activity or system abuse is investigated and may result in being barred from Surokkha services, with law enforcement involved where warranted." },
         ],
       },
     ],
   },
   {
     id: "life",
-    name: "Milvik Life & Disability",
+    name: "Surokkha Life & Disability",
     tagline: "Death & disability protection",
     underwriter: "Pragati Life Insurance Limited",
     sections: [
@@ -190,7 +190,7 @@ const plans: Plan[] = [
   },
   {
     id: "wellness",
-    name: "Milvik Wellness Plan",
+    name: "Surokkha Wellness Plan",
     tagline: "Cashless network hospitalization & wellness",
     underwriter: "Pragati Life Insurance Limited",
     sections: [
@@ -210,8 +210,8 @@ const plans: Plan[] = [
         icon: Stethoscope,
         clauses: [
           { text: "Tele-doctor consultation and partner discounts start immediately after confirmed payment; consultations cover general concerns only, with call-backs based on booking." },
-          { text: "Cashless support at MILVIK's partner diagnostics centers, external doctors, and pharmacies, when prescribed by a MILVIK doctor." },
-          { text: "Cashless inpatient treatment within MILVIK's partner hospital network, when prescribed and approved by a MILVIK doctor." },
+          { text: "Cashless support at Surokkha's partner diagnostics centers, external doctors, and pharmacies, when prescribed by a Surokkha doctor." },
+          { text: "Cashless inpatient treatment within Surokkha's partner hospital network, when prescribed and approved by a Surokkha doctor." },
           { text: "Life coverage payable on the policyholder's accidental or natural death." },
           { text: "10–50% discounts across 500+ partner providers for radiology, pathology, doctor fees, and hospital beds." },
           { text: "A 20% subscription fee reimbursement for 12 consecutive monthly payments made without filing a claim." },
@@ -222,7 +222,7 @@ const plans: Plan[] = [
         title: "Waiting period",
         icon: Clock,
         clauses: [
-          { text: "No waiting period for the Milvik Doctor service." },
+          { text: "No waiting period for the Surokkha Doctor service." },
           { text: "1 month before hospitalization and non-hospitalization benefits (medication, referrals, lab tests) become available." },
           { text: "12 months for inpatient hospitalization due to pregnancy, childbirth, or pre-existing disease." },
           { text: "180-day and yearly plans: not renewing within 15 days of the coverage period ending resets the waiting periods." },
@@ -236,7 +236,7 @@ const plans: Plan[] = [
           { text: "12-month plans: full annual hospitalization coverage from the start of the coverage period (1 month after subscription)." },
           { text: "6-month plans: 50% of the annual hospitalization coverage from the start of the coverage period." },
           { text: "Monthly plans: coverage is prorated — payments made divided by payments expected in the year, times the annual limit." },
-          { text: "Milvik Care benefits: up to 25% of the annual limit can be redeemed per month, until the annual limit is used up." },
+          { text: "Surokkha Care benefits: up to 25% of the annual limit can be redeemed per month, until the annual limit is used up." },
         ],
       },
       {
@@ -245,7 +245,7 @@ const plans: Plan[] = [
         icon: FileWarning,
         clauses: [
           { text: "No coverage for congenital diseases, or for pregnancy/childbirth or pre-existing disease hospitalization in the first 12 months." },
-          { text: "No coverage for treatment without a prior MILVIK doctor referral, or treatment outside the cashless partner network." },
+          { text: "No coverage for treatment without a prior Surokkha doctor referral, or treatment outside the cashless partner network." },
           { text: "No coverage for laser treatment, cosmetic surgery (unless accidental), dental or eye treatment, circumcision, or prophylactic/immunization procedures." },
           { text: "No coverage for voluntary abortion and related care." },
           { text: "No coverage for war/civil unrest, nuclear/biological/chemical risks, suicide or self-inflicted injury, injury during unlawful activity, mental/emotional/psychiatric disorders, alcohol or drug abuse, AIDS-related issues, or STDs." },
@@ -270,7 +270,7 @@ const plans: Plan[] = [
   },
   {
     id: "mydoctor",
-    name: "Milvik My Doctor",
+    name: "Surokkha My Doctor",
     tagline: "24/7 tele-consultation membership",
     sections: [
       {
@@ -326,8 +326,8 @@ const plans: Plan[] = [
 ];
 
 const generalNotes = [
-  "MILVIK may update the terms and conditions of any product at any time.",
-  "MILVIK may determine and change the price of any plan variant at any time.",
+  "Surokkha may update the terms and conditions of any product at any time.",
+  "Surokkha may determine and change the price of any plan variant at any time.",
 ];
 
 /**
@@ -335,7 +335,7 @@ const generalNotes = [
  * COMPONENT
  * ---------------------------------------------------------------------------
  */
-export default function MilvikTermsOfService() {
+export default function SurokkhaTermsOfService() {
   const [activePlan, setActivePlan] = React.useState(plans[0].id);
 
   return (
@@ -347,10 +347,10 @@ export default function MilvikTermsOfService() {
           Terms of Service
         </div>
         <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
-          Milvik plan terms &amp; conditions
+          Surokkha plan terms &amp; conditions
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-500">
-          Milvik values transparency and trust. Choose a plan below to see exactly
+          Surokkha values transparency and trust. Choose a plan below to see exactly
           how eligibility, coverage, waiting periods, claims, and payments work.
         </p>
       </div>
@@ -360,7 +360,7 @@ export default function MilvikTermsOfService() {
         <TabsList className="grid w-full grid-cols-2 gap-1 sm:grid-cols-4">
           {plans.map((plan) => (
             <TabsTrigger key={plan.id} value={plan.id} className="text-xs sm:text-sm">
-              {plan.name.replace("Milvik ", "")}
+              {plan.name.replace("Surokkha ", "")}
             </TabsTrigger>
           ))}
         </TabsList>

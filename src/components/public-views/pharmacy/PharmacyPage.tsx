@@ -11,34 +11,55 @@ import {
 } from "@/components/ui/select";
 import Link from "next/link";
 
-// ----------------------------------------------------------------------------
-// DESIGN NOTE — same light/dark tokens as the diagnostic page:
-//              LIGHT        DARK          USED FOR
-// paper        #F4F7F4      #0B1412       page background
-// card         #FFFFFF      #12211D       card / CTA surface
-// ink          #16241F      #E7EFEA       primary text
-// muted        #6B7A73      #8FA39B       secondary text / labels
-// teal         #0E6B58      #4FD9BC       links, focus rings, accents
-// teal-deep    #0A4A3D      #06231D       hero background
-// amber        #D9A441      #F0C36D       verified stamp accent
-// line         #D7DEDA      #24332E       hairlines / dashes
-//
-// Also fixed from the pasted version: partner data had been accidentally
-// left as the diagnostic centers list — swapped back to actual pharmacies.
-// Breadcrumb said "Diagnastic" and the CTA said "diagnostic center" — both
-// now say "Pharmacy". CTA/breadcrumb colors were plain blue/slate — now use
-// the shared teal design tokens so both pages match in both modes.
-// ----------------------------------------------------------------------------
-
 const pharmacyPartners = [
-  { id: 1, name: "Lazz Pharma", logo: "/pharmacies/lazz-pharma.png", city: "Dhaka" },
-  { id: 2, name: "Tamanna Pharmacy", logo: "/pharmacies/tamanna-pharmacy.png", city: "Dhaka" },
-  { id: 3, name: "Well Care Pharmacy", logo: "/pharmacies/well-care.png", city: "Chattogram" },
-  { id: 4, name: "Arogga", logo: "/pharmacies/arogga.png", city: "Dhaka" },
-  { id: 5, name: "Shafi Pharmacy", logo: "/pharmacies/shafi-pharmacy.png", city: "Sylhet" },
-  { id: 6, name: "Medix Pharma", logo: "/pharmacies/medix-pharma.png", city: "Khulna" },
-  { id: 7, name: "Care Point Pharmacy", logo: "/pharmacies/care-point.png", city: "Rajshahi" },
-  { id: 8, name: "Popular Pharmacy", logo: "/pharmacies/popular-pharmacy.png", city: "Dhaka" },
+  {
+    id: 1,
+    name: "Popular Diagnostic Centre",
+    logo: "https://akhil.populardiagnostic.com/Images/Logo/logo.png",
+    city: "Dhaka",
+  },
+  {
+    id: 2,
+    name: "Labaid Diagnostic",
+    logo: "https://labaiddiagnostics.com/frontend/images/labaid_new_logo.jpg",
+    city: "Dhaka",
+  },
+  {
+    id: 3,
+    name: "Ibn Sina Diagnostic",
+    logo: "https://images.seeklogo.com/logo-png/55/1/ibn-sina-logo-png_seeklogo-555156.png",
+    city: "Chattogram",
+  },
+  {
+    id: 4,
+    name: "Al Mahmud Diagnostic",
+    logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnoRWynf8YsdcDjt30PvDuuBK9U8xAAsHP4VPb0Eb6giR4TIM3L9-2dak&s=10",
+    city: "Dhaka",
+  },
+  {
+    id: 5,
+    name: "Ashiyan Diagnostic",
+    logo: "/diagnostics/ashiyan.png",
+    city: "Sylhet",
+  },
+  {
+    id: 6,
+    name: "Prime Diagnostic Centre",
+    logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTxRVFhcvlVtnOmF3fGGoYfO6BBCbZtjCrtHlSKwIB5_GE5dqg_BjUKU-6g&s=10",
+    city: "Khulna",
+  },
+  {
+    id: 7,
+    name: "Modern Diagnostic Centre",
+    logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTar_5iq7i30ujMtehZxGgXxubzh_ffpHsKQ13qk0b_rbfo-LlSDp0Zn-I&s=10",
+    city: "Rajshahi",
+  },
+  {
+    id: 8,
+    name: "Central Hospital Diagnostic",
+    logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCscM0IET3DcMN2Tnmml-FDSAfeit7eUFHpFhE-yGuQpjDXRyNSaN6piQl&s=10",
+    city: "Dhaka",
+  },
 ];
 
 const cities = [
@@ -142,7 +163,7 @@ function PharmacySlipCard({
       </div>
 
       {/* logo field */}
-      <div className="flex h-24 items-center justify-center px-4 py-3">
+      <div className="flex h-30 items-center justify-center px-4 py-3">
         {!errored ? (
           <Image
             src={logo}
