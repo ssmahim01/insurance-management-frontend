@@ -1,297 +1,3 @@
-// "use client";
-
-// import { useEffect, useState } from "react";
-// import Image from "next/image";
-// import { toast } from "sonner";
-// import { Loader2, Pencil, X } from "lucide-react";
-// import { useForm } from "react-hook-form";
-
-// import { IUser } from "@/types/user.types";
-// import { useUpdateProfileMutation } from "@/redux/features/user/user.api";
-
-// import {
-//   Dialog,
-//   DialogContent,
-//   DialogFooter,
-//   DialogHeader,
-//   DialogTitle,
-// } from "@/components/ui/dialog";
-
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import { ScrollArea } from "@/components/ui/scroll-area";
-
-// type Props = {
-//   user: IUser;
-//   open: boolean;
-//   onOpenChange: (open: boolean) => void;
-// };
-
-// export default function UpdateProfileModal({
-//   user,
-//   open,
-//   onOpenChange,
-// }: Props) {
-//   const [updateProfile, { isLoading }] = useUpdateProfileMutation();
-
-//   const [preview, setPreview] = useState<string | null>(user?.picture || null);
-
-//   const { register, reset } = useForm();
-
-//   useEffect(() => {
-//     if (!open) return;
-
-//     reset({
-//       name: user?.name || "",
-//       email: user?.email || "",
-//       nid: user?.nid || "",
-//       dateOfBirth: user?.dateOfBirth
-//         ? new Date(user.dateOfBirth).toISOString().split("T")[0]
-//         : "",
-//       gender: user?.gender || "",
-//       division: user?.address?.division || "",
-//       district: user?.address?.district || "",
-//       thana: user?.address?.thana || "",
-//       street: user?.address?.street || "",
-//     });
-
-//     // eslint-disable-next-line react-hooks/set-state-in-effect
-//     setPreview(user?.picture || null);
-//   }, [open, reset, user]);
-
-//   const handleImagePreview = (
-//     e: React.ChangeEvent<HTMLInputElement>
-//   ) => {
-//     const file = e.target.files?.[0];
-
-//     if (file) {
-//       setPreview(URL.createObjectURL(file));
-//     }
-//   };
-
-//   const handleSubmit = async (
-//     e: React.FormEvent<HTMLFormElement>
-//   ) => {
-//     e.preventDefault();
-
-//     const form = e.currentTarget;
-
-//     const formData = new FormData();
-
-//     formData.append(
-//       "name",
-//       (form.elements.namedItem("name") as HTMLInputElement).value
-//     );
-
-//     formData.append(
-//       "email",
-//       (form.elements.namedItem("email") as HTMLInputElement).value
-//     );
-
-//     // formData.append(
-//     //   "nid",
-//     //   (form.elements.namedItem("nid") as HTMLInputElement).value
-//     // );
-
-//     // formData.append(
-//     //   "dateOfBirth",
-//     //   (form.elements.namedItem("dateOfBirth") as HTMLInputElement).value
-//     // );
-
-//     // formData.append(
-//     //   "gender",
-//     //   (form.elements.namedItem("gender") as HTMLSelectElement).value
-//     // );
-
-//     formData.append(
-//       "address[division]",
-//       (form.elements.namedItem("division") as HTMLInputElement).value
-//     );
-
-//     formData.append(
-//       "address[district]",
-//       (form.elements.namedItem("district") as HTMLInputElement).value
-//     );
-
-//     formData.append(
-//       "address[thana]",
-//       (form.elements.namedItem("thana") as HTMLInputElement).value
-//     );
-
-//     formData.append(
-//       "address[street]",
-//       (form.elements.namedItem("street") as HTMLInputElement).value
-//     );
-
-//     const pictureInput = form.elements.namedItem(
-//       "picture"
-//     ) as HTMLInputElement;
-
-//     if (pictureInput.files?.[0]) {
-//       formData.append("picture", pictureInput.files[0]);
-//     }
-
-//     try {
-//       await updateProfile(formData).unwrap();
-
-//       toast.success("Profile updated successfully");
-
-//       onOpenChange(false);
-//     } catch (error) {
-//       console.error(error);
-
-//       toast.error("Failed to update profile");
-//     }
-//   };
-
-//   return (
-//     <Dialog open={open} onOpenChange={onOpenChange}>
-//       <DialogContent className="max-w-lg">
-//         <DialogHeader>
-//           <DialogTitle>Update Profile</DialogTitle>
-//         </DialogHeader>
-
-//         <ScrollArea className="max-h-[70vh] pr-4">
-//           <form
-//             onSubmit={handleSubmit}
-//             className="space-y-5"
-//           >
-//             <div className="flex flex-col items-center gap-3">
-//               <div className="relative h-24 w-24 overflow-hidden rounded-full border">
-//                 {preview ? (
-//                   <Image
-//                     src={preview}
-//                     alt="profile"
-//                     fill
-//                     className="object-cover"
-//                   />
-//                 ) : (
-//                   <div className="flex h-full w-full items-center justify-center text-2xl font-semibold">
-//                     {user?.name?.charAt(0)}
-//                   </div>
-//                 )}
-
-//                 <label
-//                   htmlFor="picture"
-//                   className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/40 opacity-0 transition hover:opacity-100"
-//                 >
-//                   <Pencil className="h-5 w-5 text-white" />
-//                 </label>
-
-//                 <input
-//                   id="picture"
-//                   type="file"
-//                   accept="image/*"
-//                   className="hidden"
-//                   {...register("picture")}
-//                   onChange={handleImagePreview}
-//                 />
-//               </div>
-//             </div>
-
-//             <div className="grid gap-4 sm:grid-cols-2">
-//               <div>
-//                 <Label>Name</Label>
-//                 <Input {...register("name")} />
-//               </div>
-
-//               <div>
-//                 <Label>Email</Label>
-//                 <Input
-//                   type="email"
-//                   {...register("email")}
-//                 />
-//               </div>
-
-//               <div>
-//                 <Label>NID</Label>
-//                 <Input {...register("nid")} />
-//               </div>
-
-//               <div>
-//                 <Label>Date of Birth</Label>
-//                 <Input
-//                   type="date"
-//                   {...register("dateOfBirth")}
-//                 />
-//               </div>
-
-//               <div>
-//                 <Label>Gender</Label>
-
-//                 <select
-//                   className="flex h-10 w-full rounded-md border bg-background px-3 text-sm"
-//                   {...register("gender")}
-//                 >
-//                   <option value="">Select Gender</option>
-//                   <option value="MALE">Male</option>
-//                   <option value="FEMALE">Female</option>
-//                   <option value="OTHER">Other</option>
-//                 </select>
-//               </div>
-//             </div>
-
-//             <div>
-//               <h3 className="mb-3 font-medium">
-//                 Address
-//               </h3>
-
-//               <div className="grid gap-4 sm:grid-cols-2">
-//                 <div>
-//                   <Label>Division</Label>
-//                   <Input {...register("division")} />
-//                 </div>
-
-//                 <div>
-//                   <Label>District</Label>
-//                   <Input {...register("district")} />
-//                 </div>
-
-//                 <div>
-//                   <Label>Thana</Label>
-//                   <Input {...register("thana")} />
-//                 </div>
-
-//                 <div>
-//                   <Label>Street</Label>
-//                   <Input {...register("street")} />
-//                 </div>
-//               </div>
-//             </div>
-
-//             <DialogFooter>
-//               <Button
-//                 type="button"
-//                 variant="outline"
-//                 onClick={() => onOpenChange(false)}
-//               >
-//                 <X className="mr-2 h-4 w-4" />
-//                 Cancel
-//               </Button>
-
-//               <Button
-//                 type="submit"
-//                 disabled={isLoading}
-//                 className="btn-bg text-white"
-//               >
-//                 {isLoading ? (
-//                   <>
-//                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-//                     Saving...
-//                   </>
-//                 ) : (
-//                   "Save Changes"
-//                 )}
-//               </Button>
-//             </DialogFooter>
-//           </form>
-//         </ScrollArea>
-//       </DialogContent>
-//     </Dialog>
-//   );
-// }
-
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -302,7 +8,11 @@ import { useForm } from "react-hook-form";
 
 import { IUser } from "@/types/user.types";
 import { useUpdateProfileMutation } from "@/redux/features/user/user.api";
-import { divisions, getDistrictsByDivision, getUpazilasByDistrict } from "@/lib/bd-address";
+import {
+  divisions,
+  getDistrictsByDivision,
+  getUpazilasByDistrict,
+} from "@/lib/bd-address";
 
 import {
   Dialog,
@@ -316,7 +26,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
+
+interface ProfileFormValues {
+  name: string;
+  email: string;
+  nid: string;
+  dateOfBirth: string;
+  gender: string;
+}
 
 type Props = {
   user: IUser;
@@ -332,6 +55,7 @@ export default function UpdateProfileModal({
   const [updateProfile, { isLoading }] = useUpdateProfileMutation();
 
   const [preview, setPreview] = useState<string | null>(user?.picture || null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const [divisionId, setDivisionId] = useState("");
   const [districtId, setDistrictId] = useState("");
@@ -342,10 +66,16 @@ export default function UpdateProfileModal({
   const [thanaName, setThanaName] = useState("");
   const [street, setStreet] = useState("");
 
-  const availableDistricts = useMemo(() => getDistrictsByDivision(divisionId), [divisionId]);
-  const availableUpazilas = useMemo(() => getUpazilasByDistrict(districtId), [districtId]);
+  const availableDistricts = useMemo(
+    () => getDistrictsByDivision(divisionId),
+    [divisionId],
+  );
+  const availableUpazilas = useMemo(
+    () => getUpazilasByDistrict(districtId),
+    [districtId],
+  );
 
-  const { register, reset } = useForm();
+  const { register, reset, handleSubmit } = useForm<ProfileFormValues>();
 
   useEffect(() => {
     if (!open) return;
@@ -360,25 +90,31 @@ export default function UpdateProfileModal({
       gender: user?.gender || "",
     });
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setPreview(user?.picture || null);
+    setTimeout(() => {
+      setPreview(user?.picture || null);
+      setImageFile(null);
+    }, 200);
 
-    // user এর existing address (name হিসেবে সেভ থাকে) থেকে ID বের করা
     const existingDivisionName = user?.address?.division || "";
-    const existingDivision = divisions.find((d) => d.name === existingDivisionName);
+    const existingDivision = divisions.find(
+      (d) => d.name === existingDivisionName,
+    );
     const existingDivisionId = existingDivision?.id ?? "";
 
     const existingDistrictName = user?.address?.district || "";
     const districtsForDivision = getDistrictsByDivision(existingDivisionId);
-    const existingDistrict = districtsForDivision.find((d) => d.name === existingDistrictName);
+    const existingDistrict = districtsForDivision.find(
+      (d) => d.name === existingDistrictName,
+    );
     const existingDistrictId = existingDistrict?.id ?? "";
 
     const existingThanaName = user?.address?.thana || "";
     const upazilasForDistrict = getUpazilasByDistrict(existingDistrictId);
-    const existingThana = upazilasForDistrict.find((u) => u.name === existingThanaName);
+    const existingThana = upazilasForDistrict.find(
+      (u) => u.name === existingThanaName,
+    );
     const existingThanaId = existingThana?.id ?? "";
 
-    
     setDivisionId(existingDivisionId);
     setDistrictId(existingDistrictId);
     setThanaId(existingThanaId);
@@ -389,12 +125,10 @@ export default function UpdateProfileModal({
     setStreet(user?.address?.street || "");
   }, [open, reset, user]);
 
-  const handleImagePreview = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleImagePreview = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-
     if (file) {
+      setImageFile(file);
       setPreview(URL.createObjectURL(file));
     }
   };
@@ -426,78 +160,48 @@ export default function UpdateProfileModal({
     setThanaName(upazila?.name ?? "");
   };
 
-  const handleSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
-    e.preventDefault();
-
-    const form = e.currentTarget;
-
-    const formData = new FormData();
-
-    formData.append(
-      "name",
-      (form.elements.namedItem("name") as HTMLInputElement).value
-    );
-
-    formData.append(
-      "email",
-      (form.elements.namedItem("email") as HTMLInputElement).value
-    );
-
-    // formData.append(
-    //   "nid",
-    //   (form.elements.namedItem("nid") as HTMLInputElement).value
-    // );
-
-    // formData.append(
-    //   "dateOfBirth",
-    //   (form.elements.namedItem("dateOfBirth") as HTMLInputElement).value
-    // );
-
-    // formData.append(
-    //   "gender",
-    //   (form.elements.namedItem("gender") as HTMLSelectElement).value
-    // );
-
-    formData.append("address[division]", divisionName);
-    formData.append("address[district]", districtName);
-    formData.append("address[thana]", thanaName);
-    formData.append("address[street]", street);
-
-    const pictureInput = form.elements.namedItem(
-      "picture"
-    ) as HTMLInputElement;
-
-    if (pictureInput.files?.[0]) {
-      formData.append("picture", pictureInput.files[0]);
-    }
-
+  const onSubmit = async (values: ProfileFormValues) => {
     try {
+      const payload: Record<string, unknown> = {
+        name: values.name,
+        ...(values.email && { email: values.email }),
+        ...(values.nid && { nid: values.nid }),
+        ...(values.dateOfBirth && { dateOfBirth: values.dateOfBirth }),
+        ...(values.gender && { gender: values.gender }),
+        address: {
+          division: divisionName,
+          district: districtName,
+          thana: thanaName,
+          street,
+        },
+      };
+
+      const formData = new FormData();
+      formData.append("data", JSON.stringify(payload));
+      if (imageFile) formData.append("picture", imageFile);
+
       await updateProfile(formData).unwrap();
-
       toast.success("Profile updated successfully");
-
       onOpenChange(false);
     } catch (error) {
-      console.error(error);
-
-      toast.error("Failed to update profile");
+      const message =
+        error && typeof error === "object" && "data" in error
+          ? ((error as { data?: { message?: string } }).data?.message ??
+            "Failed to update profile")
+          : "Failed to update profile";
+      toast.error(message);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg bg-gray-100 dark:bg-slate-950">
         <DialogHeader>
           <DialogTitle>Update Profile</DialogTitle>
         </DialogHeader>
 
         <ScrollArea className="max-h-[70vh] pr-4">
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-5"
-          >
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="flex flex-col items-center gap-3">
               <div className="relative h-24 w-24 overflow-hidden rounded-full border">
                 {preview ? (
@@ -525,7 +229,6 @@ export default function UpdateProfileModal({
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  {...register("picture")}
                   onChange={handleImagePreview}
                 />
               </div>
@@ -539,10 +242,7 @@ export default function UpdateProfileModal({
 
               <div>
                 <Label>Email</Label>
-                <Input
-                  type="email"
-                  {...register("email")}
-                />
+                <Input type="email" {...register("email")} />
               </div>
 
               <div>
@@ -552,15 +252,11 @@ export default function UpdateProfileModal({
 
               <div>
                 <Label>Date of Birth</Label>
-                <Input
-                  type="date"
-                  {...register("dateOfBirth")}
-                />
+                <Input type="date" {...register("dateOfBirth")} />
               </div>
 
               <div>
                 <Label>Gender</Label>
-
                 <select
                   className="flex h-10 w-full rounded-md border bg-background px-3 text-sm"
                   {...register("gender")}
@@ -574,14 +270,14 @@ export default function UpdateProfileModal({
             </div>
 
             <div>
-              <h3 className="mb-3 font-medium">
-                Address
-              </h3>
-
+              <h3 className="mb-3 font-medium">Address</h3>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label>Division</Label>
-                  <Select value={divisionId} onValueChange={handleDivisionChange}>
+                  <Select
+                    value={divisionId}
+                    onValueChange={handleDivisionChange}
+                  >
                     <SelectTrigger className="w-full">
                       <span className="text-sm">
                         {divisionId
@@ -609,7 +305,8 @@ export default function UpdateProfileModal({
                     <SelectTrigger className="w-full">
                       <span className="text-sm">
                         {districtId
-                          ? availableDistricts.find((d) => d.id === districtId)?.name
+                          ? availableDistricts.find((d) => d.id === districtId)
+                              ?.name
                           : "Select District"}
                       </span>
                     </SelectTrigger>
@@ -633,7 +330,8 @@ export default function UpdateProfileModal({
                     <SelectTrigger className="w-full">
                       <span className="text-sm">
                         {thanaId
-                          ? availableUpazilas.find((u) => u.id === thanaId)?.name
+                          ? availableUpazilas.find((u) => u.id === thanaId)
+                              ?.name
                           : "Select Thana"}
                       </span>
                     </SelectTrigger>
@@ -671,11 +369,11 @@ export default function UpdateProfileModal({
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="btn-bg text-white"
+                className="gap-2 bg-linear-to-r from-indigo-600 to-blue-600 text-white hover:from-indigo-700 hover:to-blue-700"
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                     Saving...
                   </>
                 ) : (

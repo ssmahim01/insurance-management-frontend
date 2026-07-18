@@ -89,7 +89,7 @@ export function KpiGrid({ summary, isCustomer }: KpiGridProps) {
     <div
       className={`
         grid gap-4
-        ${role === "ADMIN" ? "grid-cols-2 md:grid-cols-4 xl:grid-cols-5" : role === "AGENT_LEADER" ? "grid-cols-2 md:grid-cols-3 xl:grid-cols-4" : "grid-cols-2 md:grid-cols-3 xl:grid-cols-3"}
+        ${role === "ADMIN" || role === "SUPER_ADMIN" || role === "MANAGER" ? "grid-cols-2 md:grid-cols-4 xl:grid-cols-5" : role === "AGENT_LEADER" ? "grid-cols-2 md:grid-cols-3 xl:grid-cols-4" : "grid-cols-2 md:grid-cols-3 xl:grid-cols-3"}
       `}
     >
       {cards.map((card) => (

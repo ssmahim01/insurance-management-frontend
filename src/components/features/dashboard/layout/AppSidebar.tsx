@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Sidebar,
@@ -116,7 +116,10 @@ function NavItemRow({ item, isActive }: { item: NavItem; isActive: boolean }) {
 
 export function AppSidebarSkeleton() {
   return (
-    <Sidebar collapsible="icon" className="border-r border-gray-200/80 dark:border-gray-800">
+    <Sidebar
+      collapsible="icon"
+      className="border-r border-gray-200/80 dark:border-gray-800"
+    >
       <SidebarHeader className="border-b mb-3 border-gray-200/80 dark:border-gray-800">
         <div className="ml-2 my-2">
           <Skeleton className="h-12 w-12 rounded-xl" />
@@ -187,6 +190,7 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
     ?.replace(/[_-]/g, " ")
     .toLowerCase()
     .replace(/\b\w/g, (char) => char.toUpperCase());
+  const role = user?.role;
 
   return (
     <Sidebar
@@ -195,7 +199,10 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
     >
       {/* ── Header / Logo ── */}
       <SidebarHeader className="border-b border-gray-200/80 dark:border-gray-800 bg-gray-100 dark:bg-gray-950">
-        <Link href={"/"} className="flex items-center py-1 group-data-[collapsible=icon]:justify-center">
+        <Link
+          href={"/"}
+          className="flex items-center py-1 group-data-[collapsible=icon]:justify-center"
+        >
           <div
             className={cn(
               "relative rounded-xl ring-1 ring-indigo-500/10 transition-all duration-200",
@@ -233,7 +240,11 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
 
                 <SidebarMenu>
                   {group.items.map((item) => (
-                    <NavItemRow key={item.id} item={item} isActive={item.href === activeHref} />
+                    <NavItemRow
+                      key={item.id}
+                      item={item}
+                      isActive={item.href === activeHref}
+                    />
                   ))}
                 </SidebarMenu>
               </SidebarGroup>
@@ -302,9 +313,12 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="gap-2 cursor-pointer text-sm">
-                    <Link href={`${dashboardRoot}/profile`} className="flex items-center gap-2">
-                      <User className="h-3.5 w-3.5" />
-                      Profile
+                    <Link
+                      className="flex items-center gap-2 cursor-pointer"
+                      href={`${role === "ADMIN" || role === "SUPER_ADMIN" ? "/admin/dashboard/profile" : role === "AGENT_LEADER" ? "/agent-leader/dashboard/profile" : role === "AGENT" ? "/agent/dashboard/profile" : role === "MANAGER" ? "/manager/dashboard/profile" : "/customer/dashboard/profile"}`}
+                    >
+                      {" "}
+                      <User className="h-3.5 w-3.5" /> Profile
                     </Link>
                   </DropdownMenuItem>
                   {/* <DropdownMenuItem className="gap-2 cursor-pointer text-sm">

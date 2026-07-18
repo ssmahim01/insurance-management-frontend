@@ -52,6 +52,7 @@ import { useRouter } from "next/navigation";
 import { useGetMeQuery } from "@/redux/features/user/user.api";
 import { IUser } from "@/types/user.types";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 export interface NavItem {
   id: string;
@@ -191,6 +192,7 @@ export function DashboardHeader({
   const firstName = user?.name?.split(" ")[0];
   const initials = user?.name?.substring(0, 2).toUpperCase() || "U";
   const roleLabel = formatRole((user as any)?.role);
+  const role = user?.role
 
   return (
     <header className="sticky top-0 z-20 border-b border-gray-200/80 bg-linear-to-r from-white via-white to-emerald-50/40 dark:from-gray-950 dark:via-gray-950 dark:to-emerald-950/10 backdrop-blur-sm dark:border-gray-800">
@@ -325,8 +327,8 @@ export function DashboardHeader({
                 </div>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="gap-2 cursor-pointer text-sm">
-                <User className="h-3.5 w-3.5" /> Profile
+              <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-sm">
+               <Link className="flex items-center gap-2 cursor-pointer" href={`${role === "ADMIN" || role === "SUPER_ADMIN" ? "/admin/dashboard/profile" : role === "AGENT_LEADER" ? "/agent-leader/dashboard/profile" : role === "AGENT" ? "/agent/dashboard/profile" : role === "MANAGER" ? "/manager/dashboard/profile" : "/customer/dashboard/profile"}`}> <User className="h-3.5 w-3.5" /> Profile</Link>
               </DropdownMenuItem>
               {/* <DropdownMenuItem className="gap-2 cursor-pointer text-sm">
                 <Settings className="h-3.5 w-3.5" /> Settings

@@ -1,16 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Building2, MapPin, Navigation2 } from "lucide-react";
+import { Building2, Globe, MapPin, Navigation2 } from "lucide-react";
 import { IPartnerBranch } from "@/types/branch.types";
 import { BranchActions } from "./BranchActions";
 import { formatDistance } from "@/utils/geo-distance";
+import Link from "next/link";
 
 interface PopulatedPartner {
   _id?: string;
   name: string;
   logo?: string;
   phone?: string;
+  website?: string;
   email?: string;
 }
 
@@ -21,17 +23,19 @@ interface BranchCardProps {
   userCoords?: { latitude: number; longitude: number } | null;
 }
 
-function getPopulatedPartner(partner: IPartnerBranch["partner"]): PopulatedPartner | null {
+function getPopulatedPartner(
+  partner: IPartnerBranch["partner"],
+): PopulatedPartner | null {
   if (!partner || typeof partner === "string") return null;
   return partner as unknown as PopulatedPartner;
 }
 
 const GRADIENTS = [
-  "from-emerald-600 via-emerald-700 to-teal-900",
+  "from-cyan-600 via-cyan-700 to-teal-900",
   "from-blue-600 via-indigo-700 to-blue-950",
   "from-indigo-600 via-purple-700 to-indigo-950",
   "from-purple-600 via-fuchsia-700 to-purple-950",
-  "from-teal-600 via-emerald-700 to-cyan-950",
+  "from-teal-600 via-cyan-700 to-cyan-950",
   "from-blue-700 via-cyan-700 to-teal-900",
   "from-fuchsia-600 via-purple-700 to-indigo-950",
   "from-cyan-600 via-blue-700 to-indigo-950",
@@ -46,7 +50,12 @@ function hashToIndex(seed: string, length: number) {
   return Math.abs(hash) % length;
 }
 
-export function BranchCard({ branch, index = 0, distanceKm, userCoords }: BranchCardProps) {
+export function BranchCard({
+  branch,
+  index = 0,
+  distanceKm,
+  userCoords,
+}: BranchCardProps) {
   const [logoFailed, setLogoFailed] = useState(false);
 
   const partner = getPopulatedPartner(branch.partner);
@@ -54,10 +63,17 @@ export function BranchCard({ branch, index = 0, distanceKm, userCoords }: Branch
   const phone = branch.phone || partner?.phone;
   const email = branch.email || partner?.email;
 
-  const seed = String(branch._id ?? partner?.name ?? branch.branchName ?? index);
+  const seed = String(
+    branch._id ?? partner?.name ?? branch.branchName ?? index,
+  );
   const gradient = GRADIENTS[hashToIndex(seed, GRADIENTS.length)];
 
-  const addressParts = [branch.address, branch.area, branch.city, branch.postalCode].filter(Boolean);
+  const addressParts = [
+    branch.address,
+    branch.area,
+    branch.city,
+    branch.postalCode,
+  ].filter(Boolean);
   const fullAddress = addressParts.join(", ");
 
   const showLogo = Boolean(partner?.logo) && !logoFailed;
@@ -77,7 +93,7 @@ export function BranchCard({ branch, index = 0, distanceKm, userCoords }: Branch
         <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur-sm px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white ring-1 ring-white/20">
           <span
             className={`h-1.5 w-1.5 rounded-full ${
-              branch.isActive ? "bg-emerald-300 animate-pulse" : "bg-white/40"
+              branch.isActive ? "bg-cyan-300 animate-pulse" : "bg-white/40"
             }`}
           />
           {branch.isActive ? "Active" : "Inactive"}
@@ -109,8 +125,12 @@ export function BranchCard({ branch, index = 0, distanceKm, userCoords }: Branch
           )}
         </div>
         <div className="min-w-0 pt-0.5">
-          <p className="text-base font-bold text-white truncate">{branch.branchName}</p>
-          <p className="text-xs text-white/70 truncate">{partner?.name ?? "Partner"}</p>
+          <p className="text-base font-bold text-white truncate">
+            {branch.branchName}
+          </p>
+          <p className="text-xs text-white/70 truncate">
+            {partner?.name ?? "Partner"}
+          </p>
         </div>
       </div>
 
@@ -118,7 +138,9 @@ export function BranchCard({ branch, index = 0, distanceKm, userCoords }: Branch
       <div className="relative space-y-1.5">
         <div className="flex items-start gap-2 text-sm text-white/85">
           <MapPin className="h-4 w-4 mt-0.5 shrink-0 text-white/70" />
-          <p className="leading-relaxed">{fullAddress || "Address unavailable"}</p>
+          <p className="leading-relaxed">
+            {fullAddress || "Address unavailable"}
+          </p>
         </div>
         {(branch.city || branch.area) && (
           <div className="flex flex-wrap gap-1.5 pl-6">
@@ -135,6 +157,18 @@ export function BranchCard({ branch, index = 0, distanceKm, userCoords }: Branch
           </div>
         )}
       </div>
+
+      {partner?.website && (
+        <Link
+          href={partner.website}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-1.5 inline-flex items-center gap-1.5 text-xs text-white/70 hover:text-white transition-colors"
+        >
+          <Globe className="h-3 w-3" />
+          {partner.website.replace(/^https?:\/\//, "")}
+        </Link>
+      )}
 
       <BranchActions
         branchName={branch.branchName}

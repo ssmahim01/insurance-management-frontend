@@ -51,6 +51,25 @@ const STATUS_CONFIG: Record<Exclude<GeoStatus, "granted">, StatusConfig> = {
     description: "It took too long to get your location. Please try again.",
     showRetry: true,
   },
+  "ip-requesting": {
+    icon: LocateFixed,
+    title: "Getting your location...",
+    description: "Using IP address to approximate your location.",
+    showRetry: false,
+    animate: true,
+  },
+  "ip-granted": {
+    icon: LocateFixed,
+    title: "Location determined",
+    description: "Your location has been determined.",
+    showRetry: false,
+  },
+  "ip-failed": {
+    icon: AlertTriangle,
+    title: "Location detection failed",
+    description: "We couldn't determine your location. Please try again.",
+    showRetry: true,
+  },
 };
 
 export function BranchSearchCard({ status, errorMessage, onRetry }: BranchSearchCardProps) {
@@ -59,17 +78,17 @@ export function BranchSearchCard({ status, errorMessage, onRetry }: BranchSearch
 
   return (
     <div className="relative overflow-hidden flex flex-col items-center justify-center gap-5 rounded-3xl border border-border bg-card/70 backdrop-blur-sm p-10 sm:p-14 text-center shadow-sm">
-      <div className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-emerald-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-indigo-400/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-blue-400/10 blur-3xl" />
 
-      <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-500/15 to-blue-500/10 ring-1 ring-emerald-500/10">
+      <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-indigo-500/15 to-blue-500/10 ring-1 ring-indigo-500/10">
         <Icon
-          className={`h-7 w-7 text-emerald-600 dark:text-emerald-400 ${
+          className={`h-7 w-7 text-indigo-600 dark:text-indigo-400 ${
             config.animate ? "animate-pulse" : ""
           }`}
         />
         {config.animate && (
-          <span className="absolute inset-0 rounded-2xl ring-2 ring-emerald-400/40 animate-ping" />
+          <span className="absolute inset-0 rounded-2xl ring-2 ring-indigo-400/40 animate-ping" />
         )}
       </div>
 
@@ -83,7 +102,7 @@ export function BranchSearchCard({ status, errorMessage, onRetry }: BranchSearch
       {config.showRetry && (
         <Button
           onClick={onRetry}
-          className="relative gap-2 bg-linear-to-r from-emerald-600 to-blue-600 text-white shadow-md shadow-emerald-900/10 hover:from-emerald-700 hover:to-blue-700 hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.97] transition-all duration-200 ease-out"
+          className="relative gap-2 bg-linear-to-r from-indigo-600 to-blue-600 text-white shadow-md shadow-indigo-900/10 hover:from-indigo-700 hover:to-blue-700 hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.97] transition-all duration-200 ease-out"
         >
           <LocateFixed className="h-4 w-4" />
           Try Again
