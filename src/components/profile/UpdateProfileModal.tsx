@@ -115,7 +115,8 @@ export default function UpdateProfileModal({
     );
     const existingThanaId = existingThana?.id ?? "";
 
-    setDivisionId(existingDivisionId);
+  setTimeout(() => {
+      setDivisionId(existingDivisionId);
     setDistrictId(existingDistrictId);
     setThanaId(existingThanaId);
 
@@ -123,6 +124,7 @@ export default function UpdateProfileModal({
     setDistrictName(existingDistrictName);
     setThanaName(existingThanaName);
     setStreet(user?.address?.street || "");
+  }, 200);
   }, [open, reset, user]);
 
   const handleImagePreview = (e: React.ChangeEvent<HTMLInputElement>) => {
