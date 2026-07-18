@@ -7,8 +7,12 @@ import { DashboardErrorState } from "./DashboardErrorState";
 import { ManagerSummaryCards } from "./ManagerSummaryCards";
 import { RecentPartnersList } from "./RecentPartnersList";
 import { RecentBranchesList } from "./RecentBranchesList";
+import { useGetMeQuery } from "@/redux/features/user/user.api";
 
 export function ManagerDashboardContent() {
+  const { data: me } = useGetMeQuery(undefined);
+  const role = me?.data.role ?? "";
+
   const { data, isLoading, isError, refetch } = useGetManagerDashboardQuery();
 
   if (isLoading) return <DashboardSkeleton />;
@@ -18,7 +22,7 @@ export function ManagerDashboardContent() {
 
   return (
     <div className="space-y-6">
-      <DashboardHeader onRefresh={refetch} />
+      <DashboardHeader role={role} onRefresh={refetch} />
 
       <ManagerSummaryCards summary={dashboard.summary} />
 

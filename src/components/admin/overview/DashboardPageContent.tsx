@@ -19,7 +19,7 @@ import { ManagerDashboardContent } from "./ManagerDashboardContent";
 
 export function DashboardPageContent() {
   const { data: me, isLoading: isMeLoading } = useGetMeQuery();
-  const role = me?.data.role;
+  const role = me?.data.role ?? "";
   const isManager = role === "MANAGER";
 
   const { data, isLoading, isError, refetch } = useGetDashboardOverviewQuery(
@@ -42,7 +42,7 @@ export function DashboardPageContent() {
 
   return (
     <div className="space-y-6">
-      <DashboardHeader onRefresh={refetch} />
+      <DashboardHeader role={role} onRefresh={refetch} />
       <KpiGrid summary={dashboard.summary} isCustomer={isCustomer} />
       <StatusBreakdownRow summary={dashboard.summary} />
       {!isCustomer && <AverageRevenueBanner summary={dashboard.summary} />}

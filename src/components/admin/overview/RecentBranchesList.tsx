@@ -8,7 +8,7 @@ interface RecentBranchesListProps {
 
 export function RecentBranchesList({ items }: RecentBranchesListProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-gray-100 dark:bg-slate-950 shadow-sm overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800">
         <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Recent Branches</h3>
         <span className="text-xs text-slate-400">{items.length} shown</span>
