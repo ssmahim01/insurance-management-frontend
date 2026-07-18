@@ -27,6 +27,10 @@ const slides = [
     id: 3,
     image: "/assets/hero/hero3.jpeg",
   },
+  {
+    id: 4,
+    image: "/assets/hero/hero4.jpeg",
+  },
 ];
 
 export default function HeroSection() {
