@@ -278,15 +278,14 @@ export function DashboardHeader({
           </div>
         ) : user ? (
           <DropdownMenu>
-            <DropdownMenuTrigger>
-              <button
-                className={cn(
+            <DropdownMenuTrigger
+              className={cn(
                   "hidden sm:flex items-center gap-2 pl-1 pr-1.5 py-1 rounded-full",
                   "hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors duration-200",
                   "focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400",
                 )}
-              >
-                <div className="flex flex-col items-end leading-tight">
+            >
+              <div className="flex flex-col items-end leading-tight">
                   <span className="text-[13.5px] font-semibold text-gray-800 dark:text-gray-100 truncate max-w-32">
                     {user.name}
                   </span>
@@ -301,7 +300,6 @@ export function DashboardHeader({
                   </AvatarFallback>
                 </Avatar>
                 <ChevronDown className="h-3.5 w-3.5 text-gray-400 shrink-0" />
-              </button>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent align="end" sideOffset={10} className="w-64 rounded-xl">

@@ -135,6 +135,7 @@ export function NotificationTrash() {
       />
 
       <TrashStatsCards
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         items={notifications as any}
         totalCount={data?.meta.total}
         isLoading={isLoading}
