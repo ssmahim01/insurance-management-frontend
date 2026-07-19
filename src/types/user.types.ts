@@ -78,6 +78,7 @@ export interface IUser {
   // SYSTEM FLAGS
   isActive?: IsActive.ACTIVE | null;
   isVerified?: boolean;
+  hasPassword?: boolean;
   isDeleted?: boolean;
   lastLoginAt?: string; // ISO string from API
 
