@@ -34,6 +34,10 @@ interface IVerifyOtpResponse {
   user: IUserApiResponse["data"];
 }
 
+interface ISetPasswordPayload {
+  password: string;
+}
+
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     register: builder.mutation<IResponse<IRegisterResponse>, IRegister>({
@@ -51,7 +55,7 @@ export const authApi = baseApi.injectEndpoints({
       }),
     }),
 
-        // ================= SEND OTP =================
+    // ================= SEND OTP =================
 
     sendOtp: builder.mutation<IResponse<null>, ISendOtpPayload>({
       query: (body) => ({
@@ -63,7 +67,7 @@ export const authApi = baseApi.injectEndpoints({
 
     // ================= VERIFY OTP =================
 
-    verifyOtp: builder.mutation<IResponse<IVerifyOtpResponse>,IVerifyOtpPayload>({
+    verifyOtp: builder.mutation<IResponse<IVerifyOtpResponse>, IVerifyOtpPayload>({
       query: (body) => ({
         url: "/auth/verify-otp",
         method: "POST",
@@ -85,11 +89,11 @@ export const authApi = baseApi.injectEndpoints({
       }),
     }),
     changePassword: builder.mutation<
-      IChangePasswordResponse, 
-      IChangePasswordPayload 
+      IChangePasswordResponse,
+      IChangePasswordPayload
     >({
       query: (payload) => ({
-        url: "/auth/change-password", 
+        url: "/auth/change-password",
         method: "POST",
         data: payload,
       }),
@@ -105,6 +109,17 @@ export const authApi = baseApi.injectEndpoints({
         data: payload,
       }),
     }),
+
+    setPassword: builder.mutation<
+      IChangePasswordResponse,
+      ISetPasswordPayload
+    >({
+      query: (payload) => ({
+        url: "/auth/set-password",
+        method: "POST",
+        data: payload,
+      }),
+    }),
   }),
 });
 
@@ -115,6 +130,7 @@ export const {
   useUserInfoQuery,
   useChangePasswordMutation,
   useAdminChangePasswordMutation,
+  useSetPasswordMutation,
 
   //otp sent and verification
   useSendOtpMutation,
