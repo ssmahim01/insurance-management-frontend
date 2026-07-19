@@ -17,6 +17,7 @@ import {
   LayoutGrid,
   Check,
   Reply,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -265,8 +266,8 @@ export default function ContactManagement() {
   // Calculate stats from contacts
   const stats = {
     total: meta?.total ?? 0,
-    unread: contacts.filter(c => !c.isRead).length,
-    replied: contacts.filter(c => c.isReplied).length,
+    unread: contacts.filter((c) => !c.isRead).length,
+    replied: contacts.filter((c) => c.isReplied).length,
   };
 
   const hasActiveFilters = statusFilter !== "all" || repliedFilter !== "all";
@@ -392,27 +393,29 @@ export default function ContactManagement() {
           { label: "Contact Management" },
         ]}
         action={
-                  <div className="flex items-center gap-2">
-                    <Link href="/admin/dashboard/contacts/trash">
-                      <Button
-                        variant="default"
-                       className="group hover:cursor-pointer border-rose-600 text-white bg-rose-700 hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out">
-                      
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        <span>Trash</span>
-                      </Button>
-                    </Link>
-                  </div>
-                }
+          <div className="flex items-center gap-2">
+            <Link href="/admin/dashboard/contacts/trash">
+              <Button
+                variant="default"
+                className="group hover:cursor-pointer border-rose-600 text-white bg-rose-700 hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                <span>Trash</span>
+              </Button>
+            </Link>
+          </div>
+        }
       />
 
       {/* ── Stat Cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Date filter row */}
+
         <div className="sm:col-span-3 flex flex-wrap items-center gap-3">
           <p className="text-sm text-slate-500 dark:text-slate-400 shrink-0">
             Filter stats by date:
           </p>
+
           <div className="flex items-center gap-2 flex-wrap">
             <Input
               type="date"
@@ -420,13 +423,16 @@ export default function ContactManagement() {
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
             />
+
             <span className="text-slate-400 text-sm">to</span>
+
             <Input
               type="date"
               className="h-9 w-40 text-sm"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
+
             {hasDateFilter && (
               <Button
                 variant="outline"
@@ -438,6 +444,20 @@ export default function ContactManagement() {
                 <X className="w-4 h-4" />
               </Button>
             )}
+
+            {/* Refetch Button */}
+            <Button
+              variant="outline"
+              className="h-9 gap-2"
+              onClick={() => refetch()}
+              disabled={isLoading}
+              title="Refresh data"
+            >
+              <RefreshCw
+                className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </Button>
           </div>
         </div>
 
