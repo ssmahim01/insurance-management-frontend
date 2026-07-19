@@ -6,9 +6,11 @@ export interface IPartnerBranch {
   branchName: string;
   phone?: string;
   email?: string;
+  website?: string;
   address: string;
   city?: string;
   area?: string;
+    distanceKm?: number; 
   postalCode?: string;
   location: {
     type: "Point";

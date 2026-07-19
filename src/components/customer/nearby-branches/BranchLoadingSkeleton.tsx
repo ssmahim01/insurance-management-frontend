@@ -5,7 +5,7 @@ export function BranchLoadingSkeleton() {
       <div className="relative h-40 w-full overflow-hidden rounded-2xl border border-border bg-muted sm:h-52">
         <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.8s_infinite] bg-linear-to-r from-transparent via-white/40 dark:via-white/10 to-transparent" />
         <div className="flex h-full items-center justify-center">
-          <div className="h-8 w-8 rounded-full border-2 border-emerald-400/40 border-t-emerald-500 animate-spin" />
+          <div className="h-8 w-8 rounded-full border-2 border-indigo-400/40 border-t-indigo-500 animate-spin" />
         </div>
       </div>
 

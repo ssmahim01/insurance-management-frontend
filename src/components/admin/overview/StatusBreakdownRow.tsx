@@ -121,7 +121,7 @@ export function StatusBreakdownRow({ summary }: StatusBreakdownRowProps) {
   const role = me?.data?.role;
   
   return (
-   <div className={`grid ${role === "ADMIN" ? "grid-cols-2 md:grid-cols-4 xl:grid-cols-5" : role === "AGENT_LEADER" ? "grid-cols-2 md:grid-cols-3 xl:grid-cols-4" : "grid-cols-2 md:grid-cols-2 xl:grid-cols-2"} gap-3`}>
+   <div className={`grid ${role === "ADMIN" || role === "SUPER_ADMIN" || role === "MANAGER" ? "grid-cols-2 md:grid-cols-4 xl:grid-cols-5" : role === "AGENT_LEADER" ? "grid-cols-2 md:grid-cols-3 xl:grid-cols-4" : "grid-cols-2 md:grid-cols-2 xl:grid-cols-2"} gap-3`}>
   {items.map((item) => (
     <StatusChip
       key={item.label}

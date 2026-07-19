@@ -7,7 +7,7 @@ import {
 
 import { baseApi } from "../baseApi";
 
-export const contactApi = baseApi.injectEndpoints({
+export const contactApi = baseApi.injectEndpoints({ 
   endpoints: (builder) => ({
     // CREATE CONTACT
     createContact: builder.mutation<IContactResponse,ICreateContact>({

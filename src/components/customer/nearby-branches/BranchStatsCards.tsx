@@ -49,7 +49,7 @@ export function BranchStatsCards({
 
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-      <StatCard icon={MapPin} label="Branches Found" value={String(branchCount)} gradient="from-emerald-600 to-teal-800" />
+      <StatCard icon={MapPin} label="Branches Found" value={String(branchCount)} gradient="from-indigo-600 to-teal-800" />
       <StatCard icon={Building2} label="Partners Available" value={String(partnerCount)} gradient="from-blue-600 to-indigo-800" />
       <StatCard icon={Compass} label="Nearest City" value={nearestCity ?? "—"} gradient="from-indigo-600 to-purple-800" />
       <StatCard icon={LocateFixed} label="Your Coordinates" value={coordsLabel} gradient="from-purple-600 to-fuchsia-800" />

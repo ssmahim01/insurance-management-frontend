@@ -66,7 +66,7 @@ export default function ChangePasswordModal({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-gray-100 dark:bg-slate-950">
         <DialogHeader className="text-center">
           <DialogTitle className="text-xl">Change Password</DialogTitle>
         </DialogHeader>
@@ -130,24 +130,25 @@ export default function ChangePasswordModal({ open, onOpenChange }: Props) {
             <Button
               type="button"
               variant="outline"
+              className="group hover:cursor-pointer bg-transparent hover:border-rose-600 text-white hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transform disabled:opacity-60 hover:scale-105 transition-transform ease-in-out flex gap-2 items-center"
               onClick={() => {
                 reset();
                 onOpenChange(false);
               }}
             >
-              <X className="mr-2 h-4 w-4" />
+              <X className="h-4 w-4" />
               Cancel
             </Button>
 
             <Button
               type="submit"
-              className="btn-bg text-white"
+             className="group hover:cursor-pointer hover:border-indigo-600 text-white hover:bg-indigo-800 bg-indigo-700 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transform disabled:opacity-60 hover:scale-105 transition-transform ease-in-out flex gap-2 items-center"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Lock className="mr-2 h-4 w-4" />
+                <Lock className="h-4 w-4" />
               )}
               Change Password
             </Button>

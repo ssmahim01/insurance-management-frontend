@@ -12,9 +12,16 @@ export function BranchGrid({ branches, userCoords }: BranchGridProps) {
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
       {branches.map((branch, index) => {
         const [longitude, latitude] = branch.location?.coordinates ?? [0, 0];
-        const distanceKm = userCoords
-          ? getDistanceKm(userCoords.latitude, userCoords.longitude, latitude, longitude)
-          : undefined;
+        const distanceKm =
+          branch.distanceKm ??
+          (userCoords
+            ? getDistanceKm(
+                userCoords.latitude,
+                userCoords.longitude,
+                latitude,
+                longitude,
+              )
+            : undefined);
 
         return (
           <div
@@ -22,7 +29,12 @@ export function BranchGrid({ branches, userCoords }: BranchGridProps) {
             className="animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out fill-mode-both"
             style={{ animationDelay: `${Math.min(index, 12) * 60}ms` }}
           >
-            <BranchCard branch={branch} index={index} distanceKm={distanceKm} userCoords={userCoords} />
+            <BranchCard
+              branch={branch}
+              index={index}
+              distanceKm={distanceKm}
+              userCoords={userCoords}
+            />
           </div>
         );
       })}

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Sidebar,
@@ -77,12 +77,12 @@ function NavItemRow({ item, isActive }: { item: NavItem; isActive: boolean }) {
           "transition-all duration-200 ease-out",
           isActive
             ? cn(
-                "bg-linear-to-r from-emerald-500 to-green-600 *:text-white font-bold shadow-md shadow-emerald-900/20",
-                "hover:from-emerald-600 hover:to-green-700 hover:text-white",
+                "bg-linear-to-r from-indigo-500 to-blue-600 *:text-white font-bold shadow-md shadow-indigo-900/20",
+                "hover:from-indigo-600 hover:to-blue-700 hover:text-white",
               )
             : cn(
-                "text-gray-600 hover:bg-green-600 hover:text-white hover:shadow-sm",
-                "dark:text-gray-400 dark:hover:bg-green-600 dark:hover:text-gray-100",
+                "text-gray-600 hover:bg-blue-600 hover:text-white hover:shadow-sm",
+                "dark:text-gray-400 dark:hover:bg-blue-600 dark:hover:text-gray-100",
               ),
         )}
       >
@@ -116,7 +116,10 @@ function NavItemRow({ item, isActive }: { item: NavItem; isActive: boolean }) {
 
 export function AppSidebarSkeleton() {
   return (
-    <Sidebar collapsible="icon" className="border-r border-gray-200/80 dark:border-gray-800">
+    <Sidebar
+      collapsible="icon"
+      className="border-r border-gray-200/80 dark:border-gray-800"
+    >
       <SidebarHeader className="border-b mb-3 border-gray-200/80 dark:border-gray-800">
         <div className="ml-2 my-2">
           <Skeleton className="h-12 w-12 rounded-xl" />
@@ -187,6 +190,7 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
     ?.replace(/[_-]/g, " ")
     .toLowerCase()
     .replace(/\b\w/g, (char) => char.toUpperCase());
+  const role = user?.role;
 
   return (
     <Sidebar
@@ -195,11 +199,14 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
     >
       {/* ── Header / Logo ── */}
       <SidebarHeader className="border-b border-gray-200/80 dark:border-gray-800 bg-gray-100 dark:bg-gray-950">
-        <Link href={"/"} className="flex items-center py-1 group-data-[collapsible=icon]:justify-center">
+        <Link
+          href={"/"}
+          className="flex items-center py-1 group-data-[collapsible=icon]:justify-center"
+        >
           <div
             className={cn(
-              "relative rounded-xl ring-1 ring-emerald-500/10 transition-all duration-200",
-              "bg-linear-to-br from-emerald-50 via-white to-blue-50 dark:from-emerald-950/30 dark:via-gray-900 dark:to-blue-950/20",
+              "relative rounded-xl ring-1 ring-indigo-500/10 transition-all duration-200",
+              "bg-linear-to-br from-indigo-50 via-white to-blue-50 dark:from-indigo-950/30 dark:via-gray-900 dark:to-blue-950/20",
               isCollapsed ? "h-9 w-9 ml-1" : "h-12 w-60 ml-2",
             )}
           >
@@ -233,7 +240,11 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
 
                 <SidebarMenu>
                   {group.items.map((item) => (
-                    <NavItemRow key={item.id} item={item} isActive={item.href === activeHref} />
+                    <NavItemRow
+                      key={item.id}
+                      item={item}
+                      isActive={item.href === activeHref}
+                    />
                   ))}
                 </SidebarMenu>
               </SidebarGroup>
@@ -253,8 +264,8 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
                     size="lg"
                     className={cn(
                       "gap-3 rounded-xl transition-all duration-200",
-                      "hover:bg-linear-to-r hover:from-emerald-50 hover:to-blue-50",
-                      "dark:hover:from-emerald-900/20 dark:hover:to-blue-900/10",
+                      "hover:bg-linear-to-r hover:from-indigo-50 hover:to-blue-50",
+                      "dark:hover:from-indigo-900/20 dark:hover:to-blue-900/10",
                       "group-data-[collapsible=icon]:justify-center",
                     )}
                     tooltip={
@@ -263,9 +274,9 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
                         : undefined
                     }
                   >
-                    <Avatar className="h-8 w-8 shrink-0 rounded-lg ring-2 ring-transparent transition-all duration-200 hover:ring-emerald-300 dark:hover:ring-emerald-800">
+                    <Avatar className="h-8 w-8 shrink-0 rounded-lg ring-2 ring-transparent transition-all duration-200 hover:ring-indigo-300 dark:hover:ring-indigo-800">
                       <AvatarImage src={user.picture} alt={user.name} />
-                      <AvatarFallback className="rounded-lg bg-linear-to-br from-emerald-500 to-blue-500 text-white text-xs font-bold">
+                      <AvatarFallback className="rounded-lg bg-linear-to-br from-indigo-500 to-blue-500 text-white text-xs font-bold">
                         {initials}
                       </AvatarFallback>
                     </Avatar>
@@ -295,16 +306,19 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
                       {user.phone}
                     </p>
                     {roleLabel && (
-                      <span className="mt-1.5 inline-block rounded-full bg-linear-to-r from-emerald-50 to-blue-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:from-emerald-900/20 dark:to-blue-900/20 dark:text-emerald-400">
+                      <span className="mt-1.5 inline-block rounded-full bg-linear-to-r from-indigo-50 to-blue-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700 dark:from-indigo-900/20 dark:to-blue-900/20 dark:text-indigo-400">
                         {roleLabel}
                       </span>
                     )}
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="gap-2 cursor-pointer text-sm">
-                    <Link href={`${dashboardRoot}/profile`} className="flex items-center gap-2">
-                      <User className="h-3.5 w-3.5" />
-                      Profile
+                    <Link
+                      className="flex items-center gap-2 cursor-pointer"
+                      href={`${role === "ADMIN" || role === "SUPER_ADMIN" ? "/admin/dashboard/profile" : role === "AGENT_LEADER" ? "/agent-leader/dashboard/profile" : role === "AGENT" ? "/agent/dashboard/profile" : role === "MANAGER" ? "/manager/dashboard/profile" : "/customer/dashboard/profile"}`}
+                    >
+                      {" "}
+                      <User className="h-3.5 w-3.5" /> Profile
                     </Link>
                   </DropdownMenuItem>
                   {/* <DropdownMenuItem className="gap-2 cursor-pointer text-sm">

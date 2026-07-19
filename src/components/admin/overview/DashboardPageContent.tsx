@@ -15,12 +15,23 @@ import { DashboardSkeleton } from "./DashboardSkeleton";
 import { DashboardErrorState } from "./DashboardErrorState";
 import { DashboardHeader } from "./DashboardHeader";
 import { useGetMeQuery } from "@/redux/features/user/user.api";
+import { ManagerDashboardContent } from "./ManagerDashboardContent";
 
 export function DashboardPageContent() {
-  const { data, isLoading, isError, refetch } = useGetDashboardOverviewQuery();
-  const { data: me } = useGetMeQuery();
+  const { data: me, isLoading: isMeLoading } = useGetMeQuery();
+  const role = me?.data.role ?? "";
+  const isManager = role === "MANAGER";
 
-  const role = me?.data.role;
+  const { data, isLoading, isError, refetch } = useGetDashboardOverviewQuery(
+    undefined,
+    { skip: isMeLoading || isManager },
+  );
+
+  if (isMeLoading) return <DashboardSkeleton />;
+
+  if (isManager) {
+    return <ManagerDashboardContent />;
+  }
 
   const isCustomer = role === "CUSTOMER";
 
@@ -31,7 +42,7 @@ export function DashboardPageContent() {
 
   return (
     <div className="space-y-6">
-      <DashboardHeader onRefresh={refetch} />
+      <DashboardHeader role={role} onRefresh={refetch} />
       <KpiGrid summary={dashboard.summary} isCustomer={isCustomer} />
       <StatusBreakdownRow summary={dashboard.summary} />
       {!isCustomer && <AverageRevenueBanner summary={dashboard.summary} />}
@@ -42,7 +53,6 @@ export function DashboardPageContent() {
             ? "My Insurance Overview"
             : "Package Performance Overview"}
         </h2>
-        {/* Reused unmodified — IDashboardOverviewCard is structurally assignable to IOverviewCard */}
         <OverviewDashboard
           data={dashboard.overview}
           isLoading={false}
