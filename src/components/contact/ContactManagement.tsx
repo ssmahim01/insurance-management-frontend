@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/static-components */
-/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -12,11 +11,12 @@ import {
   ChevronDown,
   ChevronsUpDown,
   X,
-  Bell,
+  Mail,
   CheckCircle2,
   MailOpen,
   LayoutGrid,
   Check,
+  Reply,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -52,21 +52,19 @@ import { PageHeader } from "../shared/PageHeader";
 import { Pagination } from "../pagination/Pagination";
 
 import {
-  useGetAllNotificationsQuery,
-  useSoftDeleteNotificationMutation,
+  useGetAllContactsQuery,
+  useSoftDeleteContactMutation,
   useMarkAsReadMutation,
-  INotification,
-  NotificationType,
-} from "@/redux/features/notification/notification.api";
-import Link from "next/link";
-import { useUser } from "@/context/UserContext";
-import { Role } from "@/types/user.types";
-import { NotificationDetailsModal } from "./NotificationDetailsModal";
+  useMarkAsRepliedMutation,
+} from "@/redux/features/contact/contact.api";
+import { IContact } from "@/types/contact.type";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { ContactDetailsModal } from "./ContactDetailsModal";
+import Link from "next/link";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type SortField = "title" | "isRead" | "createdAt";
+type SortField = "name" | "isRead" | "createdAt";
 type SortDir = "asc" | "desc" | null;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -80,42 +78,9 @@ const formatDate = (iso?: string) => {
   });
 };
 
-const getUserName = (user: INotification["user"]) =>
-  typeof user === "string" ? user : user?.name;
-
-const getUserPhone = (user: INotification["user"]) =>
-  typeof user === "string" ? undefined : user?.phone;
-
-const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
-  [NotificationType.SUBSCRIPTION_CREATED]: "Subscription Created",
-  [NotificationType.PAYMENT_SUCCESS]: "Payment Success",
-  [NotificationType.PAYMENT_FAILED]: "Payment Failed",
-  [NotificationType.SUBSCRIPTION_EXPIRING]: "Subscription Expiring",
-  [NotificationType.SUBSCRIPTION_EXPIRED]: "Subscription Expired",
-  [NotificationType.GENERAL]: "General",
-  [NotificationType.CLAIM]: "Claim",
-};
-
-const NOTIFICATION_TYPE_COLORS: Record<NotificationType, string> = {
-  [NotificationType.SUBSCRIPTION_CREATED]:
-    "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
-  [NotificationType.PAYMENT_SUCCESS]:
-    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400",
-  [NotificationType.PAYMENT_FAILED]:
-    "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400",
-  [NotificationType.SUBSCRIPTION_EXPIRING]:
-    "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400",
-  [NotificationType.SUBSCRIPTION_EXPIRED]:
-    "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-800 dark:bg-orange-900/20 dark:text-orange-400",
-  [NotificationType.GENERAL]:
-    "border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
-  [NotificationType.CLAIM]:
-    "border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-700 dark:bg-blue-800 dark:text-blue-400",
-};
-
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
-function NotificationRowSkeleton() {
+function ContactRowSkeleton() {
   return (
     <TableRow>
       <TableCell>
@@ -123,7 +88,7 @@ function NotificationRowSkeleton() {
           <Skeleton className="w-10 h-10 rounded-lg shrink-0" />
           <div className="space-y-1.5">
             <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-3 w-24" />
           </div>
         </div>
       </TableCell>
@@ -157,7 +122,7 @@ function StatCardSkeleton() {
   );
 }
 
-type StatColor = "violet" | "emerald" | "slate";
+type StatColor = "violet" | "emerald" | "slate" | "blue";
 
 const STAT_COLOR_MAP: Record<
   StatColor,
@@ -178,6 +143,11 @@ const STAT_COLOR_MAP: Record<
     iconWrap: "bg-white/15",
     shadow: "shadow-slate-900/25",
   },
+  blue: {
+    gradient: "from-blue-600 to-blue-700",
+    iconWrap: "bg-white/15",
+    shadow: "shadow-blue-900/25",
+  },
 };
 
 function StatCard({
@@ -196,7 +166,7 @@ function StatCard({
   const c = STAT_COLOR_MAP[color];
   return (
     <div
-      className={`group relative overflow-hidden rounded-xl bg-gradient-to-br ${c.gradient} p-5 shadow-lg ${c.shadow} transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5`}
+      className={`group relative overflow-hidden rounded-xl bg-linear-to-br ${c.gradient} p-5 shadow-lg ${c.shadow} transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5`}
     >
       <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-xl transition-opacity duration-300 group-hover:opacity-80" />
 
@@ -238,13 +208,15 @@ function SortIcon({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function NotificationManagement() {
+export default function ContactManagement() {
   // ── filters ──
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "true" | "false">(
     "all",
   );
-  const [typeFilter, setTypeFilter] = useState<"all" | NotificationType>("all");
+  const [repliedFilter, setRepliedFilter] = useState<"all" | "true" | "false">(
+    "all",
+  );
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [page, setPage] = useState(1);
@@ -255,52 +227,60 @@ export default function NotificationManagement() {
   const [sortDir, setSortDir] = useState<SortDir>(null);
 
   // ── modals ──
-  const [viewingNotification, setViewingNotification] =
-    useState<INotification | null>(null);
+  const [viewingContact, setViewingContact] = useState<IContact | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [deletingNotification, setDeletingNotification] =
-    useState<INotification | null>(null);
+  const [deletingContact, setDeletingContact] = useState<IContact | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  const { user } = useUser();
-
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1);
-  }, [searchTerm, statusFilter, typeFilter]);
+  }, [searchTerm, statusFilter, repliedFilter]);
 
   // ── API ──
-  const { data, isLoading, refetch } = useGetAllNotificationsQuery({
-    searchTerm: searchTerm || undefined,
-    isRead: statusFilter !== "all" ? statusFilter : undefined,
-    type: typeFilter !== "all" ? typeFilter : undefined,
+  const queryParams: any = {
+    ...(searchTerm && { searchTerm }),
+    ...(statusFilter !== "all" && { isRead: statusFilter === "true" }),
+    ...(repliedFilter !== "all" && { isReplied: repliedFilter === "true" }),
     page,
     limit,
     ...(startDate && { startDate }),
     ...(endDate && { endDate }),
-  });
+  };
 
-  const [softDeleteNotification, { isLoading: isDeleting }] =
-    useSoftDeleteNotificationMutation();
-  const [markAsRead, { isLoading: isMarking }] = useMarkAsReadMutation();
+  const { data, isLoading, refetch } = useGetAllContactsQuery(queryParams);
+
+  const [softDeleteContact, { isLoading: isDeleting }] =
+    useSoftDeleteContactMutation();
+  const [markAsRead, { isLoading: isMarkingRead }] = useMarkAsReadMutation();
+  const [markAsReplied, { isLoading: isMarkingReplied }] =
+    useMarkAsRepliedMutation();
 
   // ── derived ──
-  const notifications: INotification[] = data?.data ?? [];
-  const stats = data?.stats;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const contacts: IContact[] = data?.data ?? [];
   const meta = data?.meta;
   const totalPage = meta?.totalPage ?? 1;
 
-  const hasActiveFilters = statusFilter !== "all" || typeFilter !== "all";
+  // Calculate stats from contacts
+  const stats = {
+    total: meta?.total ?? 0,
+    unread: contacts.filter(c => !c.isRead).length,
+    replied: contacts.filter(c => c.isReplied).length,
+  };
+
+  const hasActiveFilters = statusFilter !== "all" || repliedFilter !== "all";
   const hasDateFilter = !!(startDate || endDate);
 
   // ── client sort ──
-  const sortedNotifications = React.useMemo(() => {
-    if (!sortField || !sortDir) return notifications;
-    return [...notifications].sort((a, b) => {
+  const sortedContacts = React.useMemo(() => {
+    if (!sortField || !sortDir) return contacts;
+    return [...contacts].sort((a, b) => {
       let aVal = "";
       let bVal = "";
-      if (sortField === "title") {
-        aVal = a.title ?? "";
-        bVal = b.title ?? "";
+      if (sortField === "name") {
+        aVal = a.name ?? "";
+        bVal = b.name ?? "";
       }
       if (sortField === "isRead") {
         aVal = String(a.isRead);
@@ -314,7 +294,7 @@ export default function NotificationManagement() {
         ? aVal.localeCompare(bVal)
         : bVal.localeCompare(aVal);
     });
-  }, [notifications, sortField, sortDir]);
+  }, [contacts, sortField, sortDir]);
 
   // ── handlers ──
   const handleSort = (field: SortField) => {
@@ -333,42 +313,52 @@ export default function NotificationManagement() {
 
   const clearFilters = () => {
     setStatusFilter("all");
-    setTypeFilter("all");
+    setRepliedFilter("all");
   };
   const clearDateFilter = () => {
     setStartDate("");
     setEndDate("");
   };
 
-  const openDetailsDialog = (n: INotification) => {
-    setViewingNotification(n);
+  const openDetailsDialog = (c: IContact) => {
+    setViewingContact(c);
     setIsDetailsOpen(true);
   };
-  const openDeleteDialog = (n: INotification) => {
-    setDeletingNotification(n);
+  const openDeleteDialog = (c: IContact) => {
+    setDeletingContact(c);
     setIsDeleteOpen(true);
   };
 
   const handleDelete = async () => {
-    if (!deletingNotification?._id) return;
+    if (!deletingContact?._id) return;
     try {
-      await softDeleteNotification(deletingNotification._id).unwrap();
-      toast.success("Notification moved to trash");
+      await softDeleteContact(deletingContact._id).unwrap();
+      toast.success("Contact moved to trash");
       setIsDeleteOpen(false);
-      setDeletingNotification(null);
+      setDeletingContact(null);
       refetch();
     } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to delete notification");
+      toast.error(err?.data?.message || "Failed to delete contact");
     }
   };
 
-  const handleMarkAsRead = async (n: INotification) => {
+  const handleMarkAsRead = async (c: IContact) => {
     try {
-      await markAsRead(n._id).unwrap();
+      await markAsRead(c._id).unwrap();
       toast.success("Marked as read");
       refetch();
     } catch (err: any) {
       toast.error(err?.data?.message || "Failed to mark as read");
+    }
+  };
+
+  const handleMarkAsReplied = async (c: IContact) => {
+    try {
+      await markAsReplied(c._id).unwrap();
+      toast.success("Marked as replied");
+      refetch();
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to mark as replied");
     }
   };
 
@@ -395,25 +385,25 @@ export default function NotificationManagement() {
     <div className="space-y-6">
       {/* Page Header */}
       <PageHeader
-        title="Notification Management"
-        description="Manage notifications sent to users"
+        title="Contact Management"
+        description="Manage contact messages submitted by users"
         breadcrumbs={[
           { label: "Dashboard", href: "/dashboard" },
-          { label: "Notification Management" },
+          { label: "Contact Management" },
         ]}
         action={
-          <div className="flex items-center gap-2">
-            <Link href="/admin/dashboard/notifications/trash">
-              <Button
-                variant="default"
-               className="group hover:cursor-pointer border-rose-600 text-white bg-rose-700 hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out">
-              
-                <Trash2 className="mr-2 h-4 w-4" />
-                <span>Trash</span>
-              </Button>
-            </Link>
-          </div>
-        }
+                  <div className="flex items-center gap-2">
+                    <Link href="/admin/dashboard/contacts/trash">
+                      <Button
+                        variant="default"
+                       className="group hover:cursor-pointer border-rose-600 text-white bg-rose-700 hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out">
+                      
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        <span>Trash</span>
+                      </Button>
+                    </Link>
+                  </div>
+                }
       />
 
       {/* ── Stat Cards ── */}
@@ -460,18 +450,11 @@ export default function NotificationManagement() {
         ) : (
           <>
             <StatCard
-              label="Total Notifications"
+              label="Total Messages"
               value={stats?.total ?? 0}
-              sub="All notifications"
+              sub="All contact messages"
               icon={LayoutGrid}
               color="violet"
-            />
-            <StatCard
-              label="Read"
-              value={stats?.read ?? 0}
-              sub={`${stats?.total ? Math.round(((stats?.read ?? 0) / stats.total) * 100) : 0}% of total`}
-              icon={CheckCircle2}
-              color="emerald"
             />
             <StatCard
               label="Unread"
@@ -479,6 +462,13 @@ export default function NotificationManagement() {
               sub="Pending review"
               icon={MailOpen}
               color="slate"
+            />
+            <StatCard
+              label="Replied"
+              value={stats?.replied ?? 0}
+              sub={`${stats?.total ? Math.round(((stats?.replied ?? 0) / stats.total) * 100) : 0}% response rate`}
+              icon={CheckCircle2}
+              color="emerald"
             />
           </>
         )}
@@ -489,7 +479,7 @@ export default function NotificationManagement() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
-            placeholder="Search by user name or phone..."
+            placeholder="Search by name, phone or email..."
             className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -517,23 +507,22 @@ export default function NotificationManagement() {
         </Select>
 
         <Select
-          value={typeFilter as any}
-          onValueChange={(v) => setTypeFilter(v as "all" | NotificationType)}
+          value={repliedFilter}
+          onValueChange={(v) => setRepliedFilter(v as "all" | "true" | "false")}
         >
-          <SelectTrigger className="w-48 h-9 text-sm">
+          <SelectTrigger className="w-44 h-9 text-sm">
             <span>
-              {typeFilter === "all"
-                ? "All Types"
-                : NOTIFICATION_TYPE_LABELS[typeFilter]}
+              {repliedFilter === "all"
+                ? "All Replies"
+                : repliedFilter === "true"
+                  ? "Replied"
+                  : "Not Replied"}
             </span>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
-            {Object.values(NotificationType).map((t) => (
-              <SelectItem key={t} value={t}>
-                {NOTIFICATION_TYPE_LABELS[t]}
-              </SelectItem>
-            ))}
+            <SelectItem value="all">All Replies</SelectItem>
+            <SelectItem value="true">Replied</SelectItem>
+            <SelectItem value="false">Not Replied</SelectItem>
           </SelectContent>
         </Select>
 
@@ -557,12 +546,12 @@ export default function NotificationManagement() {
             <Table className="min-w-275">
               <TableHeader className="sticky top-0 z-10">
                 <TableRow className="border-none bg-linear-to-r *:text-white from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
-                  <SortableTh field="title" label="Notification" />
-                  <TableHead className="whitespace-nowrap">Type</TableHead>
-                  <TableHead className="whitespace-nowrap">User</TableHead>
+                  <SortableTh field="name" label="Contact" />
                   <TableHead className="whitespace-nowrap">Phone</TableHead>
+                  <TableHead className="whitespace-nowrap">Subject</TableHead>
                   <SortableTh field="createdAt" label="Sent" />
                   <SortableTh field="isRead" label="Status" />
+                  <TableHead className="whitespace-nowrap">Replied</TableHead>
                   <TableHead className="text-right whitespace-nowrap">
                     Actions
                   </TableHead>
@@ -572,13 +561,13 @@ export default function NotificationManagement() {
               <TableBody>
                 {isLoading ? (
                   Array.from({ length: 6 }).map((_, i) => (
-                    <NotificationRowSkeleton key={i} />
+                    <ContactRowSkeleton key={i} />
                   ))
-                ) : sortedNotifications.length === 0 ? (
+                ) : sortedContacts.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7}>
                       <div className="flex flex-col items-center justify-center py-16 text-slate-400">
-                        <Bell className="w-12 h-12 mb-4 opacity-30" />
+                        <Mail className="w-12 h-12 mb-4 opacity-30" />
                         {searchTerm || hasActiveFilters ? (
                           <>
                             <p className="text-base font-medium">
@@ -591,10 +580,11 @@ export default function NotificationManagement() {
                         ) : (
                           <>
                             <p className="text-base font-medium">
-                              No notifications yet
+                              No messages yet
                             </p>
                             <p className="text-sm mt-1">
-                              Notifications sent to users will appear here
+                              Contact messages submitted by users will appear
+                              here
                             </p>
                           </>
                         )}
@@ -602,74 +592,60 @@ export default function NotificationManagement() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  sortedNotifications.map((notification, index) => (
+                  sortedContacts.map((contact, index) => (
                     <TableRow
-                      key={notification._id}
+                      key={contact._id}
                       className={`
-border-b
-transition-all
-duration-300
-hover:shadow-sm
-hover:scale-[1.002]
-hover:bg-indigo-50
-dark:hover:bg-indigo-950/20
+                        border-b
+                        transition-all
+                        duration-300
+                        hover:shadow-sm
+                        hover:scale-[1.002]
+                        hover:bg-indigo-50
+                        dark:hover:bg-indigo-950/20
 
-${
-  index % 2 === 0
-    ? "bg-white dark:bg-background"
-    : "bg-linear-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
-}
-`}
+                        ${
+                          index % 2 === 0
+                            ? "bg-white dark:bg-background"
+                            : "bg-linear-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
+                        }
+                      `}
                     >
-                      {/* Title + message */}
+                      {/* Name + email */}
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-linear-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white shrink-0">
-                            <Bell className="w-4 h-4" />
+                            <Mail className="w-4 h-4" />
                           </div>
                           <div className="min-w-0">
                             <p className="font-medium text-slate-900 dark:text-white truncate max-w-52">
-                              {notification.title}
+                              {contact.name}
                             </p>
                             <p className="text-xs text-slate-400 truncate max-w-52">
-                              {notification.message}
+                              {contact.email}
                             </p>
                           </div>
                         </div>
                       </TableCell>
 
-                      {/* Type */}
-                      <TableCell>
-                        {notification.type ? (
-                          <Badge
-                            variant="outline"
-                            className={`whitespace-nowrap ${NOTIFICATION_TYPE_COLORS[notification.type]}`}
-                          >
-                            {NOTIFICATION_TYPE_LABELS[notification.type]}
-                          </Badge>
-                        ) : (
-                          "—"
-                        )}
-                      </TableCell>
-
-                      {/* User */}
-                      <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
-                        {getUserName(notification.user) ?? "—"}
-                      </TableCell>
-
                       {/* Phone */}
                       <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
-                        {getUserPhone(notification.user) ?? "—"}
+                        {contact.phone ?? "—"}
+                      </TableCell>
+
+                      {/* Subject */}
+                      <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
+                        <p className="truncate max-w-48">{contact.subject}</p>
                       </TableCell>
 
                       {/* Sent date */}
                       <TableCell className="text-slate-500 dark:text-slate-400 text-sm whitespace-nowrap">
-                        {formatDate(notification.createdAt)}
+                        {formatDate(contact.createdAt)}
                       </TableCell>
 
                       {/* Status */}
                       <TableCell>
-                        {notification.isRead ? (
+                        {contact.isRead ? (
                           <Badge
                             variant="outline"
                             className="border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400"
@@ -688,6 +664,26 @@ ${
                         )}
                       </TableCell>
 
+                      {/* Replied */}
+                      <TableCell>
+                        {contact.isReplied ? (
+                          <Badge
+                            variant="outline"
+                            className="border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+                          >
+                            <Reply className="w-3 h-3 mr-1" />
+                            Replied
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant="outline"
+                            className="border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400"
+                          >
+                            Pending
+                          </Badge>
+                        )}
+                      </TableCell>
+
                       {/* Actions */}
                       <TableCell>
                         <div className="flex gap-1.5 justify-end">
@@ -696,28 +692,40 @@ ${
                             size="icon"
                             className="h-8 w-8"
                             title="View details"
-                            onClick={() => openDetailsDialog(notification)}
+                            onClick={() => openDetailsDialog(contact)}
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </Button>
-                          {!notification.isRead && (
+                          {!contact.isRead && (
                             <Button
                               variant="outline"
                               size="icon"
                               className="h-8 w-8"
                               title="Mark as read"
-                              disabled={isMarking}
-                              onClick={() => handleMarkAsRead(notification)}
+                              disabled={isMarkingRead}
+                              onClick={() => handleMarkAsRead(contact)}
                             >
                               <Check className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
+                          {!contact.isReplied && (
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              title="Mark as replied"
+                              disabled={isMarkingReplied}
+                              onClick={() => handleMarkAsReplied(contact)}
+                            >
+                              <Reply className="w-3.5 h-3.5" />
                             </Button>
                           )}
                           <Button
                             variant="destructive"
                             size="icon"
                             className="h-8 w-8"
-                            title="Delete notification"
-                            onClick={() => openDeleteDialog(notification)}
+                            title="Delete message"
+                            onClick={() => openDeleteDialog(contact)}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </Button>
@@ -739,14 +747,14 @@ ${
         </div>
 
         {/* Footer count */}
-        {!isLoading && sortedNotifications.length > 0 && (
+        {!isLoading && sortedContacts.length > 0 && (
           <div className="px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Showing{" "}
               <span className="font-semibold text-slate-700 dark:text-slate-300">
-                {sortedNotifications.length}
+                {sortedContacts.length}
               </span>{" "}
-              notification{sortedNotifications.length !== 1 ? "s" : ""}
+              message{sortedContacts.length !== 1 ? "s" : ""}
               {hasActiveFilters && " (filtered)"}
             </p>
             {totalPage > 1 && (
@@ -759,11 +767,13 @@ ${
       </div>
 
       {/* ── Modals ── */}
-      {viewingNotification && (
-        <NotificationDetailsModal
+      {viewingContact && (
+        <ContactDetailsModal
           open={isDetailsOpen}
           onOpenChange={setIsDetailsOpen}
-          item={viewingNotification}
+          item={viewingContact}
+          onMarkAsReplied={handleMarkAsReplied}
+          isMarkingReplied={isMarkingReplied}
         />
       )}
 
@@ -773,9 +783,9 @@ ${
           <AlertDialogHeader>
             <AlertDialogTitle>Move to Trash</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to move{" "}
-              <strong>{deletingNotification?.title}</strong> to trash? This can
-              be restored later.
+              Are you sure you want to move the message from{" "}
+              <strong>{deletingContact?.name}</strong> to trash? This can be
+              restored later.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex gap-2">
