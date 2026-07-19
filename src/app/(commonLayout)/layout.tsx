@@ -17,22 +17,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <ReduxProvider>
-      {/* <AnnouncementBar />
+      <AnnouncementBar />
         <Navbar />
         {children}
         <WhatsAppButton />
         <ScrollToTopButton />
-        <Footer /> */}
+        <Footer />
 
       {/* <h2>Welcome to surokkha</h2> */}
- <Image
+ {/* <Image
   className="w-full h-full cursor-pointer transition-transform duration-300 ease-out group-hover:scale-105 object-cover"
   src="/assets/comming-soon-banner-image.png"
   alt="Coming Soon"
   width={1920}
   height={400}
   priority
-/>
+/> */}
     </ReduxProvider>
   );
 }
