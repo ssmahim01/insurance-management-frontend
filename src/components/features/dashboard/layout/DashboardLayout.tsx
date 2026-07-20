@@ -53,6 +53,10 @@ import { useGetMeQuery } from "@/redux/features/user/user.api";
 import { IUser } from "@/types/user.types";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import Image from "next/image";
+import { WhatsAppSupportButton } from "@/components/notification/WhatsAppSupportButton";
+import { NotificationBell } from "@/components/notification/NotificationBell";
+import { NearbyBranchesButton } from "./NearbyBranchesButton";
 
 export interface NavItem {
   id: string;
@@ -70,19 +74,59 @@ export const dashboardNavigation: NavGroup[] = [
   {
     label: "Overview",
     items: [
-      { id: "dashboard", label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+      {
+        id: "dashboard",
+        label: "Dashboard",
+        href: "/admin/dashboard",
+        icon: LayoutDashboard,
+      },
     ],
   },
   {
     label: "Management",
     items: [
-      { id: "agentLeader", label: "Agent Leaders", href: "/admin/dashboard/agent-leader", icon: Handshake },
-      { id: "admins", label: "Admins", href: "/admin/dashboard/admins", icon: User },
-      { id: "agents", label: "Agents", href: "/admin/dashboard/agents", icon: Handshake },
-      { id: "partners", label: "Partners", href: "/admin/dashboard/partners", icon: Handshake },
-      { id: "branches", label: "Branches", href: "/admin/dashboard/branches", icon: Building2 },
-      { id: "packages", label: "Packages", href: "/admin/dashboard/packages", icon: Package },
-      { id: "customers", label: "Customers", href: "/admin/dashboard/customers", icon: Package },
+      {
+        id: "agentLeader",
+        label: "Agent Leaders",
+        href: "/admin/dashboard/agent-leader",
+        icon: Handshake,
+      },
+      {
+        id: "admins",
+        label: "Admins",
+        href: "/admin/dashboard/admins",
+        icon: User,
+      },
+      {
+        id: "agents",
+        label: "Agents",
+        href: "/admin/dashboard/agents",
+        icon: Handshake,
+      },
+      {
+        id: "partners",
+        label: "Partners",
+        href: "/admin/dashboard/partners",
+        icon: Handshake,
+      },
+      {
+        id: "branches",
+        label: "Branches",
+        href: "/admin/dashboard/branches",
+        icon: Building2,
+      },
+      {
+        id: "packages",
+        label: "Packages",
+        href: "/admin/dashboard/packages",
+        icon: Package,
+      },
+      {
+        id: "customers",
+        label: "Customers",
+        href: "/admin/dashboard/customers",
+        icon: Package,
+      },
     ],
   },
 ];
@@ -131,9 +175,16 @@ function LiveClock() {
 
   if (!now) return null;
 
-  const time = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+  const time = now.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
   const seconds = now.getSeconds().toString().padStart(2, "0");
-  const date = now.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  const date = now.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
   const offsetMinutes = -now.getTimezoneOffset();
   const offsetHours = offsetMinutes / 60;
   const offsetLabel = `UTC${offsetHours >= 0 ? "+" : ""}${offsetHours}`;
@@ -187,19 +238,52 @@ export function DashboardHeader({
   const { theme, setTheme } = useTheme();
 
   const trail: BreadcrumbTrailItem[] =
-    breadcrumbs && breadcrumbs.length > 0 ? breadcrumbs : [{ label: pageTitle ?? "Dashboard" }];
+    breadcrumbs && breadcrumbs.length > 0
+      ? breadcrumbs
+      : [{ label: pageTitle ?? "Dashboard" }];
 
   const firstName = user?.name?.split(" ")[0];
   const initials = user?.name?.substring(0, 2).toUpperCase() || "U";
   const roleLabel = formatRole((user as any)?.role);
-  const role = user?.role
+  const role = user?.role;
+  const notificationsHref =
+    role === "ADMIN" || role === "SUPER_ADMIN"
+      ? "/admin/dashboard/notifications"
+      : role === "AGENT_LEADER"
+        ? "/agent-leader/dashboard/notifications"
+        : role === "AGENT"
+          ? "/agent/dashboard/notifications"
+          : role === "MANAGER"
+            ? "/manager/dashboard/notifications"
+            : "/customer/dashboard/notifications";
 
   return (
     <header className="sticky top-0 z-20 border-b border-gray-200/80 bg-linear-to-r from-white via-white to-emerald-50/40 dark:from-gray-950 dark:via-gray-950 dark:to-emerald-950/10 backdrop-blur-sm dark:border-gray-800">
       <div className="flex h-16 shrink-0 items-center gap-3 px-4">
-        <SidebarTrigger className="-ml-1 h-8 w-8 rounded-lg text-gray-500 hover:bg-emerald-50 hover:text-emerald-700 dark:text-gray-400 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400 transition-colors duration-200" />
+        {role !== "CUSTOMER" && (
+          <>
+            <SidebarTrigger className="-ml-1 h-8 w-8 rounded-lg text-gray-500 hover:bg-emerald-50 hover:text-emerald-700 dark:text-gray-400 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400 transition-colors duration-200" />
 
-        <Separator orientation="vertical" className="h-16 bg-gray-200 dark:bg-gray-700" />
+            <Separator
+              orientation="vertical"
+              className="h-16 bg-gray-200 dark:bg-gray-700"
+            />
+          </>
+        )}
+
+        <Link
+          href="/"
+          className="group flex shrink-0 items-center text-xl font-bold tracking-wide"
+        >
+          <Image
+            className="cursor-pointer transition-transform duration-300 ease-out group-hover:scale-105 w-full h-12"
+            src="/assets/logo.svg"
+            alt="Logo"
+            width={190}
+            height={170}
+            priority
+          />
+        </Link>
 
         {/* ── Greeting + breadcrumb ── */}
         <div className="flex flex-col justify-center min-w-0">
@@ -243,23 +327,13 @@ export function DashboardHeader({
         <LiveClock />
 
         {/* ── Right cluster ── */}
-        <div className="flex items-center gap-1.5 rounded-full border border-gray-200/80 bg-gray-50/60 p-2 dark:border-gray-800 dark:bg-gray-900/40 shadow-sm">
-          <DropdownMenu>
-            <DropdownMenuTrigger className="relative h-6 w-6 rounded-full hover:bg-white dark:hover:bg-gray-800 transition-colors duration-200">
-              <Bell className="h-4.5 w-4.5" />
-              <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-gray-900" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64 rounded-xl">
-              <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                Notifications
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <div className="px-3 py-6 text-center text-sm text-gray-400">
-                You&apos;re all caught up.
-              </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <div className="flex items-center gap-2">
+          <NearbyBranchesButton />
+          <WhatsAppSupportButton />
+          <NotificationBell role={role} viewAllHref={notificationsHref} />
+        </div>
 
+        <div className="flex items-center gap-1.5 rounded-full border border-gray-200/80 bg-gray-50/60 p-2 dark:border-gray-800 dark:bg-gray-900/40 shadow-sm">
           <Button
             variant="ghost"
             size="icon"
@@ -280,29 +354,33 @@ export function DashboardHeader({
           <DropdownMenu>
             <DropdownMenuTrigger
               className={cn(
-                  "hidden sm:flex items-center gap-2 pl-1 pr-1.5 py-1 rounded-full",
-                  "hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors duration-200",
-                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400",
-                )}
+                "hidden sm:flex items-center gap-2 pl-1 pr-1.5 py-1 rounded-full",
+                "hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors duration-200",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400",
+              )}
             >
               <div className="flex flex-col items-end leading-tight">
-                  <span className="text-[13.5px] font-semibold text-gray-800 dark:text-gray-100 truncate max-w-32">
-                    {user.name}
-                  </span>
-                  <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium truncate max-w-32">
-                    {roleLabel}
-                  </span>
-                </div>
-                <Avatar className="h-9 w-9 ring-2 ring-emerald-100 dark:ring-emerald-900/60">
-                  <AvatarImage src={user.picture} alt={user.name} />
-                  <AvatarFallback className="bg-linear-to-br from-emerald-500 via-cyan-500 to-blue-600 text-white text-xs font-bold">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                <ChevronDown className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                <span className="text-[13.5px] font-semibold text-gray-800 dark:text-gray-100 truncate max-w-32">
+                  {user.name}
+                </span>
+                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium truncate max-w-32">
+                  {roleLabel}
+                </span>
+              </div>
+              <Avatar className="h-9 w-9 ring-2 ring-emerald-100 dark:ring-emerald-900/60">
+                <AvatarImage src={user.picture} alt={user.name} />
+                <AvatarFallback className="bg-linear-to-br from-emerald-500 via-cyan-500 to-blue-600 text-white text-xs font-bold">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <ChevronDown className="h-3.5 w-3.5 text-gray-400 shrink-0" />
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" sideOffset={10} className="w-64 rounded-xl">
+            <DropdownMenuContent
+              align="end"
+              sideOffset={10}
+              className="w-64 rounded-xl"
+            >
               <div className="flex items-center gap-3 px-3 py-3">
                 <Avatar className="h-10 w-10 ring-2 ring-emerald-100 dark:ring-emerald-900/60">
                   <AvatarImage src={user.picture} alt={user.name} />
@@ -326,7 +404,13 @@ export function DashboardHeader({
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-sm">
-               <Link className="flex items-center gap-2 cursor-pointer" href={`${role === "ADMIN" || role === "SUPER_ADMIN" ? "/admin/dashboard/profile" : role === "AGENT_LEADER" ? "/agent-leader/dashboard/profile" : role === "AGENT" ? "/agent/dashboard/profile" : role === "MANAGER" ? "/manager/dashboard/profile" : "/customer/dashboard/profile"}`}> <User className="h-3.5 w-3.5" /> Profile</Link>
+                <Link
+                  className="flex items-center gap-2 cursor-pointer"
+                  href={`${role === "ADMIN" || role === "SUPER_ADMIN" ? "/admin/dashboard/profile" : role === "AGENT_LEADER" ? "/agent-leader/dashboard/profile" : role === "AGENT" ? "/agent/dashboard/profile" : role === "MANAGER" ? "/manager/dashboard/profile" : "/customer/dashboard/profile"}`}
+                >
+                  {" "}
+                  <User className="h-3.5 w-3.5" /> Profile
+                </Link>
               </DropdownMenuItem>
               {/* <DropdownMenuItem className="gap-2 cursor-pointer text-sm">
                 <Settings className="h-3.5 w-3.5" /> Settings
@@ -373,7 +457,13 @@ export function DashboardLayoutWrapper({
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
       <TooltipProvider>
-        <AppSidebar user={user?.data} onLogout={handleLogout} isLoading={isLoading} />
+        {user?.data?.role !== "CUSTOMER" && (
+          <AppSidebar
+            user={user?.data}
+            onLogout={handleLogout}
+            isLoading={isLoading}
+          />
+        )}
         <SidebarInset className="flex flex-col min-h-screen">
           <DashboardHeader
             pageTitle={pageTitle}
