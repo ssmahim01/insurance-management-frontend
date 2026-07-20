@@ -265,7 +265,7 @@ export default function ClaimProcessSection() {
 
             {isLastStep ? (
               <Link
-                href="tel:09610500599"
+                href="/products"
                 className="inline-flex items-center gap-2 rounded-full btn-bg px-7 py-3 text-sm font-semibold uppercase tracking-wide text-white transition-all duration-300  hover:shadow-lg"
               >
                 Call to Claim
