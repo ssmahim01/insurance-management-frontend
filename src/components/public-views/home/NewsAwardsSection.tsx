@@ -139,7 +139,8 @@ export default function NewsAwardsSection() {
                   {item.excerpt}
                 </p>
 
-                <span className="inline-flex w-fit items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#00A67E] transition-colors duration-300 group-hover:text-[#F97316]">
+                <span className="inline-flex w-fit items-center gap-2 text-xs font-semibold uppercase tracking-wide 
+                text-[#00A67E] transition-colors duration-300 group-hover:text-[#0F467C]">
                   Read More
                   <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                 </span>

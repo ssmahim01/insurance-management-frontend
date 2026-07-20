@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {  Mail, Phone, MapPin } from "lucide-react";
 import { FaFacebookF , FaLinkedinIn, FaYoutube  } from "react-icons/fa";
+import { siteConfig } from "@/lib/sideConfig";
 
 const companyLinks = [
   { label: "Our Product", href: "/product" },
@@ -37,13 +38,13 @@ export default function Footer() {
               <div className="relative h-9 w-9 shrink-0">
                 <Image
                   src="/favicon.ico"
-                  alt="Shurokka"
+                  alt="Surokkha Health"
                   fill
                   className="object-contain"
                 />
               </div>
               <span className="text-2xl font-extrabold tracking-tight text-[#0F467C] dark:text-white">
-                SHUROKKA
+                SUROKKA
               </span>
             </Link>
 
@@ -53,7 +54,7 @@ export default function Footer() {
               </h3>
 
               <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-400">
-                Shurokka helps individuals and families access reliable health insurance
+                Surokkha Health helps individuals and families access reliable health insurance
                 plans with transparent coverage, affordable premiums, and a seamless
                 digital experience.
               </p>
@@ -117,10 +118,10 @@ export default function Footer() {
                   Email
                 </p>
                 <Link
-                  href="mailto:info@shurokka.com"
+                  href={`mailto:${siteConfig.email}`}
                   className="mt-1 block text-[15px] text-[#0B1F3A] hover:text-[#00A67E] dark:text-gray-300 dark:hover:text-[#00E0AE]"
                 >
-                  info@surokkha.com
+                  {siteConfig.email}
                 </Link>
               </div>
 
@@ -133,7 +134,7 @@ export default function Footer() {
                   href="tel:+8809610500599"
                   className="mt-1 block text-[15px] text-[#0B1F3A] hover:text-[#00A67E] dark:text-gray-300 dark:hover:text-[#00E0AE]"
                 >
-                  +8809610500599
+                  {siteConfig.phone}
                 </Link>
               </div>
 
@@ -143,7 +144,8 @@ export default function Footer() {
                   Location
                 </p>
                 <p className="mt-1 text-[15px] leading-relaxed text-[#0B1F3A] dark:text-gray-300">
-                  MS Center, 8 &amp; 9th Floor, 8 Mohakhali C/A, Dhaka 1212
+                  {siteConfig.address.street}, {siteConfig.address.city}{" "}
+                  {siteConfig.address.postalCode}, Bangladesh
                 </p>
               </div>
             </div>

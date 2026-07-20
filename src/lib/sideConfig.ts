@@ -1,18 +1,18 @@
 export const siteConfig = {
-  name: "Shurokkha",
-  fullName: "Shurokkha Bangladesh",
+  name: "Surokkha Health",
+  fullName: "Surokkha Health Bangladesh",
   description:
     "Affordable health, life, and disability micro-insurance with tele-doctor consultations, cashless hospital network, and discount partners across Bangladesh.",
-  url: "https://www.shurokkha.com.bd",
+  url: "https://www.surokkhahealth.com",
 
-  phone: "09610500599",
-  whatsapp: "+8809610500599",
-  email: "support@shurokkha.com.bd",
+  phone: "01700-000000",
+  whatsapp: "+8801700-000000",
+  email: "info@surokkhahealth.com",
 
   address: {
-    street: "House 12, Road 7, Banani",
+    street: "House#304, Road#04, Avenue#04, Mirpur DOHS.",
     city: "Dhaka",
-    postalCode: "1213",
+    postalCode: "1216",
     country: "Bangladesh",
   },
 
