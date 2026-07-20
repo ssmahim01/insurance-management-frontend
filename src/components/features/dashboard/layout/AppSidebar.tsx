@@ -174,7 +174,7 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
 
   const dashboardRoot = navigation[0]?.items[0]?.href ?? "";
 
-  if (isLoading) return <AppSidebarSkeleton />;
+  if (user?.role !== "CUSTOMER" && isLoading) return <AppSidebarSkeleton />;
 
   const initials =
     user?.name

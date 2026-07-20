@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { DashboardPageContent } from '@/components/admin/overview/DashboardPageContent';
+import { CustomerDashboardOverview } from '@/components/customer/Dashboard/CustomerDashboardOverview';
 
 export const metadata: Metadata = {
   title: 'Dashboard | Shurokkha',
@@ -8,6 +9,6 @@ export const metadata: Metadata = {
 
 export default function DashboardPage() {
   return (
-    <DashboardPageContent />
+    <CustomerDashboardOverview />
   );
 }
