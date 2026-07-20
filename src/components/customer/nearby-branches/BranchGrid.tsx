@@ -1,3 +1,5 @@
+"use client"
+
 import { IPartnerBranch } from "@/types/branch.types";
 import { BranchCard } from "./BranchCard";
 import { getDistanceKm } from "@/utils/geo-distance";
@@ -9,7 +11,7 @@ interface BranchGridProps {
 
 export function BranchGrid({ branches, userCoords }: BranchGridProps) {
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+    <div className="flex flex-col gap-4 sm:gap-5">
       {branches.map((branch, index) => {
         const [longitude, latitude] = branch.location?.coordinates ?? [0, 0];
         const distanceKm =

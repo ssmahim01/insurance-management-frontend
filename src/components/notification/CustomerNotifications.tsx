@@ -36,6 +36,7 @@ import {
     NotificationType,
 } from "@/redux/features/notification/notification.api";
 import { NotificationDetailsModal } from "./NotificationDetailsModal";
+import { BackToDashboardSection } from "../shared/dashboard/BackToDashboardSection";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -171,6 +172,7 @@ export function CustomerNotifications() {
 
     return (
         <div className="space-y-5">
+            <BackToDashboardSection />
             <PageHeader
                 title="Notifications"
                 description="Stay updated on your subscriptions and claims."

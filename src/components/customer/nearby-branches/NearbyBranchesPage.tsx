@@ -17,6 +17,7 @@ import { BranchLoadingSkeleton } from "./BranchLoadingSkeleton";
 import { BranchErrorState } from "./BranchErrorState";
 import { IPartnerBranch } from "@/types/branch.types";
 import { CitySearchFallback } from "./CitySearchFallback";
+import { BackToDashboardSection } from "@/components/shared/dashboard/BackToDashboardSection";
 
 export function NearbyBranches() {
   const geo = useGeolocation();
@@ -103,6 +104,7 @@ export function NearbyBranches() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
+      <BackToDashboardSection />
       {/* ── decorative background: blurred brand-color orbs + dot grid ── */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-32 -left-24 h-96 w-96 rounded-full bg-indigo-400/20 dark:bg-indigo-500/10 blur-3xl" />

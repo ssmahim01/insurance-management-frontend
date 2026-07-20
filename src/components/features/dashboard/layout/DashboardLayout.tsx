@@ -23,7 +23,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -36,10 +35,8 @@ import {
   User,
   Sun,
   Moon,
-  Bell,
   Clock,
   LogOut,
-  Settings,
   ChevronDown,
 } from "lucide-react";
 
@@ -246,6 +243,10 @@ export function DashboardHeader({
   const initials = user?.name?.substring(0, 2).toUpperCase() || "U";
   const roleLabel = formatRole((user as any)?.role);
   const role = user?.role;
+
+  const roleKnown = !isUserLoading && !!role;
+  const showSidebarChrome = roleKnown && role !== "CUSTOMER";
+
   const notificationsHref =
     role === "ADMIN" || role === "SUPER_ADMIN"
       ? "/admin/dashboard/notifications"
@@ -257,95 +258,119 @@ export function DashboardHeader({
             ? "/manager/dashboard/notifications"
             : "/customer/dashboard/notifications";
 
+  const profileHref =
+    role === "ADMIN" || role === "SUPER_ADMIN"
+      ? "/admin/dashboard/profile"
+      : role === "AGENT_LEADER"
+        ? "/agent-leader/dashboard/profile"
+        : role === "AGENT"
+          ? "/agent/dashboard/profile"
+          : role === "MANAGER"
+            ? "/manager/dashboard/profile"
+            : "/customer/dashboard/profile";
+
   return (
     <header className="sticky top-0 z-20 border-b border-gray-200/80 bg-linear-to-r from-white via-white to-emerald-50/40 dark:from-gray-950 dark:via-gray-950 dark:to-emerald-950/10 backdrop-blur-sm dark:border-gray-800">
-      <div className="flex h-16 shrink-0 items-center gap-3 px-4">
-        {role !== "CUSTOMER" && (
+      <div className="flex h-16 shrink-0 items-center gap-4 px-4">
+        {showSidebarChrome && (
           <>
             <SidebarTrigger className="-ml-1 h-8 w-8 rounded-lg text-gray-500 hover:bg-emerald-50 hover:text-emerald-700 dark:text-gray-400 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400 transition-colors duration-200" />
-
             <Separator
               orientation="vertical"
-              className="h-16 bg-gray-200 dark:bg-gray-700"
+              className="h-8 bg-gray-200 dark:bg-gray-700"
             />
           </>
         )}
 
-        <Link
-          href="/"
-          className="group flex shrink-0 items-center text-xl font-bold tracking-wide"
-        >
-          <Image
-            className="cursor-pointer transition-transform duration-300 ease-out group-hover:scale-105 w-full h-12"
-            src="/assets/logo.svg"
-            alt="Logo"
-            width={190}
-            height={170}
-            priority
-          />
-        </Link>
+        {/* ── Brand block: logo + greeting/breadcrumb as ONE unit ── */}
+        <div className="flex min-w-0 items-center gap-3">
+          <Link
+            href="/"
+            className="group flex shrink-0 items-center"
+            aria-label="Go to homepage"
+          >
+            <Image
+              className="h-9 w-auto md:h-10 object-contain transition-transform duration-300 ease-out group-hover:scale-105"
+              src="/assets/logo.svg"
+              alt="Logo"
+              width={160}
+              height={40}
+              priority
+            />
+          </Link>
 
-        {/* ── Greeting + breadcrumb ── */}
-        <div className="flex flex-col justify-center min-w-0">
-          {firstName && (
-            <p className="hidden sm:block text-[11.5px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400 leading-tight">
-              {getGreeting()}, {firstName}
-            </p>
-          )}
-          <Breadcrumb>
-            <BreadcrumbList>
-              {trail.map((crumb, idx) => {
-                const isLast = idx === trail.length - 1;
-                return (
-                  <React.Fragment key={`${crumb.label}-${idx}`}>
-                    <BreadcrumbItem>
-                      {isLast || !crumb.href ? (
-                        <BreadcrumbPage className="text-[15px] font-semibold text-gray-800 dark:text-gray-200">
-                          {crumb.label}
-                        </BreadcrumbPage>
-                      ) : (
-                        <BreadcrumbLink
-                          href={crumb.href}
-                          className="text-[13.5px] text-gray-400 hover:text-emerald-600 dark:text-gray-500 dark:hover:text-emerald-400 transition-colors"
-                        >
-                          {crumb.label}
-                        </BreadcrumbLink>
-                      )}
-                    </BreadcrumbItem>
-                    {!isLast && <BreadcrumbSeparator />}
-                  </React.Fragment>
-                );
-              })}
-            </BreadcrumbList>
-          </Breadcrumb>
+          <span
+            aria-hidden
+            className="hidden sm:block h-8 w-px shrink-0 bg-gray-200 dark:bg-gray-800"
+          />
+
+          <div className="flex min-w-0 flex-col justify-center leading-tight">
+            {firstName && (
+              <p className="hidden sm:block truncate text-[11px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
+                {getGreeting()}, {firstName}
+              </p>
+            )}
+            <Breadcrumb>
+              <BreadcrumbList>
+                {trail.map((crumb, idx) => {
+                  const isLast = idx === trail.length - 1;
+                  return (
+                    <React.Fragment key={`${crumb.label}-${idx}`}>
+                      <BreadcrumbItem>
+                        {isLast || !crumb.href ? (
+                          <BreadcrumbPage className="text-[15px] font-semibold text-gray-800 dark:text-gray-200">
+                            {crumb.label}
+                          </BreadcrumbPage>
+                        ) : (
+                          <BreadcrumbLink
+                            href={crumb.href}
+                            className="text-[13.5px] text-gray-400 hover:text-emerald-600 dark:text-gray-500 dark:hover:text-emerald-400 transition-colors"
+                          >
+                            {crumb.label}
+                          </BreadcrumbLink>
+                        )}
+                      </BreadcrumbItem>
+                      {!isLast && <BreadcrumbSeparator />}
+                    </React.Fragment>
+                  );
+                })}
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
         </div>
 
-        {/* ── Page-level action portal (unchanged) ── */}
+        {/* ── Page-level action portal ── */}
         <div className="ml-auto flex items-center gap-2" id="header-actions" />
 
         {/* ── Live clock ── */}
         <LiveClock />
 
-        {/* ── Right cluster ── */}
-        <div className="flex items-center gap-2">
-          <NearbyBranchesButton />
+        {/* ── Standout CTA ── */}
+        <NearbyBranchesButton />
+
+        {/* ── Utility icon cluster (WhatsApp · Notifications · Theme) ── */}
+        <div className="flex items-center gap-1 rounded-full border border-gray-200/80 bg-gray-50/60 dark:border-gray-800 dark:bg-gray-900/40 shadow-sm">
           <WhatsAppSupportButton />
           <NotificationBell role={role} viewAllHref={notificationsHref} />
-        </div>
 
-        <div className="flex items-center gap-1.5 rounded-full border border-gray-200/80 bg-gray-50/60 p-2 dark:border-gray-800 dark:bg-gray-900/40 shadow-sm">
+          <span
+            aria-hidden
+            className="mx-0.5 h-5 w-px shrink-0 bg-gray-200 dark:bg-gray-700"
+          />
+
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="relative h-6 w-6 rounded-full hover:bg-white dark:hover:bg-gray-800 transition-colors duration-200"
+            className="relative h-9 w-9 rounded-full hover:scale-110 active:scale-95 hover:bg-white dark:hover:bg-gray-800 transition-all duration-200"
+            aria-label="Toggle theme"
           >
-            <Sun className="h-4.5 w-4.5 rotate-0 scale-100 transition-all duration-300 dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-4.5 w-4.5 rotate-90 scale-0 transition-all duration-300 dark:rotate-0 dark:scale-100" />
+            <Sun className="h-[18px] w-[18px] rotate-0 scale-100 transition-all duration-300 dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-[18px] w-[18px] rotate-90 scale-0 transition-all duration-300 dark:rotate-0 dark:scale-100" />
           </Button>
         </div>
 
-        {/* ── User dropdown (now clickable — shows info + logout) ── */}
+        {/* ── User dropdown ── */}
         {isUserLoading ? (
           <div className="hidden sm:flex items-center gap-2 pl-1">
             <div className="h-9 w-9 rounded-full bg-gray-200 dark:bg-gray-800 animate-pulse" />
@@ -406,15 +431,11 @@ export function DashboardHeader({
               <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-sm">
                 <Link
                   className="flex items-center gap-2 cursor-pointer"
-                  href={`${role === "ADMIN" || role === "SUPER_ADMIN" ? "/admin/dashboard/profile" : role === "AGENT_LEADER" ? "/agent-leader/dashboard/profile" : role === "AGENT" ? "/agent/dashboard/profile" : role === "MANAGER" ? "/manager/dashboard/profile" : "/customer/dashboard/profile"}`}
+                  href={profileHref}
                 >
-                  {" "}
                   <User className="h-3.5 w-3.5" /> Profile
                 </Link>
               </DropdownMenuItem>
-              {/* <DropdownMenuItem className="gap-2 cursor-pointer text-sm">
-                <Settings className="h-3.5 w-3.5" /> Settings
-              </DropdownMenuItem> */}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={onLogout}
@@ -448,6 +469,11 @@ export function DashboardLayoutWrapper({
   const { data: user, isLoading } = useGetMeQuery(undefined);
   const { logout } = useUser();
 
+  const role = user?.data?.role;
+
+  const roleKnown = !isLoading && !!role;
+  const showSidebar = roleKnown && role !== "CUSTOMER";
+
   const handleLogout = async () => {
     await logout();
     toast.success("Logout successful");
@@ -457,11 +483,11 @@ export function DashboardLayoutWrapper({
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
       <TooltipProvider>
-        {user?.data?.role !== "CUSTOMER" && (
+        {showSidebar && (
           <AppSidebar
             user={user?.data}
             onLogout={handleLogout}
-            isLoading={isLoading}
+            isLoading={false}
           />
         )}
         <SidebarInset className="flex flex-col min-h-screen">
@@ -474,7 +500,7 @@ export function DashboardLayoutWrapper({
           />
 
           <main className="flex-1 overflow-auto bg-gray-50/50 dark:bg-gray-950/50">
-            <div className="p-4 md:p-6 lg:p-8">{children}</div>
+            <div className={`${role !== "CUSTOMER" ? "p-4 md:p-6 lg:p-8" : ""}`}>{children}</div>
           </main>
         </SidebarInset>
       </TooltipProvider>

@@ -30,6 +30,7 @@ import {
   formatPlanLabel,
 } from "@/lib/utils/customer-portal-format";
 import { SubscriptionStatus } from "@/types/subscription.types";
+import { BackToDashboardSection } from "@/components/shared/dashboard/BackToDashboardSection";
 
 interface PopulatedPackage {
   _id?: string;
@@ -81,20 +82,7 @@ function SubscriptionDetailsContent({ subscription }: { subscription: any }) {
 
   return (
     <div className="space-y-6">
-      <div className="mx-auto pb-6">
-        <Button
-          variant="outline"
-          className="gap-2 border-slate-200 dark:border-slate-700"
-        >
-          <Link
-            href="/customer/dashboard"
-            className="hover:cursor-pointer flex gap-2 items-center"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
-          </Link>
-        </Button>
-      </div>
+     <BackToDashboardSection />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <SectionCard title="Subscription Details" icon={ShieldCheck}>
