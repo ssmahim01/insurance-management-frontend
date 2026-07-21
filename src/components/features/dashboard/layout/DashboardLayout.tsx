@@ -277,32 +277,36 @@ export function DashboardHeader({
             <SidebarTrigger className="-ml-1 h-8 w-8 rounded-lg text-gray-500 hover:bg-emerald-50 hover:text-emerald-700 dark:text-gray-400 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400 transition-colors duration-200" />
             <Separator
               orientation="vertical"
-              className="h-8 bg-gray-200 dark:bg-gray-700"
+              className="h-16 bg-gray-200 dark:bg-gray-700"
             />
           </>
         )}
 
         {/* ── Brand block: logo + greeting/breadcrumb as ONE unit ── */}
         <div className="flex min-w-0 items-center gap-3">
-          <Link
-            href="/"
-            className="group flex shrink-0 items-center"
-            aria-label="Go to homepage"
-          >
-            <Image
-              className="h-9 w-auto md:h-10 object-contain transition-transform duration-300 ease-out group-hover:scale-105"
-              src="/assets/logo.svg"
-              alt="Logo"
-              width={160}
-              height={40}
-              priority
-            />
-          </Link>
-
-          <span
-            aria-hidden
-            className="hidden sm:block h-8 w-px shrink-0 bg-gray-200 dark:bg-gray-800"
-          />
+          {role === "CUSTOMER" && (
+            <>
+              {" "}
+              <Link
+                href="/"
+                className="group flex shrink-0 items-center"
+                aria-label="Go to homepage"
+              >
+                <Image
+                  className="h-9 w-auto md:h-10 object-contain transition-transform duration-300 ease-out group-hover:scale-105"
+                  src="/assets/logo.svg"
+                  alt="Logo"
+                  width={160}
+                  height={40}
+                  priority
+                />
+              </Link>
+              <span
+                aria-hidden
+                className="hidden sm:block h-8 w-px shrink-0 bg-gray-200 dark:bg-gray-800"
+              />
+            </>
+          )}
 
           <div className="flex min-w-0 flex-col justify-center leading-tight">
             {firstName && (
@@ -346,7 +350,7 @@ export function DashboardHeader({
         <LiveClock />
 
         {/* ── Standout CTA ── */}
-        <NearbyBranchesButton />
+        {role === "CUSTOMER" && <NearbyBranchesButton />}
 
         {/* ── Utility icon cluster (WhatsApp · Notifications · Theme) ── */}
         <div className="flex items-center gap-1 rounded-full border border-gray-200/80 bg-gray-50/60 dark:border-gray-800 dark:bg-gray-900/40 shadow-sm">
@@ -500,7 +504,11 @@ export function DashboardLayoutWrapper({
           />
 
           <main className="flex-1 overflow-auto bg-gray-50/50 dark:bg-gray-950/50">
-            <div className={`${role !== "CUSTOMER" ? "p-4 md:p-6 lg:p-8" : ""}`}>{children}</div>
+            <div
+              className={`${role !== "CUSTOMER" ? "p-4 md:p-6 lg:p-8" : ""}`}
+            >
+              {children}
+            </div>
           </main>
         </SidebarInset>
       </TooltipProvider>
