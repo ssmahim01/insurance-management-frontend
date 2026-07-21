@@ -114,7 +114,8 @@ function NavItemRow({ item, isActive }: { item: NavItem; isActive: boolean }) {
   );
 }
 
-export function AppSidebarSkeleton() {
+export function AppSidebarSkeleton({ role }: { role?: string | null }) {
+  if (role === "CUSTOMER") return null;
   return (
     <Sidebar
       collapsible="icon"
@@ -174,7 +175,7 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
 
   const dashboardRoot = navigation[0]?.items[0]?.href ?? "";
 
-  if (user?.role !== "CUSTOMER" && isLoading) return <AppSidebarSkeleton />;
+  if (isLoading) return <AppSidebarSkeleton role={user?.role} />;
 
   const initials =
     user?.name

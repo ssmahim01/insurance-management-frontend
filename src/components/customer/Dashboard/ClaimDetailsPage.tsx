@@ -15,6 +15,7 @@ import { CustomerPortalHeader } from "./CustomerPortalHeader";
 import { formatDateTime } from "@/lib/utils/customer-portal-format";
 import { ClaimStatus } from "@/types/claim.types";
 import Link from "next/link";
+import { BackToDashboardSection } from "@/components/shared/dashboard/BackToDashboardSection";
 
 interface ClaimDetailsPageProps {
   id: string;
@@ -26,6 +27,7 @@ export function ClaimDetailsPage({ id }: ClaimDetailsPageProps) {
 
   return (
     <div className="min-h-screen">
+        
       <div className="mx-auto container">
         {isLoading ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -38,20 +40,7 @@ export function ClaimDetailsPage({ id }: ClaimDetailsPageProps) {
           </div>
         ) : (
           <>
-            <div className="mx-auto pb-6">
-              <Button
-                variant="outline"
-                className="gap-2 border-slate-200 dark:border-slate-700"
-              >
-                <Link
-                  href="/customer/dashboard"
-                  className="hover:cursor-pointer flex gap-2 items-center"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Back to Dashboard
-                </Link>
-              </Button>
-            </div>
+           <BackToDashboardSection />
             <ClaimDetailsContent claim={claim as any} />
           </>
         )}
