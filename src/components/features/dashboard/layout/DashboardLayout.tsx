@@ -12,14 +12,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -38,6 +30,9 @@ import {
   Clock,
   LogOut,
   ChevronDown,
+  Layout,
+  BriefcaseMedical,
+  MapPin,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -189,7 +184,7 @@ function LiveClock() {
   return (
     <div
       className={cn(
-        "hidden md:flex items-center gap-2.5 rounded-full px-3.5 py-1.5",
+        "hidden lg:flex items-center gap-2.5 rounded-full px-3.5 py-1.5",
         "bg-linear-to-r from-blue-600 via-green-600 to-indigo-700",
         "dark:from-emerald-950/40 dark:via-cyan-950/30 dark:to-blue-950/30",
         "shadow-sm",
@@ -226,18 +221,18 @@ function LiveClock() {
 }
 
 export function DashboardHeader({
-  pageTitle,
-  breadcrumbs,
+  // pageTitle,
+  // breadcrumbs,
   user,
   isUserLoading,
   onLogout,
 }: DashboardHeaderProps) {
   const { theme, setTheme } = useTheme();
 
-  const trail: BreadcrumbTrailItem[] =
-    breadcrumbs && breadcrumbs.length > 0
-      ? breadcrumbs
-      : [{ label: pageTitle ?? "Dashboard" }];
+  // const trail: BreadcrumbTrailItem[] =
+  //   breadcrumbs && breadcrumbs.length > 0
+  //     ? breadcrumbs
+  //     : [{ label: pageTitle ?? "Dashboard" }];
 
   const firstName = user?.name?.split(" ")[0];
   const initials = user?.name?.substring(0, 2).toUpperCase() || "U";
@@ -271,29 +266,35 @@ export function DashboardHeader({
 
   return (
     <header className="sticky top-0 z-20 border-b border-gray-200/80 bg-linear-to-r from-white via-white to-emerald-50/40 dark:from-gray-950 dark:via-gray-950 dark:to-emerald-950/10 backdrop-blur-sm dark:border-gray-800">
-      <div className="flex h-16 shrink-0 items-center gap-4 px-4">
+      <div
+        className={cn(
+          "flex flex-nowrap items-center",
+          "gap-2 sm:gap-3 lg:gap-4",
+          "min-h-14 sm:min-h-16 px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2",
+        )}
+      >
         {showSidebarChrome && (
           <>
-            <SidebarTrigger className="-ml-1 h-8 w-8 rounded-lg text-gray-500 hover:bg-emerald-50 hover:text-emerald-700 dark:text-gray-400 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400 transition-colors duration-200" />
+            <SidebarTrigger className="-ml-1 h-8 w-8 shrink-0 rounded-lg text-gray-500 hover:bg-emerald-50 hover:text-emerald-700 dark:text-gray-400 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400 transition-colors duration-200" />
+            {/* was h-16 — taller than the row itself; now scales with breakpoint */}
             <Separator
               orientation="vertical"
-              className="h-16 bg-gray-200 dark:bg-gray-700"
+              className="hidden sm:block h-8 sm:h-10 shrink-0 bg-gray-200 dark:bg-gray-700"
             />
           </>
         )}
 
-        {/* ── Brand block: logo + greeting/breadcrumb as ONE unit ── */}
-        <div className="flex min-w-0 items-center gap-3">
+        {/* ── Brand block: logo + greeting/breadcrumb — the only flexible/truncating region ── */}
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
           {role === "CUSTOMER" && (
             <>
-              {" "}
               <Link
                 href="/"
                 className="group flex shrink-0 items-center"
                 aria-label="Go to homepage"
               >
                 <Image
-                  className="h-9 w-auto md:h-10 object-contain transition-transform duration-300 ease-out group-hover:scale-105"
+                  className="h-7 sm:h-9 md:h-10 w-auto object-contain transition-transform duration-300 ease-out group-hover:scale-105"
                   src="/assets/logo.svg"
                   alt="Logo"
                   width={160}
@@ -308,148 +309,197 @@ export function DashboardHeader({
             </>
           )}
 
-          <div className="flex min-w-0 flex-col justify-center leading-tight">
+          <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
             {firstName && (
-              <p className="hidden sm:block truncate text-[11px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
+              <p className="hidden md:block shrink-0 whitespace-nowrap truncate text-[11px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
                 {getGreeting()}, {firstName}
               </p>
             )}
-            <Breadcrumb>
-              <BreadcrumbList>
+
+            {/* <Breadcrumb className="min-w-0">
+              <BreadcrumbList className="flex-nowrap">
                 {trail.map((crumb, idx) => {
                   const isLast = idx === trail.length - 1;
                   return (
                     <React.Fragment key={`${crumb.label}-${idx}`}>
-                      <BreadcrumbItem>
+                 
+                      <BreadcrumbItem className={cn("min-w-0", !isLast && "hidden sm:flex")}>
                         {isLast || !crumb.href ? (
-                          <BreadcrumbPage className="text-[15px] font-semibold text-gray-800 dark:text-gray-200">
+                          <BreadcrumbPage className="block truncate text-sm sm:text-[15px] font-semibold text-gray-800 dark:text-gray-200">
                             {crumb.label}
                           </BreadcrumbPage>
                         ) : (
                           <BreadcrumbLink
                             href={crumb.href}
-                            className="text-[13.5px] text-gray-400 hover:text-emerald-600 dark:text-gray-500 dark:hover:text-emerald-400 transition-colors"
+                            className="truncate text-[13.5px] text-gray-400 hover:text-emerald-600 dark:text-gray-500 dark:hover:text-emerald-400 transition-colors"
                           >
                             {crumb.label}
                           </BreadcrumbLink>
                         )}
                       </BreadcrumbItem>
-                      {!isLast && <BreadcrumbSeparator />}
+                      {!isLast && <BreadcrumbSeparator className="hidden sm:flex" />}
                     </React.Fragment>
                   );
                 })}
               </BreadcrumbList>
-            </Breadcrumb>
+            </Breadcrumb> */}
           </div>
         </div>
 
-        {/* ── Page-level action portal ── */}
-        <div className="ml-auto flex items-center gap-2" id="header-actions" />
+        {/* ── Right cluster: never shrinks, brand block above absorbs all truncation ── */}
+        <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2 lg:gap-3">
+          {/* Page-level action portal */}
+          <div id="header-actions" className="flex items-center gap-2" />
 
-        {/* ── Live clock ── */}
-        <LiveClock />
+          {/* Live clock — component itself is hidden below lg */}
+          <LiveClock />
 
-        {/* ── Standout CTA ── */}
-        {role === "CUSTOMER" && <NearbyBranchesButton />}
+          {/* Standout CTA — hidden on phones so it never competes with the
+              utility cluster + avatar for space; assumes NearbyBranchesButton
+              has no independent responsive behavior of its own. */}
+          {role === "CUSTOMER" && (
+            <div className="hidden sm:block">
+              <NearbyBranchesButton />
+            </div>
+          )}
 
-        {/* ── Utility icon cluster (WhatsApp · Notifications · Theme) ── */}
-        <div className="flex items-center gap-1 rounded-full border border-gray-200/80 bg-gray-50/60 dark:border-gray-800 dark:bg-gray-900/40 shadow-sm">
-          <WhatsAppSupportButton />
-          <NotificationBell role={role} viewAllHref={notificationsHref} />
+          {/* Utility icon cluster (WhatsApp · Notifications · Theme) */}
+          <div className="flex items-center gap-0.5 sm:gap-1 rounded-full border border-gray-200/80 bg-gray-50/60 dark:border-gray-800 dark:bg-gray-900/40 shadow-sm px-0.5">
+            {/* Hidden below 400px so three icon buttons never crowd a
+                narrow phone viewport; assumes WhatsAppSupportButton has no
+                independent responsive behavior of its own. */}
+            <div className="hidden min-[400px]:block">
+              <WhatsAppSupportButton />
+            </div>
 
-          <span
-            aria-hidden
-            className="mx-0.5 h-5 w-px shrink-0 bg-gray-200 dark:bg-gray-700"
-          />
+            {role === "CUSTOMER" && (
+              <NotificationBell role={role} viewAllHref={notificationsHref} />
+            )}
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="relative h-9 w-9 rounded-full hover:scale-110 active:scale-95 hover:bg-white dark:hover:bg-gray-800 transition-all duration-200"
-            aria-label="Toggle theme"
-          >
-            <Sun className="h-[18px] w-[18px] rotate-0 scale-100 transition-all duration-300 dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-[18px] w-[18px] rotate-90 scale-0 transition-all duration-300 dark:rotate-0 dark:scale-100" />
-          </Button>
-        </div>
+            <span
+              aria-hidden
+              className="hidden min-[400px]:block mx-0.5 h-5 w-px shrink-0 bg-gray-200 dark:bg-gray-700"
+            />
 
-        {/* ── User dropdown ── */}
-        {isUserLoading ? (
-          <div className="hidden sm:flex items-center gap-2 pl-1">
-            <div className="h-9 w-9 rounded-full bg-gray-200 dark:bg-gray-800 animate-pulse" />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="relative h-8 w-8 sm:h-9 sm:w-9 rounded-full hover:scale-110 active:scale-95 hover:bg-white dark:hover:bg-gray-800 transition-all duration-200"
+              aria-label="Toggle theme"
+            >
+              <Sun className="h-[16px] w-[16px] sm:h-[18px] sm:w-[18px] rotate-0 scale-100 transition-all duration-300 dark:-rotate-90 dark:scale-0" />
+              <Moon className="absolute h-[16px] w-[16px] sm:h-[18px] sm:w-[18px] rotate-90 scale-0 transition-all duration-300 dark:rotate-0 dark:scale-100" />
+            </Button>
           </div>
-        ) : user ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              className={cn(
-                "hidden sm:flex items-center gap-2 pl-1 pr-1.5 py-1 rounded-full",
-                "hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors duration-200",
-                "focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400",
-              )}
-            >
-              <div className="flex flex-col items-end leading-tight">
-                <span className="text-[13.5px] font-semibold text-gray-800 dark:text-gray-100 truncate max-w-32">
-                  {user.name}
-                </span>
-                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium truncate max-w-32">
-                  {roleLabel}
-                </span>
-              </div>
-              <Avatar className="h-9 w-9 ring-2 ring-emerald-100 dark:ring-emerald-900/60">
-                <AvatarImage src={user.picture} alt={user.name} />
-                <AvatarFallback className="bg-linear-to-br from-emerald-500 via-cyan-500 to-blue-600 text-white text-xs font-bold">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              <ChevronDown className="h-3.5 w-3.5 text-gray-400 shrink-0" />
-            </DropdownMenuTrigger>
 
-            <DropdownMenuContent
-              align="end"
-              sideOffset={10}
-              className="w-64 rounded-xl"
-            >
-              <div className="flex items-center gap-3 px-3 py-3">
-                <Avatar className="h-10 w-10 ring-2 ring-emerald-100 dark:ring-emerald-900/60">
+          {/* User dropdown — name/role collapse away below sm, avatar stays */}
+          {isUserLoading ? (
+            <div className="flex items-center gap-2 pl-1">
+              <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-gray-200 dark:bg-gray-800 animate-pulse" />
+            </div>
+          ) : user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className={cn(
+                  "flex items-center gap-1.5 sm:gap-2 pl-0.5 sm:pl-1 pr-1 sm:pr-1.5 py-1 rounded-full",
+                  "hover:bg-gray-100 dark:hover:bg-gray-800/60 transition-colors duration-200",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400",
+                )}
+              >
+                <div className="hidden sm:flex flex-col items-end leading-tight">
+                  <span className="text-[13.5px] font-semibold text-gray-800 dark:text-gray-100 truncate max-w-28 lg:max-w-32">
+                    {user.name}
+                  </span>
+                  <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium truncate max-w-28 lg:max-w-32">
+                    {roleLabel}
+                  </span>
+                </div>
+                <Avatar className="h-8 w-8 sm:h-9 sm:w-9 ring-2 ring-emerald-100 dark:ring-emerald-900/60">
                   <AvatarImage src={user.picture} alt={user.name} />
-                  <AvatarFallback className="bg-linear-to-br from-emerald-500 via-cyan-500 to-blue-600 text-white text-sm font-bold">
+                  <AvatarFallback className="bg-linear-to-br from-emerald-500 via-cyan-500 to-blue-600 text-white text-xs font-bold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-50">
-                    {user.name}
-                  </p>
-                  <p className="truncate text-xs text-gray-400 dark:text-gray-500">
-                    {user.phone}
-                  </p>
-                  {roleLabel && (
-                    <span className="mt-1 inline-block rounded-full bg-linear-to-r from-emerald-50 to-blue-50 px-2 py-0.5 text-[10.5px] font-medium text-emerald-700 dark:from-emerald-900/20 dark:to-blue-900/20 dark:text-emerald-400">
-                      {roleLabel}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-sm">
-                <Link
-                  className="flex items-center gap-2 cursor-pointer"
-                  href={profileHref}
-                >
-                  <User className="h-3.5 w-3.5" /> Profile
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={onLogout}
-                className="gap-2 cursor-pointer text-sm text-red-600 focus:text-red-600 dark:text-red-400"
+                <ChevronDown className="hidden sm:block h-3.5 w-3.5 text-gray-400 shrink-0" />
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent
+                align="end"
+                sideOffset={10}
+                className="w-64 rounded-xl"
               >
-                <LogOut className="h-3.5 w-3.5" /> Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : null}
+                <div className="flex items-center gap-3 px-3 py-3">
+                  <Avatar className="h-10 w-10 ring-2 ring-emerald-100 dark:ring-emerald-900/60">
+                    <AvatarImage src={user.picture} alt={user.name} />
+                    <AvatarFallback className="bg-linear-to-br from-emerald-500 via-cyan-500 to-blue-600 text-white text-sm font-bold">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-50">
+                      {user.name}
+                    </p>
+                    <p className="truncate text-xs text-gray-400 dark:text-gray-500">
+                      {user.phone}
+                    </p>
+                    {roleLabel && (
+                      <span className="mt-1 inline-block rounded-full bg-linear-to-r from-emerald-50 to-blue-50 px-2 py-0.5 text-[10.5px] font-medium text-emerald-700 dark:from-emerald-900/20 dark:to-blue-900/20 dark:text-emerald-400">
+                        {roleLabel}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <DropdownMenuSeparator />
+                {role === "CUSTOMER" && (
+                  <>
+                    <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Link
+                        className="flex items-center gap-2 cursor-pointer"
+                        href={"/customer/dashboard"}
+                      >
+                        <Layout className="h-3.5 w-3.5" /> Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Link
+                        className="flex items-center gap-2 cursor-pointer"
+                        href={"/customer/dashboard/nearby-branches"}
+                      >
+                        <MapPin className="h-3.5 w-3.5" /> Nearby Partners
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Link
+                        className="flex items-center gap-2 cursor-pointer"
+                        href={"/customer/dashboard/consultants"}
+                      >
+                        <BriefcaseMedical className="h-3.5 w-3.5" /> Doctor
+                        Consultants
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+                <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-sm">
+                  <Link
+                    className="flex items-center gap-2 cursor-pointer"
+                    href={profileHref}
+                  >
+                    <User className="h-3.5 w-3.5" /> Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={onLogout}
+                  className="gap-2 cursor-pointer text-sm text-red-600 focus:text-red-600 dark:text-red-400"
+                >
+                  <LogOut className="h-3.5 w-3.5" /> Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : null}
+        </div>
       </div>
     </header>
   );
