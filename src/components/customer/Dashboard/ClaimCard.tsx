@@ -47,7 +47,7 @@ export function ClaimCard({ claim }: ClaimCardProps) {
   const meta = STATUS_META[claim.status];
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+    <div className="group relative overflow-hidden rounded-2xl border border-green-200 dark:border-emerald-800 bg-green-50 dark:bg-emerald-950 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
       <div className="flex items-center justify-between px-5 pt-5">
         <h3 className="text-base font-bold text-slate-900 dark:text-white truncate pr-2">
           {claim.serviceTitle}
@@ -106,7 +106,7 @@ export function ClaimCard({ claim }: ClaimCardProps) {
         </div>
       )}
 
-      <div className="flex items-center justify-end border-t border-slate-100 dark:border-slate-800 px-5 py-3.5 bg-slate-50/60 dark:bg-slate-800/30">
+      <div className="flex items-center justify-end border-t border-green-100 dark:border-green-800 px-5 py-3.5 bg-green-100 dark:bg-emerald-800/30">
         <Button
           size="sm"
           className="bg-indigo-600 hover:bg-indigo-700 text-white transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-0.5 active:scale-95"

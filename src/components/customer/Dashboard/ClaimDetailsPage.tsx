@@ -28,7 +28,7 @@ export function ClaimDetailsPage({ id }: ClaimDetailsPageProps) {
   return (
     <div className="min-h-screen">
         
-      <div className="mx-auto container">
+      <div className="mx-auto container p-4">
         {isLoading ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Skeleton className="h-96 w-full rounded-2xl lg:col-span-2" />
