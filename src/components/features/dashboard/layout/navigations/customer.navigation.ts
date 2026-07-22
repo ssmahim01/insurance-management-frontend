@@ -7,6 +7,7 @@ import {
   Settings,
   ShieldCheck,
   User,
+  User2Icon,
 } from "lucide-react";
 import { NavGroup } from "@/types/dashboard";
 
@@ -67,6 +68,12 @@ export const customerNavigation: NavGroup[] = [
         label: "Messages",
         href: "/customer/dashboard/messages",
         icon: MessageSquare,
+      },
+      {
+        id: "consultants",
+        label: "Consultants",
+        href: "/customer/dashboard/consultants",
+        icon: User2Icon,
       },
     ],
   },

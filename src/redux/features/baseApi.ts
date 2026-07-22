@@ -21,6 +21,7 @@ export const baseApi = createApi({
     "PARTNER",
     "SUBSCRIPTION",
     "SUBSCRIPTIONS",
+    "CONSULTATIONS",
     "CATEGORIES",
     "PRODUCTS",
     "CUSTOMERS",
