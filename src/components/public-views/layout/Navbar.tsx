@@ -202,6 +202,7 @@ import ThemeToggle from '@/components/shared/ThemeToggle'
 import { useUser } from '@/context/UserContext'
 import { toast } from 'sonner'
 import { getDashboardPath } from '@/components/shared/DashboardPath'
+import { useTheme } from '@/lib/providers/ThemeProvider'
 
 const navLinks = [
   { title: 'about us', path: '/about' },
@@ -217,6 +218,8 @@ export default function Navbar() {
   const { user, logout } = useUser();
   const router = useRouter();
   const dashboardPath = getDashboardPath(user?.role)
+
+  const { theme } = useTheme();
 
   const handleLogout = async () => {
     try {
@@ -236,7 +239,7 @@ export default function Navbar() {
         <Link href="/" className="group flex shrink-0 items-center text-xl font-bold tracking-wide">
           <Image
             className="cursor-pointer transition-transform duration-300 ease-out group-hover:scale-105"
-            src="/assets/logo.svg"
+            src={theme === "dark" ? "/assets/logo-light.webp" : "/assets/logo-dark.webp"}
             alt="Logo"
             width={90}
             height={70}
