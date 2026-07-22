@@ -207,7 +207,7 @@ const coverageBlocks: CoverageBlock[] = [
     description:
       "We understand the importance of safeguarding the financial security of individuals and families. We offer a comprehensive suite of plans designed to address a wide range of needs — protection against life and disability, health, wellness, and doctor service — ensuring peace of mind for our clients and their loved ones.",
     image: "/assets/Cover1.webp",
-    href: "/plans/individuals",
+    href: "/products",
     reverse: false,
     stat: {
       icon: HeartHandshake,
@@ -223,7 +223,7 @@ const coverageBlocks: CoverageBlock[] = [
     description:
       "In today's dynamic business environment, employee well-being is paramount. We partner with organisations to develop customised health solutions that safeguard their most valuable asset: their workforce. Our healthcare plans address health needs across the spectrum, tailored to the requirements of your employees or stakeholders, ensuring their wellbeing.",
     image: "/assets/Cover2.webp",
-    href: "/plans/corporate",
+    href: "/products",
     reverse: true,
     stat: {
       icon: ShieldCheck,
@@ -317,7 +317,7 @@ function CoverageRow({ block }: { block: CoverageBlock }) {
             sizes="(max-width: 1024px) 100vw, 50vw"
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0B1F3A]/40 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-[#0B1F3A]/40 via-transparent to-transparent" />
         </div>
 
         {/* Floating stat badge, grounded in the plan's real coverage details */}
@@ -369,7 +369,7 @@ export default function CoverageSection() {
       {/* Subtle ambient backdrop */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[560px] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(0,200,150,0.08),transparent)]"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-140 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(0,200,150,0.08),transparent)]"
       />
 
       <div className="mx-auto max-w-7xl px-6">
@@ -401,7 +401,7 @@ export default function CoverageSection() {
               {index < coverageBlocks.length - 1 && (
                 <div
                   aria-hidden
-                  className="mx-auto mt-24 h-px w-full max-w-3xl bg-gradient-to-r from-transparent via-black/10 to-transparent dark:via-white/10 sm:mt-28"
+                  className="mx-auto mt-24 h-px w-full max-w-3xl bg-linear-to-r from-transparent via-black/10 to-transparent dark:via-white/10 sm:mt-28"
                 />
               )}
             </div>

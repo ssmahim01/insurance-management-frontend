@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
+import { siteConfig } from "@/lib/sideConfig";
 import { PhoneCall } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 
 export default function CallSection() {
@@ -22,7 +24,13 @@ export default function CallSection() {
           </div>
 
           <Button className="shrink-0 rounded-full btn-bg px-8 py-6 text-sm font-semibold text-white">
-            Get Call
+            <Link
+              href={`https://wa.me/${siteConfig.whatsapp}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Get Call
+            </Link>
           </Button>
         </div>
       </div>

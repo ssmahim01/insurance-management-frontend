@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Phone, FileText, HandCoins, ArrowRight, Check } from "lucide-react";
+import { siteConfig } from "@/lib/sideConfig";
 
 const steps = [
   {
@@ -11,7 +12,7 @@ const steps = [
     title: "Contact Us",
     description:
       "To claim, simply reach out to us via Shurokka Health+ App or contact us at",
-    highlight: "01700-000000",
+    highlight: `${siteConfig.phone}`,
   },
   {
     id: 2,
@@ -62,7 +63,10 @@ export default function ClaimProcessSection() {
 
             return (
               <div key={s.id} className="flex flex-1 items-center last:flex-none">
-                <div className="flex flex-col items-center">
+                <div
+                  className="flex cursor-pointer flex-col items-center"
+                  onClick={() => setCurrentStep(index)}
+                >
                   <div
                     className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-all duration-500 ${
                       isCompleted

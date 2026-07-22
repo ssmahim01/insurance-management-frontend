@@ -6,7 +6,7 @@ export const siteConfig = {
   url: "https://www.surokkhahealth.com",
 
   phone: "01700-000000",
-  whatsapp: "+8801700-000000",
+  whatsapp: "8801XXXXXXXXX",
   email: "info@surokkhahealth.com",
 
   address: {

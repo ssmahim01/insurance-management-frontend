@@ -31,9 +31,9 @@ export default function Footer() {
   return (
     <footer className="border-t border-black/5 bg-[#F7F9FC] dark:border-white/10 dark:bg-neutral-950">
       <div className="mx-auto max-w-7xl px-6 pt-16 pb-5">
-        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 md:grid-cols-3">
+        <div className="grid grid-cols-2 gap-5 sm:gap-12 md:grid-cols-3">
           {/* Brand / IDRA / Social */}
-          <div>
+          <div className="col-span-2 md:col-span-1">
             <Link href="/" className="inline-flex items-center gap-2">
               <div className="relative h-9 w-9 shrink-0">
                 <Image
