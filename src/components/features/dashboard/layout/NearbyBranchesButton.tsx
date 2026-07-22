@@ -37,8 +37,8 @@ export function NearbyBranchesButton({
       <MapPin className="h-3.5 w-3.5 shrink-0 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:scale-110" />
 
       {showLabel && (
-        <span className="hidden sm:inline text-[12.5px] font-semibold tracking-wide whitespace-nowrap">
-          Nearby Branches
+        <span className="hidden lg:inline text-[12.5px] font-semibold tracking-wide whitespace-nowrap">
+          Nearby Partners
         </span>
       )}
     </Link>
