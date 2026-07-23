@@ -52,26 +52,26 @@ export function SubscriptionCard({ subscription }: SubscriptionCardProps) {
 
       <div className="grid grid-cols-2 gap-4 px-5 py-4">
         <div>
-          <p className="text-[11px] text-slate-400 uppercase tracking-wide">Subscription ID</p>
+          <p className="text-[11px] text-slate-700 font-bold dark:text-slate-400 uppercase tracking-wide">Subscription ID</p>
           <p className="text-sm font-semibold text-indigo-700 dark:text-indigo-400 font-mono">
             {String(subscription._id).slice(-6)}
           </p>
         </div>
         <div>
-          <p className="text-[11px] text-slate-400 uppercase tracking-wide">Insured Person</p>
+          <p className="text-[11px] text-slate-700 font-bold dark:text-slate-400 uppercase tracking-wide">Insured Person</p>
           <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">
             {customer?.name ?? "—"}
           </p>
         </div>
         <div>
-          <p className="text-[11px] text-slate-400 uppercase tracking-wide">No. of People</p>
+          <p className="text-[11px] text-slate-700 font-bold dark:text-slate-400 uppercase tracking-wide">No. of People</p>
           <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
             {peopleCount} {peopleCount === 1 ? "Person" : "People"}
           </p>
         </div>
         {typeof pkg?.coverageAmount === "number" && (
           <div>
-            <p className="text-[11px] text-slate-400 uppercase tracking-wide">Total Coverage</p>
+            <p className="text-[11px] text-slate-700 font-bold dark:text-slate-400 uppercase tracking-wide">Total Coverage</p>
             <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
               {formatCurrency(pkg.coverageAmount)}
             </p>

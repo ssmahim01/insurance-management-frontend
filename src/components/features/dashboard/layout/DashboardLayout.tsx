@@ -34,6 +34,7 @@ import {
   Layout,
   BriefcaseMedical,
   MapPin,
+  Phone,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -291,17 +292,25 @@ export function DashboardHeader({
             <>
               <Link
                 href="/"
-                className="group flex shrink-0 items-center"
+                className="group flex shrink-0 items-center gap-2"
                 aria-label="Go to homepage"
               >
                 <Image
-                  className="h-7 sm:h-9 md:h-10 w-auto object-contain transition-transform duration-300 ease-out group-hover:scale-105"
-                  src="/assets/logo.svg"
-                  alt="Logo"
-                  width={160}
-                  height={40}
+                  className="h-9 sm:h-11 md:h-12 w-auto object-contain transition-transform duration-300 ease-out group-hover:scale-105"
+                  src={theme === "dark" ? "/assets/logo-light.webp" : "/assets/logo-dark.webp"}
+                  alt="Shurokkha Health"
+                  width={180}
+                  height={48}
                   priority
                 />
+                <span className="flex flex-col leading-tight">
+                  <span className="text-sm sm:text-base font-bold text-gray-900 dark:text-white tracking-tight">
+                    Shurokkha
+                  </span>
+                  <span className="text-[10px] sm:text-xs font-medium text-emerald-600 dark:text-emerald-400 -mt-0.5">
+                    Health
+                  </span>
+                </span>
               </Link>
               <span
                 aria-hidden
@@ -563,8 +572,27 @@ export function DashboardLayoutWrapper({
             )}
           >
             <div
-              className={`${role !== "CUSTOMER" ? "p-4 md:p-6 lg:p-8" : ""}`}
+              className={`${role !== "CUSTOMER" ? "p-4 md:p-6" : "p-4 md:p-6"}`}
             >
+              {role === "CUSTOMER" && (
+                <div className="relative flex flex-row items-center justify-end gap-3 mx-4">
+                  {user?.data?.phone && (
+                    <div className="flex items-center gap-2.5 rounded-xl bg-linear-to-r from-indigo-500 via-teal-500 to-indigo-600 backdrop-blur-sm px-4 py-2.5 ring-1 ring-white/15 self-start sm:self-auto">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15">
+                        <Phone className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="leading-tight">
+                        <p className="text-[10px] font-medium text-white/80 uppercase tracking-wide">
+                          Registered Mobile
+                        </p>
+                        <p className="text-sm font-semibold text-white tabular-nums">
+                          {user?.data?.phone}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
               {children}
             </div>
           </main>

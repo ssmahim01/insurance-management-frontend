@@ -14,22 +14,16 @@ interface BottomNavItem {
 
 const BOTTOM_NAV_ITEMS: BottomNavItem[] = [
   {
-    id: "doctor-call",
-    label: "Doctor Call",
-    href: "/customer/dashboard/consultants",
-    icon: BriefcaseMedical,
-  },
-  {
     id: "home",
     label: "Home",
     href: "/customer/dashboard",
     icon: Home,
   },
   {
-    id: "profile",
-    label: "Profile",
-    href: "/customer/dashboard/profile",
-    icon: User,
+    id: "doctor-call",
+    label: "Doctor Call",
+    href: "/customer/dashboard/consultants",
+    icon: BriefcaseMedical,
   },
 ];
 
@@ -84,7 +78,7 @@ export function CustomerMobileBottomNav() {
                 <span
                   className={cn(
                     "absolute top-0 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full",
-                    "bg-indigo-500 transition-opacity duration-200",
+                    "bg-emerald-500 dark:bg-emerald-300 transition-opacity duration-200",
                     isActive ? "opacity-100" : "opacity-0",
                   )}
                 />
@@ -93,8 +87,8 @@ export function CustomerMobileBottomNav() {
                   className={cn(
                     "h-5 w-5 shrink-0 transition-transform duration-200",
                     isActive
-                      ? "text-indigo-600 dark:text-indigo-400 scale-105"
-                      : "text-gray-400 dark:text-gray-500",
+                      ? "text-emerald-600 dark:text-emerald-300 scale-105"
+                      : "text-gray-500 dark:text-gray-300",
                   )}
                 />
 
@@ -102,8 +96,8 @@ export function CustomerMobileBottomNav() {
                   className={cn(
                     "text-[10px] font-semibold uppercase tracking-wide truncate max-w-full",
                     isActive
-                      ? "text-indigo-600 dark:text-indigo-400"
-                      : "text-gray-400 dark:text-gray-500",
+                      ? "text-emerald-600 dark:text-emerald-300"
+                      : "text-gray-500 dark:text-gray-300",
                   )}
                 >
                   {item.label}
