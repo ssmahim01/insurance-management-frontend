@@ -1537,28 +1537,6 @@ export default function ProductShowcase() {
                         ))}
                       </tr>
                     ))}
-                    <tr>
-                      <td className="px-5 py-5" />
-                      {TIERS.map((tier, i) => (
-                        <td
-                          key={tier}
-                          className={cn(
-                            "px-5 py-5 text-center",
-                            i === RECOMMENDED_TIER_INDEX && "bg-teal-50/40 dark:bg-teal-900/10"
-                          )}
-                        >
-                          <Button
-                            className={cn(
-                              i === RECOMMENDED_TIER_INDEX
-                                ? "bg-teal-700 shadow-md shadow-teal-900/20 hover:bg-teal-800"
-                                : "bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600"
-                            )}
-                          >
-                            Know More
-                          </Button>
-                        </td>
-                      ))}
-                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -1581,7 +1559,7 @@ export default function ProductShowcase() {
               providing reliable service.
             </p>
             <Button className="mt-6 bg-teal-700 hover:bg-teal-800">
-              <Link href="/terms">Read Our Terms</Link>
+              <Link href="/term-of-service">Read Our Terms</Link>
             </Button>
           </div>
         </section>

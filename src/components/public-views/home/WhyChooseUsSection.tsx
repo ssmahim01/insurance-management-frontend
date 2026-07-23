@@ -109,7 +109,7 @@ export default function WhyChooseBenefitsSection() {
               <div
                 key={benefit.id}
                 style={{ transitionDelay: visible ? `${index * 100}ms` : "0ms" }}
-                className={`group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all duration-700 ease-out hover:-translate-y-1 hover:border-[#00C896]/40 hover:bg-white/[0.06] ${
+                className={`group rounded-2xl border border-white/10 bg-white/3 p-6 transition-all duration-700 ease-out hover:-translate-y-1 hover:border-[#00C896]/40 hover:bg-white/6 ${
                   visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
                 }`}
               >
