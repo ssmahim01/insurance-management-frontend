@@ -11,6 +11,7 @@ import {
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CustomerMobileBottomNav } from "./CustomerMobileBottomNav";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -527,6 +528,7 @@ export function DashboardLayoutWrapper({
 
   const roleKnown = !isLoading && !!role;
   const showSidebar = roleKnown && role !== "CUSTOMER";
+  const showMobileBottomNav = roleKnown && role === "CUSTOMER";
 
   const handleLogout = async () => {
     await logout();
@@ -553,7 +555,13 @@ export function DashboardLayoutWrapper({
             onLogout={handleLogout}
           />
 
-          <main className="flex-1 overflow-auto bg-gray-50/50 dark:bg-gray-950/50">
+          <main
+            className={cn(
+              "flex-1 overflow-auto bg-gray-50/50 dark:bg-gray-950/50",
+              // reserve space so the fixed bottom nav never overlaps content
+              showMobileBottomNav && "pb-16 sm:pb-0",
+            )}
+          >
             <div
               className={`${role !== "CUSTOMER" ? "p-4 md:p-6 lg:p-8" : ""}`}
             >
@@ -561,6 +569,8 @@ export function DashboardLayoutWrapper({
             </div>
           </main>
         </SidebarInset>
+
+        {showMobileBottomNav && <CustomerMobileBottomNav />}
       </TooltipProvider>
     </SidebarProvider>
   );

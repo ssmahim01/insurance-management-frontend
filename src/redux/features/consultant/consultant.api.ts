@@ -1,3 +1,4 @@
+
 // import { baseApi } from "../baseApi";
 
 // export enum ConsultationStatus {
@@ -26,6 +27,9 @@
 //   doctorName?: string;
 //   status: ConsultationStatus;
 //   failureReason?: string;
+//   callStartedAt?: string;
+//   callEndedAt?: string;
+//   prescriptionUrl?: string;
 //   isDeleted: boolean;
 //   createdAt?: string;
 //   updatedAt?: string;
@@ -78,6 +82,9 @@
 // interface IUpdateConsultationStatusPayload {
 //   id: string;
 //   status: ConsultationStatus;
+//   callStartedAt?: string;
+//   callEndedAt?: string;
+//   prescriptionUrl?: string;
 // }
 
 // export const consultationApi = baseApi.injectEndpoints({
@@ -117,10 +124,10 @@
 //     }),
 
 //     updateConsultationStatus: builder.mutation<ISingleConsultationResponse, IUpdateConsultationStatusPayload>({
-//       query: ({ id, status }) => ({
+//       query: ({ id, ...body }) => ({
 //         url: `/consultation/${id}/status`,
 //         method: "PATCH",
-//         data: { status },
+//         data: body,
 //       }),
 //       invalidatesTags: ["CONSULTATIONS"],
 //     }),
@@ -134,6 +141,7 @@
 //   useGetSingleConsultationQuery,
 //   useUpdateConsultationStatusMutation,
 // } = consultationApi;
+
 
 
 import { baseApi } from "../baseApi";
@@ -206,6 +214,10 @@ interface IConsultationCountResponse {
   data: { count: number };
 }
 
+interface IFetchPrescriptionResponse {
+  data: { prescriptionUrl: string | null; ready: boolean };
+}
+
 interface GetConsultationsParams {
   searchTerm?: string;
   status?: string;
@@ -268,6 +280,16 @@ export const consultationApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["CONSULTATIONS"],
     }),
+
+    // Triggered by the "Get Prescription" button — hits Zaynax on-demand
+    // instead of polling automatically.
+    fetchPrescription: builder.mutation<IFetchPrescriptionResponse, string>({
+      query: (id) => ({
+        url: `/consultation/${id}/prescription`,
+        method: "GET",
+      }),
+      invalidatesTags: ["CONSULTATIONS"],
+    }),
   }),
 });
 
@@ -277,4 +299,5 @@ export const {
   useGetMyConsultationCountQuery,
   useGetSingleConsultationQuery,
   useUpdateConsultationStatusMutation,
+  useFetchPrescriptionMutation,
 } = consultationApi;
