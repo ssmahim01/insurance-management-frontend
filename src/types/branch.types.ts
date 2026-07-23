@@ -1,4 +1,4 @@
-import { IPartner } from "./partner.types";
+import { IPartner, PartnerCategory } from "./partner.types";
 
 export interface IPartnerBranch {
   _id: string;
@@ -10,6 +10,8 @@ export interface IPartnerBranch {
   address: string;
   city?: string;
   area?: string;
+   category?: PartnerCategory;  
+  description?: string;   
     distanceKm?: number; 
   postalCode?: string;
   location: {
@@ -20,4 +22,15 @@ export interface IPartnerBranch {
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface IPopulatedBranchPartner {
+  _id?: string;
+  name: string;
+  logo?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  category?: PartnerCategory; 
+  description?: string;      
 }

@@ -26,7 +26,7 @@ export function BackToDashboardSection({
       href={href}
       aria-label={label}
       className={cn(
-        "group flex w-full items-center gap-2.5 rounded border border-border",
+        "group flex w-full items-center gap-2.5 rounded border border-border my-5",
         "dark:bg-slate-950 px-4 py-3",
         "text-gray-800 dark:text-gray-300 font-bold",
         "transition-all duration-250 ease-out",

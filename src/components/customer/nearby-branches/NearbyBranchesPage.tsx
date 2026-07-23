@@ -18,6 +18,9 @@ import { BranchErrorState } from "./BranchErrorState";
 import { IPartnerBranch } from "@/types/branch.types";
 import { CitySearchFallback } from "./CitySearchFallback";
 import { BackToDashboardSection } from "@/components/shared/dashboard/BackToDashboardSection";
+import { PartnerCategory } from "@/types/partner.types";
+import { NearbyBranchesFilteredEmptyState } from "./NearbyBranchesFilteredEmptyState";
+import { NearbyBranchesFilters } from "./NearbyBranchesFilters";
 
 export function NearbyBranches() {
   const geo = useGeolocation();
@@ -41,13 +44,19 @@ export function NearbyBranches() {
     limit: 500,
   });
 
-  const partnerIds = useMemo(
-    () =>
-      (partnersData?.data ?? [])
-        .map((partner) => partner._id)
-        .filter(Boolean) as string[],
-    [partnersData],
-  );
+  const [searchTerm, setSearchTerm] = useState("");
+  const [category, setCategory] = useState<PartnerCategory | "all">("all");
+
+  const partnerIds = useMemo(() => {
+    const partners = partnersData?.data ?? [];
+    const filtered =
+      category === "all"
+        ? partners
+        : partners.filter((p) => p.category === category);
+    return filtered.map((partner) => partner._id).filter(Boolean) as string[];
+  }, [partnersData, category]);
+
+  const hasFilters = Boolean(searchTerm.trim()) || category !== "all";
 
   const canSearch =
     isLocationResolved &&
@@ -88,19 +97,47 @@ export function NearbyBranches() {
     }
   };
 
-  const nearestCity = branches[0]?.city;
+  const filteredBranches = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return branches;
+
+    return branches.filter((branch) => {
+      const partnerName =
+        branch.partner && typeof branch.partner === "object"
+          ? branch.partner.name
+          : "";
+      const haystack = [
+        branch.branchName,
+        partnerName,
+        branch.city,
+        branch.area,
+        branch.address,
+        branch.postalCode,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(term);
+    });
+  }, [branches, searchTerm]);
+
+  const nearestCity = filteredBranches[0]?.city;
 
   const nearbyPartners = useMemo(() => {
     const map = new Map();
-
-    branches.forEach((branch) => {
+    filteredBranches.forEach((branch) => {
       if (branch.partner) {
         map.set((branch?.partner as any)?._id, branch?.partner);
       }
     });
-
     return Array.from(map.values());
-  }, [branches]);
+  }, [filteredBranches]);
+
+  const handleResetFilters = () => {
+    setSearchTerm("");
+    setCategory("all");
+  };
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -127,6 +164,52 @@ export function NearbyBranches() {
           }
         />
 
+        {geo.status === "granted" && (
+          <>
+            <NearbyBranchesFilters
+              searchTerm={searchTerm}
+              onSearchTermChange={setSearchTerm}
+              category={category}
+              onCategoryChange={setCategory}
+              onReset={handleResetFilters}
+              hasFilters={hasFilters}
+            />
+
+            {!isLoading && !isError && filteredBranches.length > 0 && (
+              <BranchStatsCards
+                branchCount={filteredBranches.length}
+                partnerCount={nearbyPartners.length}
+                nearestCity={nearestCity}
+                userCoords={geo.coords}
+              />
+            )}
+
+            {isLoading ? (
+              <BranchLoadingSkeleton />
+            ) : isError ? (
+              <BranchErrorState onRetry={handleRetrySearch} />
+            ) : filteredBranches.length === 0 && hasFilters ? (
+              <NearbyBranchesFilteredEmptyState
+                onClearFilters={handleResetFilters}
+              />
+            ) : filteredBranches.length === 0 ? (
+              <BranchEmptyState
+                onRetry={handleRetrySearch}
+                onRefreshLocation={geo.request}
+              />
+            ) : (
+              <BranchGrid branches={filteredBranches} userCoords={geo.coords} />
+            )}
+
+            {isNearbyFetching && !isNearbyLoading && (
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-indigo-500" />
+                Updating nearby branches...
+              </div>
+            )}
+          </>
+        )}
+
         {!isLocationResolved &&
           geo.status !== "ip-requesting" &&
           !manualBranches && (
@@ -140,41 +223,14 @@ export function NearbyBranches() {
           )}
 
         {geo.status === "ip-failed" && !manualBranches && (
-          <CitySearchFallback onResults={(branches) => setManualBranches(branches as IPartnerBranch[])} />
+          <CitySearchFallback
+            onResults={(branches) =>
+              setManualBranches(branches as IPartnerBranch[])
+            }
+          />
         )}
 
-        {geo.status === "granted" && (
-          <>
-            {!isLoading && !isError && branches.length > 0 && (
-              <BranchStatsCards
-                branchCount={branches.length}
-                partnerCount={nearbyPartners.length}
-                nearestCity={nearestCity}
-                userCoords={geo.coords}
-              />
-            )}
-
-            {isLoading ? (
-              <BranchLoadingSkeleton />
-            ) : isError ? (
-              <BranchErrorState onRetry={handleRetrySearch} />
-            ) : branches.length === 0 ? (
-              <BranchEmptyState
-                onRetry={handleRetrySearch}
-                onRefreshLocation={geo.request}
-              />
-            ) : (
-              <BranchGrid branches={branches} userCoords={geo.coords} />
-            )}
-
-            {isNearbyFetching && !isNearbyLoading && (
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-indigo-500" />
-                Updating nearby branches...
-              </div>
-            )}
-          </>
-        )}
+      
       </div>
     </div>
   );

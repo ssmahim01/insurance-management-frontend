@@ -6,12 +6,16 @@ import { IPartnerBranch } from "@/types/branch.types";
 import { BranchActions } from "./BranchActions";
 import { formatDistance } from "@/utils/geo-distance";
 import Link from "next/link";
+import { CATEGORY_LABELS } from "./NearbyBranchesFilters";
+import { PartnerCategory } from "@/types/partner.types";
 
 interface PopulatedPartner {
   _id?: string;
   name: string;
   logo?: string;
   phone?: string;
+   category?: PartnerCategory;
+  description?: string;   
   website?: string;
   email?: string;
 }
@@ -136,7 +140,14 @@ export function BranchCard({
               <p className="truncate text-lg font-bold text-white transition-transform duration-300 group-hover:translate-x-0.5">
                 {partner?.name ?? "Partner"}
               </p>
-              <p className="truncate text-sm text-white/70">{branch.branchName}</p>
+              {partner?.category && (
+                <span className="mt-1 inline-flex items-center rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/80">
+                  {CATEGORY_LABELS[partner.category]}
+                </span>
+              )}
+              <p className="truncate text-sm text-white/70">
+                {branch.branchName}
+              </p>
             </div>
 
             {/* status + distance badges — desktop only, top-right of info column */}
@@ -144,7 +155,9 @@ export function BranchCard({
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur-sm px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white ring-1 ring-white/20">
                 <span
                   className={`h-1.5 w-1.5 rounded-full ${
-                    branch.isActive ? "bg-cyan-300 animate-pulse" : "bg-white/40"
+                    branch.isActive
+                      ? "bg-cyan-300 animate-pulse"
+                      : "bg-white/40"
                   }`}
                 />
                 {branch.isActive ? "Active" : "Inactive"}
@@ -160,7 +173,9 @@ export function BranchCard({
 
           <div className="flex items-start gap-2 text-sm text-white/85">
             <MapPin className="h-4 w-4 mt-0.5 shrink-0 text-white/70" />
-            <p className="leading-relaxed">{fullAddress || "Address unavailable"}</p>
+            <p className="leading-relaxed">
+              {fullAddress || "Address unavailable"}
+            </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5 pl-6">
