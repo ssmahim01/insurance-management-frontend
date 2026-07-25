@@ -12,13 +12,13 @@ export default function ThemeToggle() {
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className="h-9 w-9 rounded-lg transition-all duration-200 active:scale-95"
+      className="h-10 w-10 rounded-lg transition-all duration-200 active:scale-95"
       title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
     >
       {theme === "light" ? (
-        <Moon className="h-5 w-5" />
+        <Moon style={{width: "25px", height: "25px"}} />
       ) : (
-        <Sun className="h-5 w-5" />
+        <Sun style={{width: "25px", height: "25px"}} />
       )}
     </Button>
   );

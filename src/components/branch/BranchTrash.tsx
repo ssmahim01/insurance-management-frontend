@@ -135,6 +135,7 @@ export function BranchTrash() {
       />
 
       <TrashStatsCards
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         items={branches as any}
         totalCount={data?.meta.total}
         isLoading={isLoading}

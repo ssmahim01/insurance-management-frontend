@@ -1,16 +1,22 @@
-"use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Check, ArrowRight, Shield, ShieldPlus, Users, Sparkles, Infinity as InfinityIcon } from "lucide-react";
+"use client";
+import { Check, ArrowRight, Shield, ShieldPlus, Users, Sparkles, Infinity as InfinityIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { useInView } from "@/components/shared/useInView";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import Link from "next/link";
 
 interface Plan {
   id: number;
-  tier: string; // e.g. "Tier 01"
+  tier: string;
   name: string;
   tagline: string;
   description: string;
   icon: React.ElementType;
-  level: number; // 1-5, drives the coverage meter
+  level: number;
   features: string[];
   perfectFor: string;
   cta: string;
@@ -133,28 +139,74 @@ const plans: Plan[] = [
   },
 ];
 
-export default function PlansSection() {
-  const gridRef = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+function PlanCard({ plan }: { plan: Plan }) {
+  const Icon = plan.icon;
+  return (
+    <div className="group relative flex h-full w-full flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-xl dark:bg-neutral-900 dark:ring-white/10">
+      <div className="flex flex-col gap-4 p-6 pb-4">
+        <div className="flex items-center justify-between">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#00C896]/10">
+            <Icon className="h-5.5 w-5.5 text-[#007A55] dark:text-[#00C896]" strokeWidth={2} />
+          </div>
+          <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+            {plan.tier}
+          </span>
+        </div>
 
-  useEffect(() => {
-    const el = gridRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.15 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+        <div>
+          <h3 className="text-xl font-bold text-[#0B1F3A] dark:text-white">{plan.name}</h3>
+          <p className="mt-1 text-sm font-medium text-[#00A67E]">{plan.tagline}</p>
+        </div>
+
+        <p className="text-[13.5px] leading-relaxed text-gray-500 dark:text-gray-400">
+          {plan.description}
+        </p>
+      </div>
+
+      <div className="mx-6 border-t border-dashed border-gray-200 dark:border-white/10" />
+
+      <div className="flex flex-1 flex-col p-6 pt-4">
+        <span className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+          What&apos;s Included
+        </span>
+        <ul className="mb-5 flex-1 space-y-2.5">
+          {plan.features.map((feature, i) => (
+            <li key={i} className="flex items-start gap-2.5">
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#00A67E]" strokeWidth={3} />
+              <span className="text-[14px] leading-snug text-gray-600 dark:text-gray-300">
+                {feature}
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="mb-5 rounded-lg bg-[#EFF4FA] px-3.5 py-2.5 dark:bg-white/5">
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-[#00A67E]">
+            Perfect For
+          </span>
+          <p className="mt-0.5 text-[13px] leading-snug text-[#0B1F3A] dark:text-gray-200">
+            {plan.perfectFor}
+          </p>
+        </div>
+        <Link
+          href={plan.href}
+          className="group/btn inline-flex items-center justify-center gap-2 rounded-full border-2 border-[#007A55] px-6 py-3 text-sm font-semibold text-[#007A55] transition-all duration-500 hover:bg-[#007A55] hover:text-white dark:border-[#00C896] dark:text-[#00C896] dark:hover:bg-[#00C896] dark:hover:text-neutral-950"
+        >
+          {plan.cta}
+          <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+export default function PlansSection() {
+  const { ref: sectionRef, isVisible: visible } = useInView({
+    threshold: 0.1,
+  });
 
   return (
-    <section className="bg-[#EFF4FA] py-16 dark:bg-neutral-950 sm:py-20">
+    <section ref={sectionRef} className="bg-[#EFF4FA] py-6 dark:bg-neutral-950 sm:py-20">
       <div className="mx-auto max-w-7xl px-6">
         <div
           className={`mx-auto max-w-2xl text-center transition-all duration-700 ease-out ${
@@ -174,83 +226,73 @@ export default function PlansSection() {
           </p>
         </div>
 
-        {/* Plans grid */}
+        {/* Mobile: Swiper slider */}
         <div
-          ref={gridRef}
-          className="mt-14 grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3"
+          className={`relative mt-14 lg:hidden transition-all duration-700 ease-out ${
+            visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          }`}
         >
-          {plans.map((plan, index) => {
-            const Icon = plan.icon;
-            return (
-              <div
-                key={plan.id}
-                style={{ transitionDelay: visible ? `${index * 100}ms` : "0ms" }}
-                className={`group relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5 transition-all duration-700 ease-out hover:-translate-y-1.5 hover:shadow-xl dark:bg-neutral-900 dark:ring-white/10 ${
-                  visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                }`}
-              >
-                <div className="flex flex-col gap-4 p-6 pb-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#00C896]/10">
-                      <Icon className="h-5.5 w-5.5 text-[#007A55] dark:text-[#00C896]" strokeWidth={2} />
-                    </div>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                      {plan.tier}
-                    </span>
-                  </div>
+          <Swiper
+            modules={[Navigation, Pagination, Autoplay]}
+            loop={true}
+            navigation={{
+              prevEl: ".plans-prev",
+              nextEl: ".plans-next",
+            }}
+            pagination={{
+              clickable: true,
+              el: ".plans-pagination",
+            }}
+            autoplay={{
+              delay: 5000,
+              disableOnInteraction: false,
+            }}
+            className="equal-height-slider pb-12!"
+          >
+            {plans.map((plan) => (
+              <SwiperSlide key={plan.id} className="h-auto py-1">
+                <PlanCard plan={plan} />
+              </SwiperSlide>
+            ))}
+          </Swiper>
 
-                  <div>
-                    <h3 className="text-xl font-bold text-[#0B1F3A] dark:text-white">
-                      {plan.name}
-                    </h3>
-                    <p className="mt-1 text-sm font-medium text-[#00A67E]">{plan.tagline}</p>
-                  </div>
+          {/* Left Button */}
+          <button className="plans-prev absolute left-2 top-[45%] z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-lg dark:bg-neutral-800">
+            <ChevronLeft className="h-5 w-5 text-[#0B1F3A] dark:text-white" />
+          </button>
 
-                  <p className="text-[13.5px] leading-relaxed text-gray-500 dark:text-gray-400">
-                    {plan.description}
-                  </p>
-                </div>
+          {/* Right Button */}
+          <button className="plans-next absolute right-2 top-[45%] z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-lg dark:bg-neutral-800">
+            <ChevronRight className="h-5 w-5 text-[#0B1F3A] dark:text-white" />
+          </button>
 
-                <div className="mx-6 border-t border-dashed border-gray-200 dark:border-white/10" />
+          <div className="plans-pagination flex justify-center gap-1.5 [&_.swiper-pagination-bullet]:h-2.5 [&_.swiper-pagination-bullet]:w-2.5 [&_.swiper-pagination-bullet]:rounded-full [&_.swiper-pagination-bullet]:bg-gray-500 [&_.swiper-pagination-bullet-active]:w-4 [&_.swiper-pagination-bullet-active]:bg-[#007A55] [&_.swiper-pagination-bullet]:transition-all [&_.swiper-pagination-bullet]:duration-300" />
+        </div>
 
-                <div className="flex flex-1 flex-col p-6 pt-4">
-                  <span className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                    What&apos;s Included
-                  </span>
-                  <ul className="mb-5 flex-1 space-y-2.5">
-                    {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-start gap-2.5">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#00A67E]" strokeWidth={3} />
-                        <span className="text-[14px] leading-snug text-gray-600 dark:text-gray-300">
-                          {feature}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="mb-5 rounded-lg bg-[#EFF4FA] px-3.5 py-2.5 dark:bg-white/5">
-                    <span className="text-[11px] font-semibold uppercase tracking-wide text-[#00A67E]">
-                      Perfect For
-                    </span>
-                    <p className="mt-0.5 text-[13px] leading-snug text-[#0B1F3A] dark:text-gray-200">
-                      {plan.perfectFor}
-                    </p>
-                  </div>
-
-                  <a
-                    href={plan.href}
-                    className={`group/btn inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-500 border-2 border-[#007A55] text-[#007A55] hover:bg-[#007A55] hover:text-white dark:border-[#00C896] dark:text-[#00C896] dark:hover:bg-[#00C896] dark:hover:text-neutral-950"
-                    }`}
-                  >
-                    {plan.cta}
-                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
-                  </a>
-                </div>
-              </div>
-            );
-          })}
+        {/* Tablet & Desktop: grid */}
+        <div className="mt-14 hidden lg:grid sm:grid-cols-2 sm:gap-8 xl:grid-cols-3">
+          {plans.map((plan) => (
+            <div
+              key={plan.id}
+              className={`transition-all duration-700 ease-out ${
+                visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+              }`}
+            >
+              <PlanCard plan={plan} />
+            </div>
+          ))}
         </div>
       </div>
+
+      <style jsx global>{`
+        .equal-height-slider .swiper-wrapper {
+          align-items: stretch;
+        }
+        .equal-height-slider .swiper-slide {
+          height: auto !important;
+          display: flex;
+        }
+      `}</style>
     </section>
   );
 }

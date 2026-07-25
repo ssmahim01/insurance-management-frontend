@@ -62,7 +62,7 @@ export function ClaimCard({ claim }: ClaimCardProps) {
 
       <div className="grid grid-cols-2 gap-4 px-5 py-4">
         <div>
-          <p className="text-[11px] text-slate-400 uppercase tracking-wide">
+          <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
             Claim ID
           </p>
           <p className="text-sm font-semibold text-indigo-700 dark:text-indigo-400 font-mono">
@@ -70,7 +70,7 @@ export function ClaimCard({ claim }: ClaimCardProps) {
           </p>
         </div>
         <div>
-          <p className="text-[11px] text-slate-400 uppercase tracking-wide">
+          <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
             Package
           </p>
           <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">
@@ -78,7 +78,7 @@ export function ClaimCard({ claim }: ClaimCardProps) {
           </p>
         </div>
         <div>
-          <p className="text-[11px] text-slate-400 uppercase tracking-wide">
+          <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
             Claim Date
           </p>
           <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
@@ -86,7 +86,7 @@ export function ClaimCard({ claim }: ClaimCardProps) {
           </p>
         </div>
         <div>
-          <p className="text-[11px] text-slate-400 uppercase tracking-wide">
+          <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
             Update Date
           </p>
           <p className="text-sm font-medium text-slate-800 dark:text-slate-200">

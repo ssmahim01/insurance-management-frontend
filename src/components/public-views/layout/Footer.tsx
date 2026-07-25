@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {  Mail, Phone, MapPin } from "lucide-react";
 import { FaFacebookF , FaLinkedinIn, FaYoutube  } from "react-icons/fa";
+import { siteConfig } from "@/lib/sideConfig";
 
 const companyLinks = [
   { label: "Our Product", href: "/product" },
@@ -29,21 +30,21 @@ const socialLinks = [
 export default function Footer() {
   return (
     <footer className="border-t border-black/5 bg-[#F7F9FC] dark:border-white/10 dark:bg-neutral-950">
-      <div className="mx-auto max-w-7xl px-6 pt-16 pb-5">
-        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 md:grid-cols-3">
+      <div className="mx-auto max-w-7xl px-6 pt-5 sm:pt-16 pb-5">
+        <div className="grid grid-cols-2 gap-5 sm:gap-12 md:grid-cols-3">
           {/* Brand / IDRA / Social */}
-          <div>
+          <div className="col-span-2 md:col-span-1">
             <Link href="/" className="inline-flex items-center gap-2">
               <div className="relative h-9 w-9 shrink-0">
                 <Image
                   src="/favicon.ico"
-                  alt="Shurokka"
+                  alt="Surokkha Health"
                   fill
                   className="object-contain"
                 />
               </div>
               <span className="text-2xl font-extrabold tracking-tight text-[#0F467C] dark:text-white">
-                SHUROKKA
+                SUROKKA
               </span>
             </Link>
 
@@ -53,7 +54,7 @@ export default function Footer() {
               </h3>
 
               <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-400">
-                Shurokka helps individuals and families access reliable health insurance
+                Surokkha Health helps individuals and families access reliable health insurance
                 plans with transparent coverage, affordable premiums, and a seamless
                 digital experience.
               </p>
@@ -112,15 +113,15 @@ export default function Footer() {
 
             <div className="space-y-6">
               <div>
-                <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-[#00A67E]">
+                <p className="flex items-center gap-1.5 text-xs font-bold uppercase text-[#00A67E]">
                   <Mail className="h-3.5 w-3.5" />
                   Email
                 </p>
                 <Link
-                  href="mailto:info@shurokka.com"
-                  className="mt-1 block text-[15px] text-[#0B1F3A] hover:text-[#00A67E] dark:text-gray-300 dark:hover:text-[#00E0AE]"
+                  href={`mailto:${siteConfig.email}`}
+                  className="mt-1 block wrap-break-word text-[15px] text-[#0B1F3A] hover:text-[#00A67E] dark:text-gray-300 dark:hover:text-[#00E0AE]"
                 >
-                  info@surokkha.com
+                  {siteConfig.email}
                 </Link>
               </div>
 
@@ -133,7 +134,7 @@ export default function Footer() {
                   href="tel:+8809610500599"
                   className="mt-1 block text-[15px] text-[#0B1F3A] hover:text-[#00A67E] dark:text-gray-300 dark:hover:text-[#00E0AE]"
                 >
-                  +8809610500599
+                  {siteConfig.phone}
                 </Link>
               </div>
 
@@ -143,7 +144,8 @@ export default function Footer() {
                   Location
                 </p>
                 <p className="mt-1 text-[15px] leading-relaxed text-[#0B1F3A] dark:text-gray-300">
-                  MS Center, 8 &amp; 9th Floor, 8 Mohakhali C/A, Dhaka 1212
+                  {siteConfig.address.street}, {siteConfig.address.city}{" "}
+                  {siteConfig.address.postalCode}, Bangladesh
                 </p>
               </div>
             </div>
@@ -151,7 +153,7 @@ export default function Footer() {
         </div>
 
         {/* Payment partners — static wrapping grid */}
-        <div className="mt-14 border-t border-black/5 pt-8 dark:border-white/10">
+        <div className="mt-5 sm:mt-14 border-t border-black/5 pt-8 dark:border-white/10">
           <Image
             src="/assets/payment/payment-logo.svg"
             alt="Payment Gateway Logo"
@@ -165,7 +167,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className="mt-8 border-t border-black/5 pt-6 text-center dark:border-white/10">
           <p className="text-sm text-gray-900 dark:text-gray-100">
-            © {new Date().getFullYear()} Surokkha Health. All Rights Reserved. Developed by <Link target="_blank" href={"https://dotskillsbd.com"}><span className="font-bold text-[#0F467C] dark:text-[#43B748]">Dotskills</span> </Link>.
+            © {new Date().getFullYear()} <span className="font-bold">Surokkha Health</span>. All Rights Reserved. Developed by <Link target="_blank" href={"https://dotskillsbd.com"}><span className="font-bold text-[#0F467C] dark:text-[#43B748]">Dotskills</span> </Link>.
           </p>
         </div>
       </div>

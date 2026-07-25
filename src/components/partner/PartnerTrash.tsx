@@ -135,6 +135,7 @@ export function PartnerTrash() {
       />
 
       <TrashStatsCards
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         items={partners as any}
         totalCount={data?.meta.total}
         isLoading={isLoading}

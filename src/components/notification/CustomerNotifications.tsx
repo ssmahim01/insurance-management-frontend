@@ -172,7 +172,7 @@ export function CustomerNotifications() {
 
     return (
         <div className="space-y-5">
-            <BackToDashboardSection />
+            {/* <BackToDashboardSection /> */}
             <PageHeader
                 title="Notifications"
                 description="Stay updated on your subscriptions and claims."

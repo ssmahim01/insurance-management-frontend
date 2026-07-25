@@ -508,15 +508,19 @@ interface StatCardProps {
 function StatCard({ icon: Icon, value, label, gradient }: StatCardProps) {
   return (
     <div
-      className={`group relative overflow-hidden rounded-2xl bg-linear-to-br ${gradient} p-5 shadow-sm ring-1 ring-white/10 transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/20 hover:ring-white/25`}
+      className={`group relative overflow-hidden rounded-xl sm:rounded-2xl bg-linear-to-br ${gradient} p-2.5 sm:p-5 shadow-sm ring-1 ring-white/10 transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/20 hover:ring-white/25`}
     >
-      <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/10 blur-2xl transition-transform duration-500 group-hover:scale-125" />
-      <div className="relative flex flex-col items-center text-center gap-2">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm ring-1 ring-white/20 transition-transform duration-300 group-hover:scale-110">
-          <Icon className="h-5 w-5 text-white" />
+      <div className="pointer-events-none absolute -right-5 sm:-right-8 -top-5 sm:-top-8 h-14 sm:h-24 w-14 sm:w-24 rounded-full bg-white/10 blur-2xl transition-transform duration-500 group-hover:scale-125" />
+      <div className="relative flex flex-col items-center text-center gap-0.5 sm:gap-2">
+        <div className="flex h-7 w-7 sm:h-11 sm:w-11 items-center justify-center rounded-lg sm:rounded-xl bg-white/15 backdrop-blur-sm ring-1 ring-white/20 transition-transform duration-300 group-hover:scale-110">
+          <Icon className="h-3.5 w-3.5 sm:h-5 sm:w-5 text-white" />
         </div>
-        <p className="text-2xl font-bold text-white tracking-tight">{value}</p>
-        <p className="text-xs font-medium text-white/75">{label}</p>
+        <p className="text-sm sm:text-2xl font-bold text-white tracking-tight tabular-nums">
+          {value}
+        </p>
+        <p className="text-[9px] sm:text-xs font-medium text-white/75 truncate max-w-full leading-tight">
+          {label}
+        </p>
       </div>
     </div>
   );
@@ -547,7 +551,11 @@ function PrescriptionCell({ consultation }: { consultation: IConsultation }) {
   }
 
   if (consultation.status !== ConsultationStatus.COMPLETED) {
-    return <span className="text-sm text-slate-400 dark:text-slate-600 italic">—</span>;
+    return (
+      <span className="text-sm text-slate-400 dark:text-slate-600 italic">
+        —
+      </span>
+    );
   }
 
   const handleClick = async () => {
@@ -574,7 +582,9 @@ function PrescriptionCell({ consultation }: { consultation: IConsultation }) {
         Get Prescription
       </Button>
       {notReady && (
-        <p className="text-xs text-slate-400 dark:text-slate-500">Not ready yet, try again shortly.</p>
+        <p className="text-xs text-slate-400 dark:text-slate-500">
+          Not ready yet, try again shortly.
+        </p>
       )}
     </div>
   );
@@ -631,7 +641,7 @@ function CustomerConsultant() {
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
-      <BackToDashboardSection />
+      {/* <BackToDashboardSection /> */}
       <Script
         src="https://meet.zaynax.health/external_api.js"
         strategy="lazyOnload"
@@ -676,7 +686,7 @@ function CustomerConsultant() {
       )}
 
       {/* ── Hero card ── */}
-      <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-indigo-600 via-indigo-600 to-blue-700 dark:from-indigo-700 dark:via-indigo-800 dark:to-blue-900 p-8 sm:p-10 text-center shadow-lg shadow-indigo-900/10 dark:shadow-black/30">
+      <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-indigo-600 via-lime-600 to-blue-700 dark:from-indigo-700 dark:via-lime-800 dark:to-blue-900 p-8 sm:p-10 text-center shadow-lg shadow-indigo-900/10 dark:shadow-black/30">
         <div className="pointer-events-none absolute -top-14 -right-14 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-20 left-10 h-64 w-64 rounded-full bg-blue-300/10 blur-3xl" />
 
@@ -813,7 +823,7 @@ active:scale-95
       )}
 
       {/* ── Stat cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         <StatCard
           icon={PhoneCall}
           value={totalTaken}

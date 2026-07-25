@@ -9,6 +9,7 @@ import {
   HeartPulse,
   Smartphone,
 } from "lucide-react";
+import { useInView } from "@/components/shared/useInView";
 
 interface Benefit {
   id: number;
@@ -63,29 +64,14 @@ const benefits: Benefit[] = [
 ];
 
 export default function WhyChooseBenefitsSection() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.15 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  const { ref: sectionRef, isVisible: visible } = useInView({
+        threshold: 0.2,
+    });
 
   return (
     <section
       ref={sectionRef}
-      className="bg-[#0B1F3A] py-16 dark:bg-[#050D1A] sm:py-20"
+      className="bg-[#0B1F3A] py-6 dark:bg-[#050D1A] sm:py-20"
     >
       <div className="mx-auto max-w-6xl px-6">
         <div
@@ -109,7 +95,7 @@ export default function WhyChooseBenefitsSection() {
               <div
                 key={benefit.id}
                 style={{ transitionDelay: visible ? `${index * 100}ms` : "0ms" }}
-                className={`group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-all duration-700 ease-out hover:-translate-y-1 hover:border-[#00C896]/40 hover:bg-white/[0.06] ${
+                className={`group rounded-2xl border border-white/10 bg-white/3 p-6 transition-all duration-700 ease-out hover:-translate-y-1 hover:border-[#00C896]/40 hover:bg-white/6 ${
                   visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
                 }`}
               >

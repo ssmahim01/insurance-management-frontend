@@ -94,42 +94,6 @@ function useInView<T extends HTMLElement>(threshold = 0.15) {
   return { ref, inView };
 }
 
-// A thin barcode-style rule, used as a recurring motif tying the hero
-// to the report/requisition theme without being literal decoration.
-function BarcodeRule({
-  className = "",
-  seed = 1,
-}: {
-  className?: string;
-  seed?: number;
-}) {
-  const bars = useMemo(() => {
-    let n = seed * 9301 + 49297;
-    const out: number[] = [];
-    for (let i = 0; i < 28; i++) {
-      n = (n * 9301 + 49297) % 233280;
-      out.push(1 + (n / 233280) * 3);
-    }
-    return out;
-  }, [seed]);
-
-  return (
-    <svg
-      viewBox="0 0 200 20"
-      className={className}
-      preserveAspectRatio="none"
-      aria-hidden
-    >
-      {bars.map((w, i) => {
-        const x = bars.slice(0, i).reduce((a, b) => a + b + 1.4, 0);
-        return (
-          <rect key={i} x={x} y={0} width={w} height={20} fill="currentColor" />
-        );
-      })}
-    </svg>
-  );
-}
-
 function SpecimenCard({
   name,
   logo,
@@ -173,7 +137,7 @@ function SpecimenCard({
             alt={name}
             width={140}
             height={56}
-            className="max-h-11 w-auto object-contain grayscale transition-all duration-300 group-hover:grayscale-0 dark:brightness-110 dark:contrast-110"
+            className="max-h-11 w-auto object-contain transition-all duration-300 group-hover:grayscale-0 dark:brightness-110 dark:contrast-110"
             onError={() => setErrored(true)}
           />
         ) : (
@@ -317,7 +281,6 @@ export default function DiagnosticPage() {
             </div>
           </div>
 
-          <BarcodeRule seed={7} className="mt-8 h-4 w-full text-[#7FD9C4]/40" />
         </div>
       </div>
 
@@ -414,7 +377,7 @@ export default function DiagnosticPage() {
         </div>
 
         {/* ---------------- CTA, styled as the tear-off bottom of a form ---------------- */}
-        <div className="mt-14 flex flex-col items-center justify-between gap-4 rounded-md border border-[#D7DEDA] bg-white p-6 text-center dark:border-[#24332E] dark:bg-[#12211D] sm:flex-row sm:text-left">
+        {/* <div className="mt-14 flex flex-col items-center justify-between gap-4 rounded-md border border-[#D7DEDA] bg-white p-6 text-center dark:border-[#24332E] dark:bg-[#12211D] sm:flex-row sm:text-left">
           <div>
             <p className="text-sm font-semibold text-[#16241F] dark:text-[#E7EFEA]">
               Don&apos;t see your local diagnostic center?
@@ -426,7 +389,7 @@ export default function DiagnosticPage() {
           <button className="shrink-0 rounded-md bg-[#0E6B58] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#0A4A3D] dark:bg-[#4FD9BC] dark:text-[#06231D] dark:hover:bg-[#7FD9C4]">
             Suggest a diagnostic center
           </button>
-        </div>
+        </div> */}
       </div>
     </section>
   );

@@ -141,7 +141,7 @@ export function NearbyBranches() {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <BackToDashboardSection />
+      {/* <BackToDashboardSection /> */}
       {/* ── decorative background: blurred brand-color orbs + dot grid ── */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-32 -left-24 h-96 w-96 rounded-full bg-indigo-400/20 dark:bg-indigo-500/10 blur-3xl" />

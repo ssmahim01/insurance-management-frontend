@@ -315,6 +315,45 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   align-items: center;
   justify-content: center;
 }
+
+/* @media (max-width:600px) {
+  .swiper .swiper-button-prev,
+  .swiper .swiper-button-next {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: #fff !important;
+    opacity: 0.5 !important;
+    color: #007A55 !important;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+} */
+
+@media (max-width: 600px) {
+  .swiper .swiper-button-prev,
+  .swiper .swiper-button-next {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: #fff;
+    opacity: 0.5;
+    color: #007A55;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .swiper .swiper-button-prev::after,
+  .swiper .swiper-button-next::after {
+    font-size: 16px !important; /* Arrow size */
+    font-weight: bold;
+  }
+}
+
 .swiper .swiper-button-prev svg,
 .swiper .swiper-button-next svg{
   height: 20px;

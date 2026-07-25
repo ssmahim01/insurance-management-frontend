@@ -230,10 +230,11 @@ export default function ContactForm() {
               </div>
             </dl>
 
+
             {/* Replace with an actual embedded Google Map (office coordinates) */}
             <div className="mt-6 flex h-56 items-center justify-center rounded-2xl border border-dashed border-slate-300 text-sm text-slate-400 dark:border-slate-700">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d206.45997676361523!2d90.36015113525936!3d23.806818398093768!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c13bf1b25cd9%3A0x337ad20eaa1a2578!2sBachelor%20corner!5e1!3m2!1sen!2sbd!4v1784112169335!5m2!1sen!2sbd"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d69275.57624721782!2d90.35021810742175!3d23.815567509217146!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755c100158363c3%3A0x7c2257e4b78b8c29!2sMirpur%20DOHS!5e1!3m2!1sen!2sbd!4v1784744178652!5m2!1sen!2sbd"
                 className="w-full h-full border-0"
                 loading="lazy"
                 allowFullScreen

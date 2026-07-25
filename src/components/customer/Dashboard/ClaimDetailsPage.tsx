@@ -40,7 +40,7 @@ export function ClaimDetailsPage({ id }: ClaimDetailsPageProps) {
           </div>
         ) : (
           <>
-           <BackToDashboardSection />
+           {/* <BackToDashboardSection /> */}
             <ClaimDetailsContent claim={claim as any} />
           </>
         )}
@@ -262,7 +262,7 @@ function ClaimProgressStepper({ status }: { status: ClaimStatus }) {
 
   return (
     <div className="relative pl-2">
-      <div className="absolute left-5 top-2 bottom-2 w-0.5 bg-slate-200 dark:bg-slate-700" />
+      <div className="absolute left-5.5 top-2 bottom-2 w-0.5 bg-slate-200 dark:bg-slate-700" />
       <div className="space-y-6">
         {steps.map((step, i) => {
           const circleColor = step.isFinal

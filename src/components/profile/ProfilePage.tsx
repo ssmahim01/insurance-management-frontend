@@ -56,7 +56,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-indigo-50/50 via-background to-blue-50/30 dark:from-indigo-950/10 dark:via-background dark:to-blue-950/10">
-      <BackToDashboardSection />
+      {/* <BackToDashboardSection /> */}
       <div className="mx-auto container p-4 space-y-6">
         {/* ── Hero banner ── */}
         <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-indigo-600 via-indigo-600 to-blue-700 p-6 sm:p-8 shadow-lg shadow-indigo-900/10">
