@@ -1,4 +1,4 @@
-
+// Working version patient to doctor 
 // import { baseApi } from "../baseApi";
 
 // export enum ConsultationStatus {
@@ -69,6 +69,10 @@
 //   data: { count: number };
 // }
 
+// interface IFetchPrescriptionResponse {
+//   data: { prescriptionUrl: string | null; ready: boolean };
+// }
+
 // interface GetConsultationsParams {
 //   searchTerm?: string;
 //   status?: string;
@@ -89,7 +93,6 @@
 
 // export const consultationApi = baseApi.injectEndpoints({
 //   endpoints: (builder) => ({
-
 //     initiateConsultation: builder.mutation<IInitiateConsultationResponse, void>({
 //       query: () => ({
 //         url: "/consultation/initiate",
@@ -123,11 +126,30 @@
 //       providesTags: ["CONSULTATIONS"],
 //     }),
 
+//     // Resolves Zaynax's orderID/bookingID (from INCOMING_CALL_FROM_DOCTOR)
+//     // back to our own Consultation record. Used as a lazy trigger, not an
+//     // automatic query — fired only when a doctor callback socket event fires.
+//     getConsultationByBookingId: builder.query<ISingleConsultationResponse, string>({
+//       query: (bookingId) => ({
+//         url: `/consultation/booking/${bookingId}`,
+//         method: "GET",
+//       }),
+//       providesTags: ["CONSULTATIONS"],
+//     }),
+
 //     updateConsultationStatus: builder.mutation<ISingleConsultationResponse, IUpdateConsultationStatusPayload>({
 //       query: ({ id, ...body }) => ({
 //         url: `/consultation/${id}/status`,
 //         method: "PATCH",
 //         data: body,
+//       }),
+//       invalidatesTags: ["CONSULTATIONS"],
+//     }),
+
+//     fetchPrescription: builder.mutation<IFetchPrescriptionResponse, string>({
+//       query: (id) => ({
+//         url: `/consultation/${id}/prescription`,
+//         method: "GET",
 //       }),
 //       invalidatesTags: ["CONSULTATIONS"],
 //     }),
@@ -139,9 +161,10 @@
 //   useGetMyConsultationsQuery,
 //   useGetMyConsultationCountQuery,
 //   useGetSingleConsultationQuery,
+//   useLazyGetConsultationByBookingIdQuery,
 //   useUpdateConsultationStatusMutation,
+//   useFetchPrescriptionMutation,
 // } = consultationApi;
-
 
 
 import { baseApi } from "../baseApi";
@@ -218,6 +241,17 @@ interface IFetchPrescriptionResponse {
   data: { prescriptionUrl: string | null; ready: boolean };
 }
 
+interface IActiveConsultation {
+  consultationId: string;
+  roomId: string;
+  orderID?: string;
+  zaynaxAuthToken: string;
+}
+
+interface IActiveConsultationResponse {
+  data: IActiveConsultation | null;
+}
+
 interface GetConsultationsParams {
   searchTerm?: string;
   status?: string;
@@ -272,6 +306,17 @@ export const consultationApi = baseApi.injectEndpoints({
       providesTags: ["CONSULTATIONS"],
     }),
 
+    // Checked once on page load so the frontend can proactively reconnect
+    // a socket and listen for a doctor callback on a booking from an
+    // earlier (not-yet-terminal) attempt.
+    getActiveConsultation: builder.query<IActiveConsultationResponse, void>({
+      query: () => ({
+        url: "/consultation/active",
+        method: "GET",
+      }),
+      providesTags: ["CONSULTATIONS"],
+    }),
+
     updateConsultationStatus: builder.mutation<ISingleConsultationResponse, IUpdateConsultationStatusPayload>({
       query: ({ id, ...body }) => ({
         url: `/consultation/${id}/status`,
@@ -281,8 +326,6 @@ export const consultationApi = baseApi.injectEndpoints({
       invalidatesTags: ["CONSULTATIONS"],
     }),
 
-    // Triggered by the "Get Prescription" button — hits Zaynax on-demand
-    // instead of polling automatically.
     fetchPrescription: builder.mutation<IFetchPrescriptionResponse, string>({
       query: (id) => ({
         url: `/consultation/${id}/prescription`,
@@ -298,6 +341,7 @@ export const {
   useGetMyConsultationsQuery,
   useGetMyConsultationCountQuery,
   useGetSingleConsultationQuery,
+  useGetActiveConsultationQuery,
   useUpdateConsultationStatusMutation,
   useFetchPrescriptionMutation,
 } = consultationApi;
