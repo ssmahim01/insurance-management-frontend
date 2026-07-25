@@ -68,6 +68,15 @@ import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 type SortField = "transactionId" | "amount" | "status" | "createdAt";
 type SortDir = "asc" | "desc" | null;
+// type StatusFilter =
+//   | "all"
+//   | "UNPAID"
+//   | "PAID"
+//   | "COMPLETED"
+//   | "FAILED"
+//   | "CANCELLED"
+//   | "REFUNDED";
+
 type StatusFilter =
   | "all"
   | "UNPAID"
@@ -75,8 +84,8 @@ type StatusFilter =
   | "COMPLETED"
   | "FAILED"
   | "CANCELLED"
+  | "REFUND_PENDING"
   | "REFUNDED";
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const formatDate = (iso?: string) => {
@@ -121,6 +130,8 @@ const STATUS_STYLES: Record<string, string> = {
     "border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
   REFUNDED:
     "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
+  REFUND_PENDING:
+    "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-800 dark:bg-orange-900/20 dark:text-orange-400",
 };
 
 const STATUS_DOT: Record<string, string> = {
@@ -130,6 +141,7 @@ const STATUS_DOT: Record<string, string> = {
   FAILED: "bg-red-500",
   CANCELLED: "bg-slate-400",
   REFUNDED: "bg-blue-500",
+  REFUND_PENDING: "bg-orange-500",
 };
 
 function StatusBadge({ status }: { status: string }) {
@@ -634,6 +646,7 @@ export default function PaymentManagement() {
             <SelectItem value="COMPLETED">Completed</SelectItem>
             <SelectItem value="FAILED">Failed</SelectItem>
             <SelectItem value="CANCELLED">Cancelled</SelectItem>
+            <SelectItem value="REFUND_PENDING">Refund Pending</SelectItem>
             <SelectItem value="REFUNDED">Refunded</SelectItem>
           </SelectContent>
         </Select>
@@ -726,11 +739,10 @@ hover:scale-[1.002]
 hover:bg-indigo-50
 dark:hover:bg-indigo-950/20
 
-${
-  index % 2 === 0
-    ? "bg-white dark:bg-background"
-    : "bg-gradient-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
-}
+${index % 2 === 0
+                            ? "bg-white dark:bg-background"
+                            : "bg-gradient-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
+                          }
 `}
                       >
                         {/* Transaction */}

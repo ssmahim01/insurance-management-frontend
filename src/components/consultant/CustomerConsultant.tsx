@@ -1,3 +1,4 @@
+
 // /* eslint-disable @typescript-eslint/no-explicit-any */
 // "use client";
 
@@ -26,7 +27,9 @@
 
 // import { useZaynaxCall } from "@/hooks/useZaynaxCall";
 // import {
+//   ConsultationStatus,
 //   IConsultation,
+//   useFetchPrescriptionMutation,
 //   useGetMyConsultationCountQuery,
 //   useGetMyConsultationsQuery,
 // } from "@/redux/features/consultant/consultant.api";
@@ -71,6 +74,57 @@
 //         <p className="text-2xl font-bold text-white tracking-tight">{value}</p>
 //         <p className="text-xs font-medium text-white/75">{label}</p>
 //       </div>
+//     </div>
+//   );
+// }
+
+// function PrescriptionCell({ consultation }: { consultation: IConsultation }) {
+//   const [fetchPrescription, { isLoading }] = useFetchPrescriptionMutation();
+//   const [notReady, setNotReady] = useState(false);
+
+//   if (consultation.prescriptionUrl) {
+//     return (
+//       <Button
+//         size="sm"
+//         className="gap-1.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-0.5 active:scale-95"
+//       >
+//         <a href={consultation.prescriptionUrl} className="flex gap-1 items-center" target="_blank" rel="noopener noreferrer">
+//           <Download className="w-3.5 h-3.5" />
+//           Download Prescription
+//         </a>
+//       </Button>
+//     );
+//   }
+
+//   if (consultation.status !== ConsultationStatus.COMPLETED) {
+//     return <span className="text-sm text-slate-400 dark:text-slate-600 italic">—</span>;
+//   }
+
+//   const handleClick = async () => {
+//     setNotReady(false);
+//     try {
+//       const res = await fetchPrescription(consultation._id).unwrap();
+//       if (!res.data.ready) setNotReady(true);
+//     } catch {
+//       setNotReady(true);
+//     }
+//   };
+
+//   return (
+//     <div className="space-y-1">
+//       <Button
+//         size="sm"
+//         variant="outline"
+//         onClick={handleClick}
+//         disabled={isLoading}
+//         className="gap-1.5 rounded-full transition-all duration-200 ease-out hover:shadow-sm hover:-translate-y-0.5 active:scale-95"
+//       >
+//         {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+//         Get Prescription
+//       </Button>
+//       {notReady && (
+//         <p className="text-xs text-slate-400 dark:text-slate-500">Not ready yet, try again shortly.</p>
+//       )}
 //     </div>
 //   );
 // }
@@ -340,25 +394,7 @@
 //                           {formatDuration(c.callStartedAt, c.callEndedAt)}
 //                         </TableCell>
 //                         <TableCell>
-//                           {c.prescriptionUrl ? (
-//                             <Button
-//                               size="sm"
-//                               className="gap-1.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-0.5 active:scale-95"
-//                             >
-//                               <a
-//                                 href={c.prescriptionUrl}
-//                                 target="_blank"
-//                                 rel="noopener noreferrer"
-//                               >
-//                                 <Download className="w-3.5 h-3.5" />
-//                                 Download
-//                               </a>
-//                             </Button>
-//                           ) : (
-//                             <span className="text-sm text-slate-400 dark:text-slate-600 italic">
-//                               —
-//                             </span>
-//                           )}
+//                           <PrescriptionCell consultation={c} />
 //                         </TableCell>
 //                       </TableRow>
 //                     ))}
@@ -401,14 +437,20 @@
 
 // export default CustomerConsultant;
 
+
+
+// -------------------------------------------
+// with doctor call 
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Script from "next/script";
 import {
   Download,
   PhoneCall,
+  PhoneIncoming,
   History,
   Video,
   Stethoscope,
@@ -492,6 +534,7 @@ function PrescriptionCell({ consultation }: { consultation: IConsultation }) {
     return (
       <Button
         size="sm"
+        // asChild
         className="gap-1.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-0.5 active:scale-95"
       >
         <a
@@ -528,6 +571,7 @@ function PrescriptionCell({ consultation }: { consultation: IConsultation }) {
   return (
     <div className="space-y-1">
       <Button
+        type="button"
         size="sm"
         variant="outline"
         onClick={handleClick}
@@ -559,8 +603,17 @@ function CustomerConsultant() {
 
   const { data: countRes } = useGetMyConsultationCountQuery();
 
-  const { stage, doctorInfo, errorMessage, startCall, cancelCall, endCall } =
-    useZaynaxCall("jitsi-call-container");
+  const {
+    stage,
+    doctorInfo,
+    errorMessage,
+    startCall,
+    cancelCall,
+    endCall,
+    incomingCall,
+    acceptIncomingCall,
+    rejectIncomingCall,
+  } = useZaynaxCall("jitsi-call-container");
 
   const consultations: IConsultation[] = Array.isArray(listRes?.data)
     ? listRes.data
@@ -582,6 +635,10 @@ function CustomerConsultant() {
   ];
   const isCallActive = inCallStages.includes(stage);
 
+// useEffect(()=>{
+//   startCall()
+// }, [])
+
   return (
     <div className="space-y-6 p-4 sm:p-6">
       {/* <BackToDashboardSection /> */}
@@ -590,6 +647,43 @@ function CustomerConsultant() {
         strategy="lazyOnload"
         onLoad={() => setJitsiReady(true)}
       />
+
+      {/* ── Incoming call from doctor (callback on an existing booking) ── */}
+      {incomingCall && stage !== "in-call" && (
+        <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-emerald-500 via-emerald-600 to-teal-700 p-5 sm:p-6 shadow-lg shadow-emerald-900/20">
+          <div className="pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/10 blur-3xl animate-pulse" />
+          <div className="relative flex flex-col sm:flex-row items-center gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white/20 ring-1 ring-white/30">
+              <PhoneIncoming className="h-6 w-6 text-white animate-pulse" />
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <p className="text-white font-bold text-lg">
+                Incoming call from {incomingCall.doctorName}
+              </p>
+              <p className="text-emerald-50/90 text-sm">
+                Your doctor is calling you back for your consultation.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                onClick={acceptIncomingCall}
+                className="rounded-full bg-white text-emerald-700 hover:bg-emerald-50 font-semibold"
+              >
+                Accept
+              </Button>
+              <Button
+                type="button"
+                onClick={rejectIncomingCall}
+                variant="outline"
+                className="rounded-full border-white/40 bg-white/10 text-white hover:bg-white/20"
+              >
+                Decline
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Hero card ── */}
       <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-indigo-600 via-lime-600 to-blue-700 dark:from-indigo-700 dark:via-lime-800 dark:to-blue-900 p-8 sm:p-10 text-center shadow-lg shadow-indigo-900/10 dark:shadow-black/30">
@@ -615,6 +709,7 @@ function CustomerConsultant() {
 
           {!isCallActive ? (
             <Button
+              type="button"
               onClick={startCall}
               disabled={!jitsiReady}
               size="lg"
@@ -673,6 +768,7 @@ active:scale-95
             </Button>
           ) : (
             <Button
+              type="button"
               variant="destructive"
               size="lg"
               onClick={stage === "in-call" ? endCall : cancelCall}
@@ -712,16 +808,17 @@ active:scale-95
         </div>
       )}
 
-      {stage === "rejected" && (
+      {stage === "rejected" && !incomingCall && (
         <div className="rounded-2xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20 p-4 text-sm text-amber-700 dark:text-amber-400">
-          The doctor couldn&apos;t take your call right now. Please try again
-          shortly.
+          The doctor couldn&apos;t take your call right now. They may call you
+          back shortly — keep this page open.
         </div>
       )}
 
-      {stage === "timeout" && (
+      {stage === "timeout" && !incomingCall && (
         <div className="rounded-2xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/20 p-4 text-sm text-amber-700 dark:text-amber-400">
-          No response from the doctor. Please try again.
+          No response from the doctor. They may call you back shortly — keep
+          this page open.
         </div>
       )}
 
@@ -822,6 +919,7 @@ active:scale-95
               {meta && meta.totalPage > 1 && (
                 <div className="flex items-center justify-end gap-2 p-4 border-t border-slate-100 dark:border-slate-800">
                   <Button
+                    type="button"
                     variant="outline"
                     size="sm"
                     disabled={page <= 1 || isFetching}
@@ -834,6 +932,7 @@ active:scale-95
                     Page {meta.page} of {meta.totalPage}
                   </span>
                   <Button
+                    type="button"
                     variant="outline"
                     size="sm"
                     disabled={page >= meta.totalPage || isFetching}
