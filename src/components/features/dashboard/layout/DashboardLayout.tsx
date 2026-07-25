@@ -398,8 +398,8 @@ export function DashboardHeader({
               className="relative h-8 w-8 sm:h-9 sm:w-9 rounded-full hover:scale-110 active:scale-95 hover:bg-white dark:hover:bg-gray-800 transition-all duration-200"
               aria-label="Toggle theme"
             >
-              <Sun className="h-[16px] w-[16px] sm:h-[18px] sm:w-[18px] rotate-0 scale-100 transition-all duration-300 dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute h-[16px] w-[16px] sm:h-[18px] sm:w-[18px] rotate-90 scale-0 transition-all duration-300 dark:rotate-0 dark:scale-100" />
+              <Sun className="h-4 w-4 sm:h-4.5 sm:w-4.5 rotate-0 scale-100 transition-all duration-300 dark:-rotate-90 dark:scale-0" />
+              <Moon className="absolute h-4 w-4 sm:h-4.5 sm:w-4.5 rotate-90 scale-0 transition-all duration-300 dark:rotate-0 dark:scale-100" />
             </Button>
           </div>
 
