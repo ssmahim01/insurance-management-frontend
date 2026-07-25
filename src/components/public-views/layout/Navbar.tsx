@@ -23,6 +23,7 @@ import { useUser } from '@/context/UserContext'
 import { toast } from 'sonner'
 import { getDashboardPath } from '@/components/shared/DashboardPath'
 import { useTheme } from '@/lib/providers/ThemeProvider'
+import { useState } from 'react'
 
 const navLinks = [
   { title: 'about us', path: '/about' },
@@ -34,6 +35,7 @@ const navLinks = [
 ]
 
 export default function Navbar() {
+  const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname()
   const { user, logout } = useUser();
   const router = useRouter();
@@ -129,7 +131,7 @@ export default function Navbar() {
         {/* Mobile Menu */}
         <div className='flex items-center gap-2 lg:hidden '>
           <ThemeToggle />
-          <Sheet>
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger
             aria-label="Open menu"
             className="flex items-center justify-center rounded-full transition-colors hover:bg-muted"
@@ -147,6 +149,7 @@ export default function Navbar() {
                     <Link
                       key={link.path}
                       href={link.path}
+                      onClick={() => setMobileOpen(false)}
                       className={`group flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium uppercase tracking-wide transition-colors ${
                         active ? "bg-primary text-primary-foreground" : "hover:bg-muted"
                       }`}
