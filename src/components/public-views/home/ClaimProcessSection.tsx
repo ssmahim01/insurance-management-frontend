@@ -43,7 +43,7 @@ export default function ClaimProcessSection() {
   };
 
   return (
-    <section className="bg-[#EFF4FA] py-16 dark:bg-neutral-950 sm:py-20">
+    <section className="bg-[#EFF4FA] py-6 dark:bg-neutral-950 sm:py-20">
       <div className="mx-auto max-w-3xl px-6">
         <div className="mx-auto mb-14 max-w-2xl text-center">
           <h2 className="text-4xl font-extrabold text-[#0B1F3A] dark:text-white sm:text-5xl">
