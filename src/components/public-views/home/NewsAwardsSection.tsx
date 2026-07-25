@@ -1,9 +1,7 @@
 "use client";
-
-import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { useInView } from "@/components/shared/useInView";
 
 interface NewsItem {
   id: number;
@@ -53,30 +51,15 @@ const typeStyles: Record<NewsItem["type"], string> = {
 };
 
 export default function NewsAwardsSection() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.15 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  const { ref: sectionRef, isVisible: visible } = useInView({
+        threshold: 0.2,
+    });
 
   return (
-    <section className="relative overflow-hidden bg-gray-50 py-16 dark:bg-neutral-950 sm:py-20">
+    <section ref={sectionRef} className="relative overflow-hidden bg-gray-50 py-6 dark:bg-neutral-950 sm:py-20">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[420px] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(0,200,150,0.07),transparent)]"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-105 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(0,200,150,0.07),transparent)]"
       />
 
       <div className="mx-auto max-w-7xl px-6">
@@ -98,14 +81,13 @@ export default function NewsAwardsSection() {
         </div>
 
         <div
-          ref={sectionRef}
+          // ref={sectionRef}
           className="grid grid-cols-1 gap-8 md:grid-cols-3"
         >
-          {newsItems.map((item, index) => (
+          {newsItems.map((item) => (
             <Link
               key={item.id}
               href={item.href}
-              style={{ transitionDelay: visible ? `${index * 150}ms` : "0ms" }}
               className={`group flex flex-col overflow-hidden rounded-2xl bg-white shadow-md shadow-black/5 ring-1 ring-black/5 transition-all duration-700 ease-out hover:-translate-y-1.5 hover:shadow-xl hover:shadow-black/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00A67E] focus-visible:ring-offset-2 dark:bg-neutral-900 dark:ring-white/10 motion-reduce:transition-none motion-reduce:transform-none ${
                 visible
                   ? "opacity-100 translate-y-0"
@@ -120,7 +102,7 @@ export default function NewsAwardsSection() {
                   sizes="(max-width: 768px) 100vw, 33vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent" />
                 <span
                   className={`absolute left-4 top-4 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white ${
                     typeStyles[item.type]

@@ -1,6 +1,6 @@
 
 import type { Metadata } from 'next';
-import PartnerManagement from '@/components/partner/PartnerManagement';
+// import PartnerManagement from '@/components/partner/PartnerManagement';
 import BranchManagement from '@/components/branch/BranchManagement';
 
 export const metadata: Metadata = {

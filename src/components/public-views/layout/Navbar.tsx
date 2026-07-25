@@ -132,9 +132,9 @@ export default function Navbar() {
           <Sheet>
           <SheetTrigger
             aria-label="Open menu"
-            className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-muted"
+            className="flex items-center justify-center rounded-full transition-colors hover:bg-muted"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-10 w-10" />
           </SheetTrigger>
 
           <SheetContent side="right" className="w-80 px-0 pt-5">

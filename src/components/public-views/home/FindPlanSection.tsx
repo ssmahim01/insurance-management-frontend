@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 import React from 'react'
 
 export default function FindPlanSection() {
@@ -12,7 +13,7 @@ export default function FindPlanSection() {
                    dark:bg-[radial-gradient(circle,rgba(240,169,58,0.12)_0%,transparent_70%)]"
       />
 
-      <div className="relative w-full max-w-7xl mx-auto px-5 py-20">
+      <div className="relative w-full max-w-7xl mx-auto px-5 py-6 sm:py-20">
         <div className="text-center max-w-3xl mx-auto">
           <span className="inline-block text-sm font-semibold tracking-wide uppercase text-[#0F467C] dark:text-[#F0A93A] mb-3">
             Plans for every stage of life
@@ -34,7 +35,11 @@ export default function FindPlanSection() {
                          dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-[#0B2E52]
                          transition-colors font-medium text-lg"
             >
-              Compare Plans
+              <Link
+                href={"/products"}
+              >
+                Compare Plans
+              </Link>
             </Button>
 
             <Button

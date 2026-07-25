@@ -88,6 +88,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { useInView } from "@/components/shared/useInView";
 
 const stats = [
   { value: "500+", label: "Hospitals & labs" },
@@ -96,31 +97,16 @@ const stats = [
 ];
 
 export default function PartnerSection() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.2 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  const { ref: sectionRef, isVisible: visible } = useInView({
+        threshold: 0.2,
+    });
 
   return (
-    <section className="relative overflow-hidden bg-[#EFF4FA] py-16 dark:bg-neutral-950 sm:py-20">
+    <section className="relative overflow-hidden bg-[#EFF4FA] py-6 dark:bg-neutral-950 sm:py-20">
       {/* Ambient backdrop, echoes the coverage section's teal wash */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[480px] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(0,200,150,0.10),transparent)]"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-120 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(0,200,150,0.10),transparent)]"
       />
 
       <div ref={sectionRef} className="mx-auto max-w-5xl px-6 text-center">
@@ -166,7 +152,6 @@ export default function PartnerSection() {
           className={`relative mt-12 transition-all duration-700 ease-out motion-reduce:transition-none motion-reduce:transform-none ${
             visible ? "opacity-100 scale-100" : "opacity-0 scale-95"
           }`}
-          style={{ transitionDelay: visible ? "250ms" : "0ms" }}
         >
           {/* Offset backdrop panel for depth, matching the coverage section's language */}
           <div

@@ -30,7 +30,7 @@ const socialLinks = [
 export default function Footer() {
   return (
     <footer className="border-t border-black/5 bg-[#F7F9FC] dark:border-white/10 dark:bg-neutral-950">
-      <div className="mx-auto max-w-7xl px-6 pt-16 pb-5">
+      <div className="mx-auto max-w-7xl px-6 pt-5 sm:pt-16 pb-5">
         <div className="grid grid-cols-2 gap-5 sm:gap-12 md:grid-cols-3">
           {/* Brand / IDRA / Social */}
           <div className="col-span-2 md:col-span-1">
@@ -113,13 +113,13 @@ export default function Footer() {
 
             <div className="space-y-6">
               <div>
-                <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-[#00A67E]">
+                <p className="flex items-center gap-1.5 text-xs font-bold uppercase text-[#00A67E]">
                   <Mail className="h-3.5 w-3.5" />
                   Email
                 </p>
                 <Link
                   href={`mailto:${siteConfig.email}`}
-                  className="mt-1 block text-[15px] text-[#0B1F3A] hover:text-[#00A67E] dark:text-gray-300 dark:hover:text-[#00E0AE]"
+                  className="mt-1 block wrap-break-word text-[15px] text-[#0B1F3A] hover:text-[#00A67E] dark:text-gray-300 dark:hover:text-[#00E0AE]"
                 >
                   {siteConfig.email}
                 </Link>
@@ -153,7 +153,7 @@ export default function Footer() {
         </div>
 
         {/* Payment partners — static wrapping grid */}
-        <div className="mt-14 border-t border-black/5 pt-8 dark:border-white/10">
+        <div className="mt-5 sm:mt-14 border-t border-black/5 pt-8 dark:border-white/10">
           <Image
             src="/assets/payment/payment-logo.svg"
             alt="Payment Gateway Logo"
@@ -167,7 +167,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className="mt-8 border-t border-black/5 pt-6 text-center dark:border-white/10">
           <p className="text-sm text-gray-900 dark:text-gray-100">
-            © {new Date().getFullYear()} Surokkha Health. All Rights Reserved. Developed by <Link target="_blank" href={"https://dotskillsbd.com"}><span className="font-bold text-[#0F467C] dark:text-[#43B748]">Dotskills</span> </Link>.
+            © {new Date().getFullYear()} <span className="font-bold">Surokkha Health</span>. All Rights Reserved. Developed by <Link target="_blank" href={"https://dotskillsbd.com"}><span className="font-bold text-[#0F467C] dark:text-[#43B748]">Dotskills</span> </Link>.
           </p>
         </div>
       </div>

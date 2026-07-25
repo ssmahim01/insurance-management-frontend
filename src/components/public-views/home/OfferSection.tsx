@@ -138,6 +138,7 @@ import {
   Pill,
   ShoppingCart,
 } from "lucide-react";
+import { useInView } from "@/components/shared/useInView";
 
 const benefits = [
   {
@@ -185,27 +186,12 @@ const benefits = [
 ];
 
 export default function OfferSection() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.2 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  const { ref: sectionRef, isVisible: visible } = useInView({
+      threshold: 0.2,
+  });
 
   return (
-    <section className="bg-white py-16 dark:bg-neutral-950 sm:py-20">
+    <section ref={sectionRef} className="bg-white py-6 dark:bg-neutral-950 sm:py-20">
       <div className="mx-auto max-w-7xl px-6">
         <div
           className={`mx-auto max-w-2xl px-5 text-center transition-all duration-700 ease-out ${
