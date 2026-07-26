@@ -22,7 +22,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {children}
         <WhatsAppButton />
         <ScrollToTopButton />
-        <Footer />
+        {/* <Footer /> */}
 
       {/* <h2>Welcome to surokkha</h2> */}
  {/* <Image
