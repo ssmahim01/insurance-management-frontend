@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 "use client";
 
@@ -133,25 +134,39 @@ export function useZaynaxCall(jitsiContainerId: string) {
 
   // Actual Jitsi iframe creation. Only ever called from the effect once
   // the container element is confirmed to exist.
-  const createJitsiInstance = useCallback(
-    (roomId: string, containerEl: HTMLElement) => {
-      if (!window.JitsiMeetExternalAPI) {
-        setErrorMessage("Video call could not load, please refresh and try again.");
-        setStageBoth("error");
-        return;
-      }
+   const createJitsiInstance = useCallback(
+  (roomId: string, containerEl: HTMLElement) => {
+    if (!window.JitsiMeetExternalAPI) {
+      setErrorMessage("Video call could not load, please refresh and try again.");
+      setStageBoth("error");
+      return;
+    }
 
-      log("creating JitsiMeetExternalAPI for room:", roomId);
-      jitsiApiRef.current = new window.JitsiMeetExternalAPI("meet.zaynax.health", {
-        roomName: roomId,
-        parentNode: containerEl,
-        width: "100%",
-        height: "100%",
+    const api = new window.JitsiMeetExternalAPI("meet.zaynax.health", {
+      roomName: roomId,
+      parentNode: containerEl,
+      width: "100%",
+      height: "100%",
+    });
+    jitsiApiRef.current = api;
+    setStageBoth("in-call");
+
+    const handleCallEnded = () => {
+      log("Jitsi reported call ended (videoConferenceLeft/readyToClose)");
+      reportStatus(ConsultationStatus.COMPLETED, {
+        callEndedAt: new Date().toISOString(),
       });
-      setStageBoth("in-call");
-    },
-    [setStageBoth],
-  );
+      cleanupSocket("jitsi call ended");
+      setStageBoth("ended");
+      api.dispose();
+      jitsiApiRef.current = null;
+    };
+
+    api.addEventListener("videoConferenceLeft", handleCallEnded);
+    api.addEventListener("readyToClose", handleCallEnded);
+  },
+  [setStageBoth, reportStatus, cleanupSocket],
+);
 
   // Waits (polls via rAF) for the container element to exist in the DOM,
   // then creates the Jitsi instance. Bails out with an error after
@@ -278,6 +293,29 @@ export function useZaynaxCall(jitsiContainerId: string) {
     },
     [registerListeners],
   );
+
+
+
+useEffect(() => {
+  const handlePageHide = () => {
+    const s = sessionRef.current;
+    if (!s || stageRef.current !== "in-call") return;
+
+    const payload = JSON.stringify({
+      id: s.consultationId,
+      status: ConsultationStatus.COMPLETED,
+      callEndedAt: new Date().toISOString(),
+    });
+
+    navigator.sendBeacon?.(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/consultations/beacon-status`,
+      new Blob([payload], { type: "application/json" }),
+    );
+  };
+
+  window.addEventListener("pagehide", handlePageHide);
+  return () => window.removeEventListener("pagehide", handlePageHide);
+}, []);
 
   // Runs once an active-consultation check comes back — if there's
   // something to listen for, connect. No-ops otherwise.

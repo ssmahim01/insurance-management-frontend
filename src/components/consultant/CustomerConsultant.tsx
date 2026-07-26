@@ -30,7 +30,6 @@ import {
 
 import { useZaynaxCall } from "@/hooks/useZaynaxCall";
 import {
-  ConsultationStatus,
   IConsultation,
   useFetchPrescriptionMutation,
   useGetMyConsultationCountQuery,
@@ -86,65 +85,40 @@ function StatCard({ icon: Icon, value, label, gradient }: StatCardProps) {
 
 function PrescriptionCell({ consultation }: { consultation: IConsultation }) {
   const [fetchPrescription, { isLoading }] = useFetchPrescriptionMutation();
-  const [notReady, setNotReady] = useState(false);
 
-  if (consultation.prescriptionUrl) {
+  if (consultation.prescriptionStatus === "READY" && consultation.prescriptionUrl) {
     return (
-      <Button
-        size="sm"
-        className="gap-1.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white transition-all duration-200 ease-out hover:shadow-md hover:-translate-y-0.5 active:scale-95"
-      >
-        <a
-          href={consultation.prescriptionUrl}
-          className="flex gap-1 items-center"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Download className="w-3.5 h-3.5" />
-          Download Prescription
+      <Button size="sm" className="gap-1.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-95">
+        <a href={consultation.prescriptionUrl} target="_blank" rel="noopener noreferrer" className="flex gap-1 items-center">
+          <Download className="w-3.5 h-3.5" /> Download Prescription
         </a>
       </Button>
     );
   }
 
-  if (consultation.status !== ConsultationStatus.COMPLETED) {
+  if (consultation.prescriptionStatus === "PENDING") {
     return (
-      <span className="text-sm text-slate-400 dark:text-slate-600 italic">
-        —
+      <span className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
+        <Loader2 className="w-3.5 h-3.5 animate-spin" /> Syncing prescription...
       </span>
     );
   }
 
-  const handleClick = async () => {
-    setNotReady(false);
-    try {
-      const res = await fetchPrescription(consultation._id).unwrap();
-      if (!res.data.ready) setNotReady(true);
-    } catch {
-      setNotReady(true);
-    }
-  };
-
-  return (
-    <div className="space-y-1">
+  if (consultation.prescriptionStatus === "FAILED") {
+    return (
       <Button
-        type="button"
         size="sm"
         variant="outline"
-        onClick={handleClick}
         disabled={isLoading}
-        className="gap-1.5 rounded-full transition-all duration-200 ease-out hover:shadow-sm hover:-translate-y-0.5 active:scale-95"
+        onClick={() => fetchPrescription(consultation._id)}
+        className="gap-1.5 rounded-full transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5 active:scale-95"
       >
-        {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-        Get Prescription
+        {isLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />} Retry Sync
       </Button>
-      {notReady && (
-        <p className="text-xs text-slate-400 dark:text-slate-500">
-          Not ready yet, try again shortly.
-        </p>
-      )}
-    </div>
-  );
+    );
+  }
+
+  return <span className="text-sm text-slate-400 dark:text-slate-600 italic">—</span>;
 }
 
 function CustomerConsultant() {

@@ -27,6 +27,7 @@ export interface IConsultation {
   doctorName?: string;
   status: ConsultationStatus;
   failureReason?: string;
+  prescriptionStatus?: string;
   callStartedAt?: string;
   callEndedAt?: string;
   prescriptionUrl?: string;
