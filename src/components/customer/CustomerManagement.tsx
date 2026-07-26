@@ -657,8 +657,8 @@ export default function CustomerManagement() {
               <Crown className="w-4 h-4 text-slate-400 shrink-0" />
               {filterMode === "by_leader" && selectedLeaderId
                 ? (leadersData?.data ?? []).find(
-                    (l: IUser) => String(l._id) === selectedLeaderId,
-                  )?.name || "Leader"
+                  (l: IUser) => String(l._id) === selectedLeaderId,
+                )?.name || "Leader"
                 : "All Leaders"}
             </span>
           </SelectTrigger>
@@ -691,8 +691,8 @@ export default function CustomerManagement() {
               <UserCog className="w-4 h-4 text-slate-400 shrink-0" />
               {filterMode === "by_agent" && selectedAgentId
                 ? (agentsData?.data ?? []).find(
-                    (a: IUser) => String(a._id) === selectedAgentId,
-                  )?.name || "Agent"
+                  (a: IUser) => String(a._id) === selectedAgentId,
+                )?.name || "Agent"
                 : "All Agents"}
             </span>
           </SelectTrigger>
@@ -763,9 +763,9 @@ export default function CustomerManagement() {
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
         <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
           <ScrollArea className="w-full whitespace-nowrap">
-            <Table className="min-w-[1100px]">
+            <Table className="min-w-275">
               <TableHeader className="sticky top-0 z-10">
-                <TableRow className="border-none bg-gradient-to-r *:text-white from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
+                <TableRow className="border-none bg-linear-to-r *:text-white from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
                   <SortableTh field="name" label="Customer" />
                   <SortableTh field="phone" label="Phone" />
                   <SortableTh field="gender" label="Gender" />
@@ -831,11 +831,10 @@ hover:scale-[1.002]
 hover:bg-indigo-50
 dark:hover:bg-indigo-950/20
 
-${
-  index % 2 === 0
-    ? "bg-white dark:bg-background"
-    : "bg-gradient-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
-}
+${index % 2 === 0
+                            ? "bg-white dark:bg-background"
+                            : "bg-linear-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
+                          }
 `}
                       >
                         {/* Customer name */}

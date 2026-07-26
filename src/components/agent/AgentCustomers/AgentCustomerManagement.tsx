@@ -733,7 +733,7 @@ ${
                               >
                                 <PackageCheck className="w-3.5 h-3.5" />
                               </Button>
-                              <Button
+                              {/* <Button
                                 variant="outline"
                                 size="icon"
                                 className="h-8 w-8 transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5 active:scale-95"
@@ -741,7 +741,7 @@ ${
                                 onClick={() => openEditDialog(customer)}
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
-                              </Button>
+                              </Button> */}
                               {/* No Delete action: backend's deleteUser route does
                                 not currently authorize Role.AGENT. */}
                             </div>
