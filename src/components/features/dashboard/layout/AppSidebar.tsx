@@ -33,7 +33,7 @@ import { ChevronDown, LogOut, Settings, User } from "lucide-react";
 import { IUser } from "@/types/user.types";
 import { getDashboardNavigation } from "./navigation";
 import { Skeleton } from "@/components/ui/skeleton";
-
+import logo from "../../../../../public/assets/shurokkha-logo-1.png"
 export interface AppSidebarProps {
   user?: IUser | null;
   onLogout?: () => void;
@@ -77,13 +77,13 @@ function NavItemRow({ item, isActive }: { item: NavItem; isActive: boolean }) {
           "transition-all duration-200 ease-out",
           isActive
             ? cn(
-                "bg-linear-to-r from-indigo-500 to-blue-600 *:text-white font-bold shadow-md shadow-indigo-900/20",
-                "hover:from-indigo-600 hover:to-blue-700 hover:text-white",
-              )
+              "bg-linear-to-r from-indigo-500 to-blue-600 *:text-white font-bold shadow-md shadow-indigo-900/20",
+              "hover:from-indigo-600 hover:to-blue-700 hover:text-white",
+            )
             : cn(
-                "text-gray-600 hover:bg-blue-600 hover:text-white hover:shadow-sm",
-                "dark:text-gray-400 dark:hover:bg-blue-600 dark:hover:text-gray-100",
-              ),
+              "text-gray-600 hover:bg-blue-600 hover:text-white hover:shadow-sm",
+              "dark:text-gray-400 dark:hover:bg-blue-600 dark:hover:text-gray-100",
+            ),
         )}
       >
         <Link
@@ -201,24 +201,37 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
       {/* ── Header / Logo ── */}
       <SidebarHeader className="border-b border-gray-200/80 dark:border-gray-800 bg-gray-100 dark:bg-gray-950">
         <Link
-          href={"/"}
+          href="/"
           className="flex items-center py-1 group-data-[collapsible=icon]:justify-center"
         >
           <div
             className={cn(
-              "relative rounded-xl ring-1 ring-indigo-500/10 transition-all duration-200",
+              "flex items-center gap-1 rounded-xl ring-1 ring-indigo-500/10 transition-all duration-200",
               "bg-linear-to-br from-indigo-50 via-white to-blue-50 dark:from-indigo-950/30 dark:via-gray-900 dark:to-blue-950/20",
-              isCollapsed ? "h-9 w-9 ml-1" : "h-12 w-60 ml-2",
+              isCollapsed ? "h-9 w-9 ml-1 justify-center" : "h-12 w-60 ml-2 px-2"
             )}
           >
-            <Image
-              src="/assets/logo.svg"
-              alt="Shurokkha Logo"
-              fill
-              quality={90}
-              className="rounded-xl object-contain p-1"
-              priority
-            />
+            <div
+              className={cn(
+                "relative shrink-0",
+                isCollapsed ? "h-7 w-7" : "h-9 w-9"
+              )}
+            >
+              <Image
+                src={logo}
+                alt="Shurokkha Logo"
+                fill
+                quality={90}
+                className="object-contain"
+                priority
+              />
+            </div>
+
+            {!isCollapsed && (
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+                Surokkha Health
+              </h3>
+            )}
           </div>
         </Link>
       </SidebarHeader>

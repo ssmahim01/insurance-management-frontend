@@ -646,9 +646,9 @@ export default function AgentLeaderCustomerManagement() {
         <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
           <ScrollArea className="w-full whitespace-nowrap">
             <div className="overflow-x-auto">
-              <Table className="min-w-[1250px]">
+              <Table className="min-w-312.5">
                 <TableHeader className="sticky top-0 z-10">
-                  <TableRow className="border-none *:text-white bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
+                  <TableRow className="border-none *:text-white bg-linear-to-r from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
                     <SortableTh
                       field="name"
                       label="Customer"
@@ -752,7 +752,7 @@ export default function AgentLeaderCustomerManagement() {
                           ${
                             index % 2 === 0
                               ? "bg-white dark:bg-background"
-                              : "bg-gradient-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
+                              : "bg-linear-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
                           }
                           `}
                         >
@@ -766,7 +766,7 @@ export default function AgentLeaderCustomerManagement() {
                                   priority
                                   quality={90}
                                   alt={customer.name}
-                                  className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 via-blue-500 to-cyan-500 shadow-md flex items-center justify-center text-white font-bold"
+                                  className="w-10 h-10 rounded-full bg-linear-to-br from-indigo-500 via-blue-500 to-cyan-500 shadow-md flex items-center justify-center text-white font-bold"
                                 />
                               ) : (
                                 <div className="w-9 h-9 rounded-full bg-linear-to-br from-emerald-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
@@ -854,7 +854,7 @@ export default function AgentLeaderCustomerManagement() {
                               >
                                 <PackageCheck className="w-3.5 h-3.5" />
                               </Button>
-                              <Button
+                              {/* <Button
                                 variant="outline"
                                 size="icon"
                                 className="h-8 w-8 transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5 active:scale-95"
@@ -862,7 +862,7 @@ export default function AgentLeaderCustomerManagement() {
                                 onClick={() => openEditDialog(customer)}
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
-                              </Button>
+                              </Button> */}
                               <Button
                                 variant="destructive"
                                 size="icon"
