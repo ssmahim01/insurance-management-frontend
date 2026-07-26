@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 // export default CustomerConsultant;
 
@@ -35,7 +36,6 @@ import {
   useGetMyConsultationCountQuery,
   useGetMyConsultationsQuery,
 } from "@/redux/features/consultant/consultant.api";
-import { BackToDashboardSection } from "../shared/dashboard/BackToDashboardSection";
 
 function formatDateTime(iso?: string) {
   if (!iso) return "—";
@@ -200,7 +200,6 @@ function CustomerConsultant() {
     if (stage === "accepted" || stage === "in-call") {
       const el = document.getElementById("jitsi-call-container");
       if (!el) {
-        // eslint-disable-next-line no-console
         console.warn(
           "[CustomerConsultant] #jitsi-call-container not found in DOM at stage:",
           stage
@@ -428,8 +427,8 @@ active:scale-95
       </div>
 
       {/* ── Consultation history ── */}
-      <Card className="overflow-hidden rounded-2xl shadow-sm">
-        <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40">
+      <Card className="overflow-hidden rounded-2xl shadow-sm p-0">
+        <CardHeader className="border-b border-slate-100 dark:border-slate-900 bg-slate-50 dark:bg-slate-950">
           <CardTitle className="text-base font-bold text-slate-900 dark:text-white">
             Completed Video Consultations
           </CardTitle>
@@ -456,7 +455,7 @@ active:scale-95
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                    <TableRow className="bg-slate-100 dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900">
                       <TableHead className="whitespace-nowrap">#SN</TableHead>
                       <TableHead className="whitespace-nowrap">
                         Call Start Time
