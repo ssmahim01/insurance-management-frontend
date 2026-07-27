@@ -18,6 +18,7 @@ import {
   Undo2,
   LayoutGrid,
   Wallet,
+  Send,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -56,6 +57,7 @@ import { PaymentDetailsModal } from "./PaymentDetailsModal";
 import {
   useGetAllPaymentsQuery,
   useSoftDeletePaymentMutation,
+  useInitPaymentMutation,
   IPayment,
 } from "@/redux/features/payment/payment.api";
 import Link from "next/link";
@@ -386,7 +388,10 @@ export default function PaymentManagement() {
 
   const [softDeletePayment, { isLoading: isDeleting }] =
     useSoftDeletePaymentMutation();
+  const [initPayment, { isLoading: isInitiating }] =
+    useInitPaymentMutation();
 
+  const [initiatingId, setInitiatingId] = useState<string | null>(null);
   // ── derived ──
   const payments: IPayment[] = data?.data ?? [];
   const stats = data?.stats;
@@ -457,6 +462,29 @@ export default function PaymentManagement() {
   const openDeleteDialog = (p: IPayment) => {
     setDeletingPayment(p);
     setIsDeleteOpen(true);
+  };
+
+  const handleInitPayment = async (payment: IPayment) => {
+    if (!payment?._id) return;
+    try {
+      setInitiatingId(payment._id);
+
+      console.log("Payment ", payment)
+
+      const res = await initPayment(
+        (typeof payment.subscription === "string"
+          ? payment.subscription
+          : payment.subscription?._id) as string,
+      ).unwrap();
+      toast.success("Payment link generated and sent to customer");
+      refetch();
+    } catch (err: any) {
+      toast.error(
+        err?.data?.message || "Failed to generate payment link",
+      );
+    } finally {
+      setInitiatingId(null);
+    }
   };
 
   const handleDelete = async () => {
@@ -792,6 +820,23 @@ ${index % 2 === 0
                         {/* Actions */}
                         <TableCell>
                           <div className="flex gap-1.5 justify-end">
+                            {payment.status !== "PAID" && (
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8 text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700 dark:border-blue-800 dark:hover:bg-blue-950/30"
+                                title="Resend payment link"
+                                disabled={initiatingId === payment._id}
+                                onClick={() => handleInitPayment(payment)}
+                              >
+                                <Send
+                                  className={`w-3.5 h-3.5 ${initiatingId === payment._id
+                                    ? "animate-pulse"
+                                    : ""
+                                    }`}
+                                />
+                              </Button>
+                            )}
                             <Button
                               variant="outline"
                               size="icon"
