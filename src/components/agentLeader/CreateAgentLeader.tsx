@@ -42,6 +42,7 @@ const schema = z
       .email("Enter a valid email address")
       .optional()
       .or(z.literal("")),
+    employeeId: z.string().optional(),
     salary: z.preprocess(
       (val) => (val !== "" && val !== undefined ? Number(val) : undefined),
       z.number().min(0, "Must be 0 or more").optional(),
@@ -100,6 +101,7 @@ export function CreateAgentLeaderModal({ onSuccess }: Props) {
       name: "",
       phone: "",
       email: "",
+      employeeId: "",
       salary: undefined,
       salaryPerCustomer: undefined,
       division: "",
@@ -176,6 +178,7 @@ export function CreateAgentLeaderModal({ onSuccess }: Props) {
         name: data.name,
         phone: data.phone,
         ...(data.email && { email: data.email }),
+        ...(data.employeeId && { employeeId: data.employeeId }),
         password: data.password,
         role: "AGENT_LEADER",
         ...(data.salary !== undefined && { salary: String(data.salary) }),
@@ -278,28 +281,36 @@ export function CreateAgentLeaderModal({ onSuccess }: Props) {
                   )}
                 </div>
 
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label
-                    htmlFor="al-email"
-                    className="text-xs font-semibold tracking-widest uppercase"
-                  >
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                <div className="space-y-1.5 ">
+                  <Label htmlFor="a-email" className="text-xs font-semibold tracking-widest uppercase">
                     Email{" "}
-                    <span className="text-[#96999A] normal-case font-normal">
-                      (optional)
-                    </span>
+                    <span className="text-[#96999A] normal-case font-normal">(optional)</span>
                   </Label>
                   <Input
-                    id="al-email"
+                    id="a-email"
                     type="email"
                     placeholder="example@email.com"
                     {...register("email")}
                   />
-                  {errors.email && (
-                    <p className="text-xs text-red-400">
-                      {errors.email.message}
-                    </p>
+                  {errors.email && <p className="text-xs text-red-400">{errors.email.message}</p>}
+                </div>
+                <div className="space-y-1.5 ">
+                  <Label htmlFor="a-employee-id" className="text-xs font-semibold tracking-widest uppercase">
+                    Employee ID{" "}
+                    <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+                  </Label>
+                  <Input
+                    id="a-employee-id"
+                    placeholder="e.g. EMP-1024"
+                    {...register("employeeId")}
+                  />
+                  {errors.employeeId && (
+                    <p className="text-xs text-red-400">{errors.employeeId.message}</p>
                   )}
                 </div>
+
               </div>
             </div>
 
@@ -593,7 +604,7 @@ export function CreateAgentLeaderModal({ onSuccess }: Props) {
             <Button
               type="submit"
               disabled={isLoading}
-               className="group hover:cursor-pointer border-indigo-600 text-white w-full bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
+              className="group hover:cursor-pointer border-indigo-600 text-white w-full bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
             >
               {isLoading ? (
                 <span className="flex items-center gap-2">

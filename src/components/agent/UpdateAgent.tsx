@@ -44,6 +44,7 @@ const updateAgentSchema = z
       .email("Enter a valid email address")
       .optional()
       .or(z.literal("")),
+    employeeId: z.string().optional(),
     agentLeader: z.string().min(1, "Please select an Agent Leader"),
     isActive: z.nativeEnum(IsActive),
     salary: z.preprocess(
@@ -153,6 +154,7 @@ export function UpdateAgentModal({
         name: item.name ?? "",
         phone: item.phone ?? "",
         email: item.email ?? "",
+        employeeId: item.employeeId ?? "",
         agentLeader: String(leaderId),
         isActive: item.isActive ?? IsActive.ACTIVE,
         salary: item.salary ? Number(item.salary) : undefined,
@@ -251,6 +253,7 @@ export function UpdateAgentModal({
         name: data.name,
         phone: data.phone,
         ...(data.email && { email: data.email }),
+        ...(data.employeeId && { employeeId: data.employeeId }),
         agentLeader: data.agentLeader,
         isActive: data.isActive,
         ...(data.salary !== undefined && { salary: String(data.salary) }),
@@ -284,10 +287,10 @@ export function UpdateAgentModal({
 
   // Status label + styles for the select preview
   const STATUS_META: Record<IsActive, { label: string; dot: string }> = {
-    [IsActive.ACTIVE]:   { label: "Active",   dot: "bg-emerald-500" },
+    [IsActive.ACTIVE]: { label: "Active", dot: "bg-emerald-500" },
     [IsActive.INACTIVE]: { label: "Inactive", dot: "bg-slate-400" },
-    [IsActive.BLOCKED]:  { label: "Blocked",  dot: "bg-red-500" },
-    [IsActive.ALL]:      { label: "All",      dot: "bg-slate-400" },
+    [IsActive.BLOCKED]: { label: "Blocked", dot: "bg-red-500" },
+    [IsActive.ALL]: { label: "All", dot: "bg-slate-400" },
   };
 
   return (
@@ -316,7 +319,7 @@ export function UpdateAgentModal({
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 pt-1">
 
           {/* ── Personal Information ── */}
-          <div>
+          {/* <div>
             <p className="text-xs font-bold tracking-widest uppercase text-slate-400 mb-3">
               Personal Information
             </p>
@@ -359,8 +362,62 @@ export function UpdateAgentModal({
               </div>
 
             </div>
-          </div>
+          </div> */}
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            <div className="space-y-1.5">
+              <Label htmlFor="ua-name" className="text-xs font-semibold tracking-widest uppercase">
+                Full Name <span className="text-red-500">*</span>
+              </Label>
+              <Input id="ua-name" placeholder="e.g. Md. Rafiqul Islam" {...register("name")} />
+              {errors.name && (
+                <p className="text-xs text-red-400">{errors.name.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="ua-phone" className="text-xs font-semibold tracking-widest uppercase">
+                Phone Number <span className="text-red-500">*</span>
+              </Label>
+              <Input id="ua-phone" placeholder="01XXXXXXXXX" {...register("phone")} />
+              {errors.phone && (
+                <p className="text-xs text-red-400">{errors.phone.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="ua-email" className="text-xs font-semibold tracking-widest uppercase">
+                Email{" "}
+                <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+              </Label>
+              <Input
+                id="ua-email"
+                type="email"
+                placeholder="example@email.com"
+                {...register("email")}
+              />
+              {errors.email && (
+                <p className="text-xs text-red-400">{errors.email.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="ua-employee-id" className="text-xs font-semibold tracking-widest uppercase">
+                Employee ID{" "}
+                <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+              </Label>
+              <Input
+                id="ua-employee-id"
+                placeholder="e.g. EMP-1024"
+                {...register("employeeId")}
+              />
+              {errors.employeeId && (
+                <p className="text-xs text-red-400">{errors.employeeId.message}</p>
+              )}
+            </div>
+
+          </div>
           <Separator />
 
           {/* ── Assignment & Status ── */}
@@ -385,8 +442,8 @@ export function UpdateAgentModal({
                     <span className="text-sm">
                       {selectedLeader
                         ? (leadersData?.data ?? []).find(
-                            (l: IUser) => String(l._id) === selectedLeader,
-                          )?.name || "Select a leader"
+                          (l: IUser) => String(l._id) === selectedLeader,
+                        )?.name || "Select a leader"
                         : "Select a leader"}
                     </span>
                   </SelectTrigger>
@@ -715,7 +772,7 @@ export function UpdateAgentModal({
           <Button
             type="submit"
             disabled={isLoading}
-             className="group hover:cursor-pointer border-indigo-600 text-white w-full bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
+            className="group hover:cursor-pointer border-indigo-600 text-white w-full bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
           >
             {isLoading ? (
               <span className="flex items-center gap-2">

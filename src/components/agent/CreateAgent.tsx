@@ -40,6 +40,7 @@ const createAgentSchema = z
     name: z.string().min(2, "Name must be at least 2 characters").max(100),
     phone: z.string().min(11, "Enter a valid phone number").max(15),
     email: z.string().email("Enter a valid email address").optional().or(z.literal("")),
+    employeeId: z.string().optional(),
     agentLeader: z.string().min(1, "Please select an Agent Leader"),
     salary: z.preprocess(
       (val) => (val !== "" && val !== undefined ? Number(val) : undefined),
@@ -101,6 +102,7 @@ export function CreateAgentModal({ onSuccess }: CreateAgentModalProps) {
       name: "",
       phone: "",
       email: "",
+      employeeId: "",
       agentLeader: "",
       salary: undefined,
       salaryPerCustomer: undefined,
@@ -180,6 +182,7 @@ export function CreateAgentModal({ onSuccess }: CreateAgentModalProps) {
         name: data.name,
         phone: data.phone,
         ...(data.email && { email: data.email }),
+        ...(data.employeeId && { employeeId: data.employeeId }),
         password: data.password,
         role: "AGENT",
         agentLeader: data.agentLeader,
@@ -208,7 +211,7 @@ export function CreateAgentModal({ onSuccess }: CreateAgentModalProps) {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}   className="group hover:cursor-pointer border-indigo-600 text-white bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out">
+      <Button onClick={() => setOpen(true)} className="group hover:cursor-pointer border-indigo-600 text-white bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out">
         <Plus className="h-4 w-4" />
         Add Agent
       </Button>
@@ -260,7 +263,9 @@ export function CreateAgentModal({ onSuccess }: CreateAgentModalProps) {
                   {errors.phone && <p className="text-xs text-red-400">{errors.phone.message}</p>}
                 </div>
 
-                <div className="space-y-1.5 sm:col-span-2">
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                <div className="space-y-1.5 ">
                   <Label htmlFor="a-email" className="text-xs font-semibold tracking-widest uppercase">
                     Email{" "}
                     <span className="text-[#96999A] normal-case font-normal">(optional)</span>
@@ -272,6 +277,20 @@ export function CreateAgentModal({ onSuccess }: CreateAgentModalProps) {
                     {...register("email")}
                   />
                   {errors.email && <p className="text-xs text-red-400">{errors.email.message}</p>}
+                </div>
+                <div className="space-y-1.5 ">
+                  <Label htmlFor="a-employee-id" className="text-xs font-semibold tracking-widest uppercase">
+                    Employee ID{" "}
+                    <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+                  </Label>
+                  <Input
+                    id="a-employee-id"
+                    placeholder="e.g. EMP-1024"
+                    {...register("employeeId")}
+                  />
+                  {errors.employeeId && (
+                    <p className="text-xs text-red-400">{errors.employeeId.message}</p>
+                  )}
                 </div>
 
               </div>
@@ -297,8 +316,8 @@ export function CreateAgentModal({ onSuccess }: CreateAgentModalProps) {
                     <span className="text-sm">
                       {selectedLeader
                         ? (leadersData?.data ?? []).find(
-                            (l: IUser) => String(l._id) === selectedLeader,
-                          )?.name || "Select a leader"
+                          (l: IUser) => String(l._id) === selectedLeader,
+                        )?.name || "Select a leader"
                         : "Select a leader"}
                     </span>
                   </SelectTrigger>
@@ -582,7 +601,7 @@ export function CreateAgentModal({ onSuccess }: CreateAgentModalProps) {
             <Button
               type="submit"
               disabled={isLoading}
-               className="group hover:cursor-pointer border-indigo-600 text-white w-full bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
+              className="group hover:cursor-pointer border-indigo-600 text-white w-full bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
             >
               {isLoading ? (
                 <span className="flex items-center gap-2">

@@ -12,6 +12,10 @@ export function AgentActivityCard({ agent }: AgentActivityCardProps) {
   return (
     <DetailCard title="Activity" icon={Clock}>
       <DetailRow
+        label="Employee ID"
+        value={agent.employeeId || "—"}
+      />
+      <DetailRow
         label="Last Login"
         value={
           agent.lastLoginAt

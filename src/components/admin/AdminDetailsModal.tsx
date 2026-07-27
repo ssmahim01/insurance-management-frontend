@@ -21,6 +21,7 @@ import {
   Users,
   LogIn,
   User,
+  IdCard,
 } from "lucide-react";
 import { IsActive, IUser } from "@/types/user.types";
 
@@ -137,7 +138,7 @@ export function AdminDetailsModal({ open, onOpenChange, item }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto p-0">
+      <DialogContent className="sm:max-w-2xl scrollbar-none max-h-[90vh] overflow-y-auto p-0">
 
         {/* Header */}
         <div className="relative bg-linear-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 px-6 pt-8 pb-6 rounded-t-lg">
@@ -203,6 +204,7 @@ export function AdminDetailsModal({ open, onOpenChange, item }: Props) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field icon={Phone} label="Phone" value={item.phone} mono />
               <Field icon={Mail}  label="Email" value={item.email} />
+              <Field icon={IdCard}  label="Employee ID" value={item.employeeId} />
             </div>
           </div>
 

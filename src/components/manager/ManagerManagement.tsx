@@ -456,7 +456,7 @@ export default function ManagerManagement() {
             <Link href="/admin/dashboard/managers/trash">
               <Button
                 variant="default"
-               className="group hover:cursor-pointer border-rose-600 text-white bg-rose-700 hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
+                className="group hover:cursor-pointer border-rose-600 text-white bg-rose-700 hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 <span>Trash</span>
@@ -592,11 +592,13 @@ export default function ManagerManagement() {
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
         <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
           <ScrollArea className="w-full whitespace-nowrap">
-            <Table className="min-w-[1100px]">
+            <Table className="min-w-275">
               <TableHeader className="sticky top-0 z-10">
-                <TableRow className="border-none bg-gradient-to-r *:text-white from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
+                <TableRow className="border-none bg-linear-to-r *:text-white from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
                   <SortableTh field="name" label="Manager" />
                   <SortableTh field="phone" label="Phone" />
+                  <SortableTh field="phone" label="Phone" />
+                  <TableHead className="whitespace-nowrap">Employee ID</TableHead>
                   <TableHead className="whitespace-nowrap">
                     Created By
                   </TableHead>
@@ -658,11 +660,10 @@ hover:scale-[1.002]
 hover:bg-indigo-50
 dark:hover:bg-indigo-950/20
 
-${
-  index % 2 === 0
-    ? "bg-white dark:bg-background"
-    : "bg-gradient-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
-}
+${index % 2 === 0
+                            ? "bg-white dark:bg-background"
+                            : "bg-linear-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
+                          }
 `}
                       >
                         {/* Name + phone */}
@@ -694,7 +695,10 @@ ${
                         <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
                           {manager.phone ?? "—"}
                         </TableCell>
-
+                        {/* Agent Id  */}
+                        <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
+                          {manager.employeeId ?? "—"}
+                        </TableCell>
                         {/* Created By */}
                         <TableCell className="text-slate-600 dark:text-slate-400 text-sm">
                           {getCreatedByName(manager)}

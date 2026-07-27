@@ -41,6 +41,7 @@ const schema = z
       .email("Enter a valid email address")
       .optional()
       .or(z.literal("")),
+    employeeId: z.string().optional(),
     division: z.string().optional(),
     district: z.string().optional(),
     thana: z.string().optional(),
@@ -91,6 +92,7 @@ export function CreateAdminModal({ onSuccess }: Props) {
       name: "",
       phone: "",
       email: "",
+      employeeId: "",
       division: "",
       district: "",
       thana: "",
@@ -165,6 +167,7 @@ export function CreateAdminModal({ onSuccess }: Props) {
         name: data.name,
         phone: data.phone,
         ...(data.email && { email: data.email }),
+        ...(data.employeeId && { employeeId: data.employeeId }),
         password: data.password,
         role: "ADMIN",
         address: {
@@ -263,29 +266,37 @@ export function CreateAdminModal({ onSuccess }: Props) {
                   )}
                 </div>
 
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label
-                    htmlFor="ad-email"
-                    className="text-xs font-semibold tracking-widest uppercase"
-                  >
-                    Email{" "}
-                    <span className="text-[#96999A] normal-case font-normal">
-                      (optional)
-                    </span>
-                  </Label>
-                  <Input
-                    id="ad-email"
-                    type="email"
-                    placeholder="example@email.com"
-                    {...register("email")}
-                  />
-                  {errors.email && (
-                    <p className="text-xs text-red-400">
-                      {errors.email.message}
-                    </p>
-                  )}
-                </div>
               </div>
+                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                              <div className="space-y-1.5 ">
+                                <Label htmlFor="a-email" className="text-xs font-semibold tracking-widest uppercase">
+                                  Email{" "}
+                                  <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+                                </Label>
+                                <Input
+                                  id="a-email"
+                                  type="email"
+                                  placeholder="example@email.com"
+                                  {...register("email")}
+                                />
+                                {errors.email && <p className="text-xs text-red-400">{errors.email.message}</p>}
+                              </div>
+                              <div className="space-y-1.5 ">
+                                <Label htmlFor="a-employee-id" className="text-xs font-semibold tracking-widest uppercase">
+                                  Employee ID{" "}
+                                  <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+                                </Label>
+                                <Input
+                                  id="a-employee-id"
+                                  placeholder="e.g. EMP-1024"
+                                  {...register("employeeId")}
+                                />
+                                {errors.employeeId && (
+                                  <p className="text-xs text-red-400">{errors.employeeId.message}</p>
+                                )}
+                              </div>
+              
+                            </div>
             </div>
 
             <Separator />

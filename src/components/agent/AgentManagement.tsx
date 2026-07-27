@@ -638,12 +638,12 @@ export default function AgentManagement() {
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
         <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
           <ScrollArea className="w-full whitespace-nowrap">
-            <Table className="min-w-[1100px]">
+            <Table className="min-w-275">
               <TableHeader className="sticky top-0 z-10">
-                <TableRow className="border-none bg-gradient-to-r *:text-white from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
+                <TableRow className="border-none bg-linear-to-r *:text-white from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
                   <SortableTh field="name" label="Agent" />
                   <SortableTh field="phone" label="Phone" />
-                  <TableHead className="whitespace-nowrap">Agent ID</TableHead>
+                  <TableHead className="whitespace-nowrap">Employee ID</TableHead>
                   <TableHead className="whitespace-nowrap">
                     Agent Leader
                   </TableHead>
@@ -711,7 +711,7 @@ dark:hover:bg-indigo-950/20
 ${
   index % 2 === 0
     ? "bg-white dark:bg-background"
-    : "bg-gradient-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
+    : "bg-linear-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
 }
 `}
                       >
@@ -747,7 +747,7 @@ ${
 
                         {/* Agent Id  */}
                         <TableCell className="text-slate-600 dark:text-slate-400 font-mono text-sm">
-                          {agent.customId ?? "—"}
+                          {agent.employeeId ?? "—"}
                         </TableCell>
 
                         {/* Agent Leader */}
