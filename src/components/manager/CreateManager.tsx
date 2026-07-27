@@ -36,6 +36,7 @@ const schema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters").max(100),
     phone: z.string().min(11, "Enter a valid phone number").max(15),
+    employeeId: z.string().optional(),
     email: z
       .string()
       .email("Enter a valid email address")
@@ -89,6 +90,7 @@ export function CreateManagerModal({ onSuccess }: Props) {
     defaultValues: {
       name: "",
       phone: "",
+      employeeId: "",
       email: "",
       division: "",
       district: "",
@@ -162,6 +164,7 @@ export function CreateManagerModal({ onSuccess }: Props) {
         name: data.name,
         phone: data.phone,
         ...(data.email && { email: data.email }),
+        ...(data.employeeId && { employeeId: data.employeeId }),
         password: data.password,
         role: "MANAGER",
         address: {
@@ -187,7 +190,7 @@ export function CreateManagerModal({ onSuccess }: Props) {
     <>
       <Button
         onClick={() => setOpen(true)}
-          className="group hover:cursor-pointer border-indigo-600 text-white bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
+        className="group hover:cursor-pointer border-indigo-600 text-white bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
       >
         <Plus className="h-4 w-4" />
         Add Manager
@@ -259,29 +262,36 @@ export function CreateManagerModal({ onSuccess }: Props) {
                     </p>
                   )}
                 </div>
-
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label
-                    htmlFor="mg-email"
-                    className="text-xs font-semibold tracking-widest uppercase"
-                  >
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                <div className="space-y-1.5 ">
+                  <Label htmlFor="a-email" className="text-xs font-semibold tracking-widest uppercase">
                     Email{" "}
-                    <span className="text-[#96999A] normal-case font-normal">
-                      (optional)
-                    </span>
+                    <span className="text-[#96999A] normal-case font-normal">(optional)</span>
                   </Label>
                   <Input
-                    id="mg-email"
+                    id="a-email"
                     type="email"
                     placeholder="example@email.com"
                     {...register("email")}
                   />
-                  {errors.email && (
-                    <p className="text-xs text-red-400">
-                      {errors.email.message}
-                    </p>
+                  {errors.email && <p className="text-xs text-red-400">{errors.email.message}</p>}
+                </div>
+                <div className="space-y-1.5 ">
+                  <Label htmlFor="a-employee-id" className="text-xs font-semibold tracking-widest uppercase">
+                    Employee ID{" "}
+                    <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+                  </Label>
+                  <Input
+                    id="a-employee-id"
+                    placeholder="e.g. EMP-1024"
+                    {...register("employeeId")}
+                  />
+                  {errors.employeeId && (
+                    <p className="text-xs text-red-400">{errors.employeeId.message}</p>
                   )}
                 </div>
+
               </div>
             </div>
 
@@ -520,7 +530,7 @@ export function CreateManagerModal({ onSuccess }: Props) {
             <Button
               type="submit"
               disabled={isLoading}
-                className="group hover:cursor-pointer border-indigo-600 text-white w-full bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
+              className="group hover:cursor-pointer border-indigo-600 text-white w-full bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
             >
               {isLoading ? (
                 <span className="flex items-center gap-2">

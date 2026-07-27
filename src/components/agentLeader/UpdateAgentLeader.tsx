@@ -41,6 +41,7 @@ const schema = z
       .email("Enter a valid email address")
       .optional()
       .or(z.literal("")),
+    employeeId: z.string().optional(),
     isActive: z.nativeEnum(IsActive),
     salary: z.preprocess(
       (val) => (val !== "" && val !== undefined ? Number(val) : undefined),
@@ -91,10 +92,10 @@ interface Props {
 }
 
 const STATUS_META: Record<IsActive, { label: string; dot: string }> = {
-  [IsActive.ACTIVE]:   { label: "Active",   dot: "bg-emerald-500" },
+  [IsActive.ACTIVE]: { label: "Active", dot: "bg-emerald-500" },
   [IsActive.INACTIVE]: { label: "Inactive", dot: "bg-slate-400" },
-  [IsActive.BLOCKED]:  { label: "Blocked",  dot: "bg-red-500" },
-  [IsActive.ALL]:      { label: "All",      dot: "bg-slate-400" },
+  [IsActive.BLOCKED]: { label: "Blocked", dot: "bg-red-500" },
+  [IsActive.ALL]: { label: "All", dot: "bg-slate-400" },
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -136,6 +137,7 @@ export function UpdateAgentLeaderModal({ open, onOpenChange, item, onSuccess }: 
         name: item.name ?? "",
         phone: item.phone ?? "",
         email: item.email ?? "",
+        employeeId: item.employeeId ?? "",
         isActive: item.isActive ?? IsActive.ACTIVE,
         salary: item.salary ? Number(item.salary) : undefined,
         salaryPerCustomer: item.salaryPerCustomer ? Number(item.salaryPerCustomer) : undefined,
@@ -226,6 +228,7 @@ export function UpdateAgentLeaderModal({ open, onOpenChange, item, onSuccess }: 
         name: data.name,
         phone: data.phone,
         ...(data.email && { email: data.email }),
+        ...(data.employeeId && { employeeId: data.employeeId }),
         isActive: data.isActive,
         ...(data.salary !== undefined && { salary: String(data.salary) }),
         ...(data.salaryPerCustomer !== undefined && { salaryPerCustomer: String(data.salaryPerCustomer) }),
@@ -246,7 +249,7 @@ export function UpdateAgentLeaderModal({ open, onOpenChange, item, onSuccess }: 
       toast.success("Agent Leader updated successfully!");
       handleClose();
       onSuccess?.();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error?.data?.message || "Failed to update agent leader");
     }
@@ -294,13 +297,35 @@ export function UpdateAgentLeaderModal({ open, onOpenChange, item, onSuccess }: 
                 {errors.phone && <p className="text-xs text-red-400">{errors.phone.message}</p>}
               </div>
 
-              <div className="space-y-1.5 sm:col-span-2">
-                <Label htmlFor="ual-email" className="text-xs font-semibold tracking-widest uppercase">
+              <div className="space-y-1.5">
+                <Label htmlFor="ua-email" className="text-xs font-semibold tracking-widest uppercase">
                   Email{" "}
                   <span className="text-[#96999A] normal-case font-normal">(optional)</span>
                 </Label>
-                <Input id="ual-email" type="email" placeholder="example@email.com" {...register("email")} />
-                {errors.email && <p className="text-xs text-red-400">{errors.email.message}</p>}
+                <Input
+                  id="ua-email"
+                  type="email"
+                  placeholder="example@email.com"
+                  {...register("email")}
+                />
+                {errors.email && (
+                  <p className="text-xs text-red-400">{errors.email.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="ua-employee-id" className="text-xs font-semibold tracking-widest uppercase">
+                  Employee ID{" "}
+                  <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+                </Label>
+                <Input
+                  id="ua-employee-id"
+                  placeholder="e.g. EMP-1024"
+                  {...register("employeeId")}
+                />
+                {errors.employeeId && (
+                  <p className="text-xs text-red-400">{errors.employeeId.message}</p>
+                )}
               </div>
 
             </div>
@@ -564,7 +589,7 @@ export function UpdateAgentLeaderModal({ open, onOpenChange, item, onSuccess }: 
           <Button
             type="submit"
             disabled={isLoading}
-           className="group hover:cursor-pointer border-indigo-600 text-white bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white w-full duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
+            className="group hover:cursor-pointer border-indigo-600 text-white bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white w-full duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
           >
             {isLoading ? (
               <span className="flex items-center gap-2">

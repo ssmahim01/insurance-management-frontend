@@ -23,6 +23,7 @@ import {
   Users,
   LogIn,
   User,
+  IdCard,
 } from "lucide-react";
 import { IsActive, IUser } from "@/types/user.types";
 
@@ -92,12 +93,12 @@ const STATUS_CONFIG: Record<IsActive, { label: string; icon: React.ElementType; 
     icon: ShieldAlert,
     badge: "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400",
   },
-    [IsActive.ALL]: {
-      label: "All",
-      icon: ShieldCheck,
-      badge:
-        "border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
-    },
+  [IsActive.ALL]: {
+    label: "All",
+    icon: ShieldCheck,
+    badge:
+      "border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
+  },
 };
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -113,8 +114,8 @@ interface Props {
 export function AgentLeaderDetailsModal({ open, onOpenChange, item }: Props) {
   if (!item) return null;
 
-  const status     = (item.isActive as IsActive) ?? IsActive.INACTIVE;
-  const statusCfg  = STATUS_CONFIG[status] ?? STATUS_CONFIG[IsActive.INACTIVE];
+  const status = (item.isActive as IsActive) ?? IsActive.INACTIVE;
+  const statusCfg = STATUS_CONFIG[status] ?? STATUS_CONFIG[IsActive.INACTIVE];
   const StatusIcon = statusCfg.icon;
 
   const address = item.address;
@@ -202,9 +203,11 @@ export function AgentLeaderDetailsModal({ open, onOpenChange, item }: Props) {
           {/* Contact */}
           <div>
             <SectionTitle>Contact Information</SectionTitle>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field icon={Phone} label="Phone" value={item.phone} mono />
-              <Field icon={Mail}  label="Email" value={item.email} />
+              <Field icon={Mail} label="Email" value={item.email} />
+              <Field icon={IdCard} label="Employee ID" value={item.employeeId} mono />
             </div>
           </div>
 
@@ -264,7 +267,7 @@ export function AgentLeaderDetailsModal({ open, onOpenChange, item }: Props) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field icon={MapPin} label="Division" value={address?.division} />
                   <Field icon={MapPin} label="District" value={address?.district} />
-                  <Field icon={MapPin} label="Thana"    value={address?.thana} />
+                  <Field icon={MapPin} label="Thana" value={address?.thana} />
                   <Field icon={MapPin} label="Street" value={address?.street} />
                 </div>
                 <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
@@ -280,8 +283,8 @@ export function AgentLeaderDetailsModal({ open, onOpenChange, item }: Props) {
           <div>
             <SectionTitle>Account Details</SectionTitle>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field icon={User}         label="Role"         value="Agent Leader" />
-              <Field icon={CalendarDays} label="Joined"       value={formatDate(item.createdAt)} />
+              <Field icon={User} label="Role" value="Agent Leader" />
+              <Field icon={CalendarDays} label="Joined" value={formatDate(item.createdAt)} />
               <Field
                 icon={LogIn}
                 label="Last Login"

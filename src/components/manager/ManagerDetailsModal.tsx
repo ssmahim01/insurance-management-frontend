@@ -21,6 +21,7 @@ import {
     Users,
     LogIn,
     User,
+    IdCard,
 } from "lucide-react";
 import { IsActive, IUser } from "@/types/user.types";
 
@@ -204,6 +205,7 @@ export function ManagerDetailsModal({ open, onOpenChange, item }: Props) {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <Field icon={Phone} label="Phone" value={item.phone} mono />
                             <Field icon={Mail} label="Email" value={item.email} />
+                            <Field icon={IdCard} label="Employee ID" value={item.employeeId} mono />
                         </div>
                     </div>
 

@@ -40,6 +40,7 @@ const schema = z
       .email("Enter a valid email address")
       .optional()
       .or(z.literal("")),
+    employeeId: z.string().optional(),
     isActive: z.nativeEnum(IsActive),
     division: z.string().optional(),
     district: z.string().optional(),
@@ -82,10 +83,10 @@ interface Props {
 }
 
 const STATUS_META: Record<IsActive, { label: string; dot: string }> = {
-  [IsActive.ACTIVE]:   { label: "Active",   dot: "bg-emerald-500" },
+  [IsActive.ACTIVE]: { label: "Active", dot: "bg-emerald-500" },
   [IsActive.INACTIVE]: { label: "Inactive", dot: "bg-slate-400" },
-  [IsActive.BLOCKED]:  { label: "Blocked",  dot: "bg-red-500" },
-  [IsActive.ALL]:      { label: "All",      dot: "bg-slate-400" },
+  [IsActive.BLOCKED]: { label: "Blocked", dot: "bg-red-500" },
+  [IsActive.ALL]: { label: "All", dot: "bg-slate-400" },
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -125,6 +126,7 @@ export function UpdateManagerModal({ open, onOpenChange, item, onSuccess }: Prop
         name: item.name ?? "",
         phone: item.phone ?? "",
         email: item.email ?? "",
+        employeeId: item.employeeId ?? "",
         isActive: item.isActive ?? IsActive.ACTIVE,
         division: item.address?.division ?? "",
         district: item.address?.district ?? "",
@@ -211,6 +213,7 @@ export function UpdateManagerModal({ open, onOpenChange, item, onSuccess }: Prop
         name: data.name,
         phone: data.phone,
         ...(data.email && { email: data.email }),
+        ...(data.employeeId && { employeeId: data.employeeId }),
         isActive: data.isActive,
         address: {
           division: data.division || "",
@@ -229,7 +232,7 @@ export function UpdateManagerModal({ open, onOpenChange, item, onSuccess }: Prop
       toast.success("Manager updated successfully!");
       handleClose();
       onSuccess?.();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error?.data?.message || "Failed to update manager");
     }
@@ -277,13 +280,35 @@ export function UpdateManagerModal({ open, onOpenChange, item, onSuccess }: Prop
                 {errors.phone && <p className="text-xs text-red-400">{errors.phone.message}</p>}
               </div>
 
-              <div className="space-y-1.5 sm:col-span-2">
-                <Label htmlFor="umg-email" className="text-xs font-semibold tracking-widest uppercase">
+              <div className="space-y-1.5">
+                <Label htmlFor="ua-email" className="text-xs font-semibold tracking-widest uppercase">
                   Email{" "}
                   <span className="text-[#96999A] normal-case font-normal">(optional)</span>
                 </Label>
-                <Input id="umg-email" type="email" placeholder="example@email.com" {...register("email")} />
-                {errors.email && <p className="text-xs text-red-400">{errors.email.message}</p>}
+                <Input
+                  id="ua-email"
+                  type="email"
+                  placeholder="example@email.com"
+                  {...register("email")}
+                />
+                {errors.email && (
+                  <p className="text-xs text-red-400">{errors.email.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="ua-employee-id" className="text-xs font-semibold tracking-widest uppercase">
+                  Employee ID{" "}
+                  <span className="text-[#96999A] normal-case font-normal">(optional)</span>
+                </Label>
+                <Input
+                  id="ua-employee-id"
+                  placeholder="e.g. EMP-1024"
+                  {...register("employeeId")}
+                />
+                {errors.employeeId && (
+                  <p className="text-xs text-red-400">{errors.employeeId.message}</p>
+                )}
               </div>
 
             </div>
@@ -518,7 +543,7 @@ export function UpdateManagerModal({ open, onOpenChange, item, onSuccess }: Prop
           <Button
             type="submit"
             disabled={isLoading}
-              className="group hover:cursor-pointer border-indigo-600 text-white w-full bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
+            className="group hover:cursor-pointer border-indigo-600 text-white w-full bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
           >
             {isLoading ? (
               <span className="flex items-center gap-2">
