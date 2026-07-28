@@ -702,7 +702,7 @@ export function CreateSubscriptionModal({
       }}
     >
       <DialogTrigger>
-        <Button   className="group hover:cursor-pointer border-indigo-600 text-white bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out">
+        <Button   className="group hover:cursor-pointer border-indigo-600 text-white bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white cursor-pointer font-bold tracking-widest transition-all  uppercase disabled:opacity-60 hover:scale-103 ease-in-out">
           <Plus className="w-4 h-4" /> New Subscription / Customer
         </Button>
       </DialogTrigger>
