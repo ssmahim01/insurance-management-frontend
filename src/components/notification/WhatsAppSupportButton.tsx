@@ -4,7 +4,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const WHATSAPP_NUMBER = "8809610500599";
+const WHATSAPP_NUMBER = "01350775021";
 const DEFAULT_MESSAGE = "Hi, I need help with my account.";
 
 interface WhatsAppSupportButtonProps {
