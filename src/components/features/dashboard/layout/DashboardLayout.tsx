@@ -391,10 +391,10 @@ export function DashboardHeader({
               <NotificationBell role={role} viewAllHref={notificationsHref} />
             )}
 
-            <span
+            {/* <span
               aria-hidden
               className="hidden min-[400px]:block mx-0.5 h-5 w-px shrink-0 bg-gray-200 dark:bg-gray-700"
-            />
+            /> */}
 
             <Button
               variant="ghost"
