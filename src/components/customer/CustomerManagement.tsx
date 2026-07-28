@@ -1,3 +1,4 @@
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -19,6 +20,7 @@ import {
   UserCog,
   Crown,
   KeyRound,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -34,6 +36,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
@@ -41,6 +44,13 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -53,6 +63,9 @@ import {
   useGetAllCustomersQuery,
   useGetAgentCustomersQuery,
   useGetAgentLeaderCustomersQuery,
+  useLazyGetAllCustomersQuery,
+  useLazyGetAgentCustomersQuery,
+  useLazyGetAgentLeaderCustomersQuery,
   useDeleteUserMutation,
   useGetAllAgentsQuery,
   useGetAllAgentLeadersQuery,
@@ -73,6 +86,7 @@ import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 type SortField = "name" | "phone" | "isActive" | "createdAt" | "gender";
 type SortDir = "asc" | "desc" | null;
 type FilterMode = "all" | "by_agent" | "by_leader";
+type ExportScope = "selected" | "page" | "all";
 
 const STATUS_LABELS: Record<IsActive, string> = {
   [IsActive.ACTIVE]: "Active",
@@ -114,9 +128,75 @@ const formatDate = (iso?: string) => {
   });
 };
 
+// ── CSV export helpers ──────────────────────────────────────────────────────
+
+function escapeCsvField(field: unknown): string {
+  const str = field === null || field === undefined ? "" : String(field);
+  if (/[",\n]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+function buildCustomerCsvColumns(getAgentName: (c: IUser) => string) {
+  return [
+    { header: "Name", accessor: (c: IUser) => c.name ?? "" },
+    { header: "Phone", accessor: (c: IUser) => c.phone ?? "" },
+    { header: "Email", accessor: (c: IUser) => c.email ?? "" },
+    {
+      header: "Gender",
+      accessor: (c: IUser) => (c.gender ? GENDER_LABELS[c.gender] : ""),
+    },
+    { header: "NID", accessor: (c: IUser) => c.nid ?? "" },
+    { header: "Created By", accessor: (c: IUser) => getAgentName(c) },
+    { header: "Joined", accessor: (c: IUser) => formatDate(c.createdAt) },
+    {
+      header: "Last Login",
+      accessor: (c: IUser) =>
+        c.lastLoginAt ? formatDate(c.lastLoginAt) : "Never",
+    },
+    {
+      header: "Status",
+      accessor: (c: IUser) =>
+        STATUS_LABELS[c.isActive ?? IsActive.INACTIVE] ?? "Unknown",
+    },
+  ];
+}
+
+function buildCsv(
+  customers: IUser[],
+  getAgentName: (c: IUser) => string,
+): string {
+  const columns = buildCustomerCsvColumns(getAgentName);
+  const header = columns.map((col) => escapeCsvField(col.header)).join(",");
+  const rows = customers.map((c) =>
+    columns.map((col) => escapeCsvField(col.accessor(c))).join(","),
+  );
+  return [header, ...rows].join("\n");
+}
+
+// Prepend a UTF-8 BOM so Excel / Google Sheets render Bangla names & text
+// correctly instead of showing garbled characters.
+function downloadCsv(csvContent: string, filename: string) {
+  const blob = new Blob(["\uFEFF" + csvContent], {
+    type: "text/csv;charset=utf-8;",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 function CustomerRowSkeleton() {
   return (
     <TableRow>
+      <TableCell>
+        <Skeleton className="h-4 w-4" />
+      </TableCell>
       <TableCell>
         <div className="flex items-center gap-3">
           <Skeleton className="w-9 h-9 rounded-full shrink-0" />
@@ -283,32 +363,6 @@ function SortIcon({
   );
 }
 
-function SortableTh({
-  field,
-  label,
-  sortField,
-  sortDir,
-  handleSort,
-}: {
-  field: SortField;
-  label: string;
-  sortField: SortField | null;
-  sortDir: SortDir;
-  handleSort: (f: SortField) => void;
-}) {
-  return (
-    <TableHead
-      className="cursor-pointer select-none whitespace-nowrap"
-      onClick={() => handleSort(field)}
-    >
-      <span className="inline-flex items-center hover:text-slate-900 dark:hover:text-white transition-colors">
-        {label}
-        <SortIcon field={field} sortField={sortField} sortDir={sortDir} />
-      </span>
-    </TableHead>
-  );
-}
-
 export default function CustomerManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterMode, setFilterMode] = useState<FilterMode>("all");
@@ -326,6 +380,12 @@ export default function CustomerManagement() {
   // ── sort ──
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>(null);
+
+  // ── selection (kept as full records so it survives pagination) ──
+  const [selectedCustomers, setSelectedCustomers] = useState<
+    Map<string, IUser>
+  >(new Map());
+  const [isExporting, setIsExporting] = useState(false);
 
   // ── modals ──
   const [editingCustomer, setEditingCustomer] = useState<IUser | null>(null);
@@ -391,6 +451,12 @@ export default function CustomerManagement() {
   const { data, isLoading, refetch } = activeResult;
   const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
 
+  // ── lazy queries used only for "export all filtered" (fetches beyond the
+  // current page without disturbing the paginated view above) ──
+  const [triggerAllCustomers] = useLazyGetAllCustomersQuery();
+  const [triggerAgentCustomers] = useLazyGetAgentCustomersQuery();
+  const [triggerLeaderCustomers] = useLazyGetAgentLeaderCustomersQuery();
+
   // ── dropdown data ──
   const { data: agentsData } = useGetAllAgentsQuery({ limit: 200 });
   const { data: leadersData } = useGetAllAgentLeadersQuery({ limit: 100 });
@@ -436,6 +502,11 @@ export default function CustomerManagement() {
         : bVal.localeCompare(aVal);
     });
   }, [customers, sortField, sortDir]);
+
+  const selectedCount = selectedCustomers.size;
+  const isAllOnPageSelected =
+    sortedCustomers.length > 0 &&
+    sortedCustomers.every((c) => selectedCustomers.has(String(c._id)));
 
   // ── handlers ──
   const handleSort = (field: SortField) => {
@@ -498,6 +569,31 @@ export default function CustomerManagement() {
     }
   };
 
+  // ── selection handlers ──
+  const toggleSelectAllOnPage = (checked: boolean) => {
+    setSelectedCustomers((prev) => {
+      const next = new Map(prev);
+      sortedCustomers.forEach((c) => {
+        const id = String(c._id);
+        if (checked) next.set(id, c);
+        else next.delete(id);
+      });
+      return next;
+    });
+  };
+
+  const toggleSelectOne = (customer: IUser, checked: boolean) => {
+    setSelectedCustomers((prev) => {
+      const next = new Map(prev);
+      const id = String(customer._id);
+      if (checked) next.set(id, customer);
+      else next.delete(id);
+      return next;
+    });
+  };
+
+  const clearSelection = () => setSelectedCustomers(new Map());
+
   // ── sortable th ──
   const SortableTh = ({
     field,
@@ -524,6 +620,60 @@ export default function CustomerManagement() {
     return a.name ?? "—";
   };
 
+  // ── export ──
+  const fetchAllFilteredCustomers = async (): Promise<IUser[]> => {
+    const totalCount = meta?.total ?? customers.length;
+    const exportParams = { ...baseParams, page: 1, limit: totalCount || limit };
+
+    if (filterMode === "by_agent" && selectedAgentId) {
+      const res = await triggerAgentCustomers({
+        agentId: selectedAgentId,
+        params: exportParams,
+      }).unwrap();
+      return res.data ?? [];
+    }
+    if (filterMode === "by_leader" && selectedLeaderId) {
+      const res = await triggerLeaderCustomers({
+        agentLeaderId: selectedLeaderId,
+        params: exportParams,
+      }).unwrap();
+      return res.data ?? [];
+    }
+    const res = await triggerAllCustomers(exportParams).unwrap();
+    return res.data ?? [];
+  };
+
+  const handleExport = async (scope: ExportScope) => {
+    setIsExporting(true);
+    try {
+      let toExport: IUser[] = [];
+
+      if (scope === "selected") {
+        toExport = Array.from(selectedCustomers.values());
+      } else if (scope === "page") {
+        toExport = sortedCustomers;
+      } else {
+        toExport = await fetchAllFilteredCustomers();
+      }
+
+      if (toExport.length === 0) {
+        toast.error("No customers to export");
+        return;
+      }
+
+      const csv = buildCsv(toExport, getAgentName);
+      const stamp = new Date().toISOString().slice(0, 10);
+      downloadCsv(csv, `customers-${scope}-${stamp}.csv`);
+      toast.success(
+        `Exported ${toExport.length} customer${toExport.length !== 1 ? "s" : ""} to CSV`,
+      );
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to export customers");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -534,19 +684,103 @@ export default function CustomerManagement() {
           { label: "Customer Management" },
         ]}
         action={
-          <div className="flex items-center gap-2">
-            <Link href="/admin/dashboard/customers/trash">
-              <Button
-                variant="default"
-                className="group hover:cursor-pointer border-rose-600 text-white bg-rose-700 hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                <span>Trash</span>
-              </Button>
-            </Link>
+          // <div className="flex items-center justify-center gap-2">
+          //   <DropdownMenu>
+          //     <DropdownMenuTrigger>
+          //       <Button
+          //         variant="outline"
+          //         className="gap-2 h-8 cursor-pointer"
+          //         disabled={isExporting}
+          //       >
+          //         <Download className="h-4 w-4" />
+          //         {isExporting ? "Exporting..." : "Export"}
+          //       </Button>
+          //     </DropdownMenuTrigger>
+          //     <DropdownMenuContent align="end" className="w-64">
+          //       <DropdownMenuItem
+          //         className="cursor-pointer"
+          //         disabled={selectedCount === 0}
+          //         onClick={() => handleExport("selected")}
+          //       >
+          //         Export Selected ({selectedCount})
+          //       </DropdownMenuItem>
+          //       <DropdownMenuItem
+          //         className="cursor-pointer"
+          //         onClick={() => handleExport("page")}
+          //       >
+          //         Export This Page ({sortedCustomers.length})
+          //       </DropdownMenuItem>
+          //       <DropdownMenuSeparator />
+          //       <DropdownMenuItem
+          //         className="cursor-pointer"
+          //         onClick={() => handleExport("all")}
+          //       >
+          //         Export All Filtered ({meta?.total ?? 0})
+          //       </DropdownMenuItem>
+          //     </DropdownMenuContent>
+          //   </DropdownMenu>
 
-            <CreateSubscriptionModal onSuccess={refetch} />
-          </div>
+          //   <Link href="/admin/dashboard/customers/trash">
+          //     <Button
+          //       variant="default"
+          //       className="group hover:cursor-pointer border-rose-600 text-white bg-rose-700 hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
+          //     >
+          //       <Trash2 className="mr-2 h-4 w-4" />
+          //       <span>Trash</span>
+          //     </Button>
+          //   </Link>
+
+          //   <CreateSubscriptionModal onSuccess={refetch} />
+          // </div>
+
+          <div className="flex items-center gap-2">
+  <DropdownMenu>
+    <DropdownMenuTrigger>
+      <Button
+        variant="outline"
+        className="gap-2  cursor-pointer bg-green-500 text-white font-semibold hover:bg-green-600 hover:text-white hover:scale-105 transition-all "
+        disabled={isExporting}
+      >
+        <Download className="h-4 w-4" />
+        {isExporting ? "Exporting..." : "Export"}
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end" className="w-64">
+      <DropdownMenuItem
+        className="cursor-pointer"
+        disabled={selectedCount === 0}
+        onClick={() => handleExport("selected")}
+      >
+        Export Selected ({selectedCount})
+      </DropdownMenuItem>
+      <DropdownMenuItem
+        className="cursor-pointer"
+        onClick={() => handleExport("page")}
+      >
+        Export This Page ({sortedCustomers.length})
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem
+        className="cursor-pointer"
+        onClick={() => handleExport("all")}
+      >
+        Export All Filtered ({meta?.total ?? 0})
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+
+  <Link href="/admin/dashboard/customers/trash">
+    <Button
+      variant="default"
+      className="group hover:cursor-pointer transition-all  border-rose-600 text-white bg-rose-700 hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white cursor-pointer font-bold tracking-widest uppercase disabled:opacity-60 hover:scale-105 ease-in-out"
+    >
+      <Trash2 className="mr-2 h-4 w-4" />
+      <span>Trash</span>
+    </Button>
+  </Link>
+
+  <CreateSubscriptionModal onSuccess={refetch} />
+</div>
         }
       />
 
@@ -626,7 +860,7 @@ export default function CustomerManagement() {
       </div>
 
       {/* ── Search & Filters ── */}
-      <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
+      <div className="flex flex-col sm:flex-row gap-3 flex-wrap items-center">
         {/* Search */}
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -757,6 +991,20 @@ export default function CustomerManagement() {
             <X className="w-4 h-4" />
           </Button>
         )}
+
+        {selectedCount > 0 && (
+          <div className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/30 px-3 py-1.5 text-sm text-blue-700 dark:text-blue-300 shrink-0">
+            <span className="font-medium">{selectedCount} selected</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40"
+              onClick={clearSelection}
+            >
+              Clear
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* ── Table ── */}
@@ -766,6 +1014,16 @@ export default function CustomerManagement() {
             <Table className="min-w-275">
               <TableHeader className="sticky top-0 z-10">
                 <TableRow className="border-none bg-linear-to-r *:text-white from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
+                  <TableHead className="w-10">
+                    <Checkbox
+                      checked={isAllOnPageSelected}
+                      onCheckedChange={(checked) =>
+                        toggleSelectAllOnPage(!!checked)
+                      }
+                      aria-label="Select all on this page"
+                      className="border-white/70 data-[state=checked]:bg-white data-[state=checked]:text-blue-600"
+                    />
+                  </TableHead>
                   <SortableTh field="name" label="Customer" />
                   <SortableTh field="phone" label="Phone" />
                   <SortableTh field="gender" label="Gender" />
@@ -791,7 +1049,7 @@ export default function CustomerManagement() {
                   ))
                 ) : sortedCustomers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9}>
+                    <TableCell colSpan={10}>
                       <div className="flex flex-col items-center justify-center py-16 text-slate-400">
                         <Users className="w-12 h-12 mb-4 opacity-30" />
                         {searchTerm || hasActiveFilters ? (
@@ -819,9 +1077,13 @@ export default function CustomerManagement() {
                 ) : (
                   sortedCustomers.map((customer, index) => {
                     const status = customer.isActive ?? IsActive.INACTIVE;
+                    const isSelected = selectedCustomers.has(
+                      String(customer._id),
+                    );
                     return (
                       <TableRow
                         key={String(customer._id)}
+                        data-state={isSelected ? "selected" : undefined}
                         className={`
 border-b
 transition-all
@@ -830,13 +1092,26 @@ hover:shadow-sm
 hover:scale-[1.002]
 hover:bg-indigo-50
 dark:hover:bg-indigo-950/20
+${isSelected ? "bg-blue-50 dark:bg-blue-950/20" : ""}
 
-${index % 2 === 0
+${index % 2 === 0 && !isSelected
                             ? "bg-white dark:bg-background"
-                            : "bg-linear-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
+                            : !isSelected
+                              ? "bg-linear-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
+                              : ""
                           }
 `}
                       >
+                        {/* Select checkbox */}
+                        <TableCell>
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={(checked) =>
+                              toggleSelectOne(customer, !!checked)
+                            }
+                            aria-label={`Select ${customer.name}`}
+                          />
+                        </TableCell>
                         {/* Customer name */}
                         <TableCell>
                           <div className="flex items-center gap-3">

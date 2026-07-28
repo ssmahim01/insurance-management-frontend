@@ -335,18 +335,18 @@ export const userApi = baseApi.injectEndpoints({
 });
 
 export const {
-  // Create
   useCreateUserMutation,
-  // Profile
   useGetMeQuery,
   useUpdateProfileMutation,
-  // All staff
   useGetAllUsersQuery,
   useGetAllTrashUsersQuery,
-  // Role-specific (Admin / Super Admin)
   useGetAllAgentLeadersQuery,
   useGetAllAgentsQuery,
   useGetAllTrashAgentsQuery,
+  useLazyGetAllCustomersQuery,
+  useLazyGetAgentLeaderCustomersQuery,
+  useLazyGetAgentCustomersQuery,
+
   useGetAllAdminsQuery,
   useGetAllTrashAdminsQuery,
   useGetAllCustomersQuery,
