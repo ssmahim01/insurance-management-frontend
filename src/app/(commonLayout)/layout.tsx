@@ -22,17 +22,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {children}
         <WhatsAppButton />
         <ScrollToTopButton />
-        {/* <Footer /> */}
-
-      {/* <h2>Welcome to surokkha</h2> */}
- {/* <Image
-  className="w-full h-full cursor-pointer transition-transform duration-300 ease-out group-hover:scale-105 object-cover"
-  src="/assets/comming-soon-banner-image.png"
-  alt="Coming Soon"
-  width={1920}
-  height={400}
-  priority
-/> */}
+        <Footer />
     </ReduxProvider>
   );
 }
