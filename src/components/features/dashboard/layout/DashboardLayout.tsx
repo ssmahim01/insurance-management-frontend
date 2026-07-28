@@ -379,7 +379,12 @@ export function DashboardHeader({
                 narrow phone viewport; assumes WhatsAppSupportButton has no
                 independent responsive behavior of its own. */}
             <div className="hidden min-[400px]:block">
+
+             {
+              role === "CUSTOMER" && 
               <WhatsAppSupportButton />
+             }
+
             </div>
 
             {role === "CUSTOMER" && (
