@@ -16,12 +16,12 @@ export default function AnnouncementBar() {
           Our Health Plan just got better – more benefits at a new price!
         </p>
 
-        <Link
+        {/* <Link
           href="/products"
           className="shrink-0 rounded-full btn-bg px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-white transition-colors duration-300  sm:text-[13px]"
         >
           Click Here
-        </Link>
+        </Link> */}
 
         <button
           onClick={() => setVisible(false)}
