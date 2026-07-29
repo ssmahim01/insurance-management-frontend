@@ -10,7 +10,7 @@ type Role =
 export const getDashboardPath = (role?: Role | string): string => {
   switch (role) {
     case "SUPER_ADMIN":
-      return "/super-admin/dashboard";
+      return "/admin/dashboard";
     case "ADMIN":
       return "/admin/dashboard";
     case "MANAGER":
