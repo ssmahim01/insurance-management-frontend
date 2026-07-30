@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useInView } from "@/components/shared/useInView";
 import {
   ShieldCheck,
@@ -16,6 +17,8 @@ import {
   Scale,
   RefreshCcw,
   Gavel,
+  ChevronDown,
+  ChevronUp,
   type LucideIcon,
 } from "lucide-react";
 
@@ -204,6 +207,8 @@ const sections: TermSection[] = [
   },
 ];
 
+const INITIAL_COUNT = 6;
+
 function TermCard({ section, index }: { section: TermSection; index: number }) {
   const { ref, isVisible: visible } = useInView({ threshold: 0.1 });
   const Icon = section.icon;
@@ -211,7 +216,7 @@ function TermCard({ section, index }: { section: TermSection; index: number }) {
   return (
     <div
       ref={ref}
-      style={{ transitionDelay: visible ? `${(index % 4) * 80}ms` : "0ms" }}
+      style={{ transitionDelay: visible ? `${(index % 6) * 80}ms` : "0ms" }}
       className={`group relative overflow-hidden rounded-2xl border border-black/5 bg-white p-6 shadow-sm transition-all duration-700 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-black/5 dark:border-white/10 dark:bg-neutral-900 sm:p-7 ${
         visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
       }`}
@@ -244,10 +249,15 @@ export default function ProductTermsAndCondition() {
   const { ref: headerRef, isVisible: headerVisible } = useInView({
     threshold: 0.2,
   });
+  const [expanded, setExpanded] = useState(false);
+
+  const visibleSections = expanded
+    ? sections
+    : sections.slice(0, INITIAL_COUNT);
 
   return (
     <section className="bg-[#F7F9FC] py-16 dark:bg-neutral-950 sm:py-20">
-      <div className="mx-auto max-w-6xl px-5 sm:px-6">
+      <div className="mx-auto max-w-7xl px-5 sm:px-6">
         <div
           ref={headerRef}
           className={`mx-auto mb-14 max-w-2xl text-center transition-all duration-700 ease-out ${
@@ -271,10 +281,27 @@ export default function ProductTermsAndCondition() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {sections.map((section, index) => (
+          {visibleSections.map((section, index) => (
             <TermCard key={section.id} section={section} index={index} />
           ))}
         </div>
+
+        {sections.length > INITIAL_COUNT && (
+          <div className="mt-10 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setExpanded((prev) => !prev)}
+              className="inline-flex items-center gap-2 rounded-full border border-[#0B1F3A]/10 bg-white px-6 py-2.5 text-sm font-semibold text-[#0B1F3A] shadow-sm transition-all duration-300 hover:border-[#00A67E]/40 hover:bg-[#00A67E]/5 dark:border-white/10 dark:bg-neutral-900 dark:text-white dark:hover:bg-white/5"
+            >
+              {expanded ? "Show Less" : "Show More"}
+              {expanded ? (
+                <ChevronUp className="h-4 w-4 text-[#00A67E] dark:text-[#00E0AE]" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-[#00A67E] dark:text-[#00E0AE]" />
+              )}
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );
