@@ -81,8 +81,8 @@ export default function ProfilePage() {
                   <BadgeCheck className="h-3.5 w-3.5" />
                   {user.role?.replace(/_/g, " ")}
                 </span>
-                {user.customId && (
-                  <span className="text-xs text-white/70">ID: {user.customId}</span>
+                {user.employeeId && (
+                  <span className="text-xs text-white/70">ID: {user?.employeeId}</span>
                 )}
               </div>
             </div>

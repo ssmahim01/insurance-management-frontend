@@ -329,7 +329,7 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
                   <DropdownMenuItem className="gap-2 cursor-pointer text-sm">
                     <Link
                       className="flex items-center gap-2 cursor-pointer"
-                      href={`${role === "ADMIN" || role === "SUPER_ADMIN" ? "/admin/dashboard/profile" : role === "AGENT_LEADER" ? "/agent-leader/dashboard/profile" : role === "AGENT" ? "/agent/dashboard/profile" : role === "MANAGER" ? "/manager/dashboard/profile" : "/customer/dashboard/profile"}`}
+                      href={`${role === "ADMIN" || role === "SUPER_ADMIN" ? "/admin/dashboard/profile" : role === "AGENT_LEADER" ? "/agent-leader/dashboard/profile" : role === "AGENT" ? "/agent/dashboard/profile" : role === "MANAGER" ? "/manager/dashboard/profile": role === "A_A_MANAGER" ? "/a-a-manager/dashboard/profile" : "/customer/dashboard/profile"}`}
                     >
                       {" "}
                       <User className="h-3.5 w-3.5" /> Profile

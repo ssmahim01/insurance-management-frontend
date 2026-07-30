@@ -1,12 +1,7 @@
 import {
   Building2,
-  Handshake,
   LayoutDashboard,
   Package,
-  Settings,
-  ShieldCheck,
-  User,
-  Users,
 } from "lucide-react";
 import { NavGroup } from "@/types/dashboard";
 

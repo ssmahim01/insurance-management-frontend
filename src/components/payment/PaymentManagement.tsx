@@ -62,7 +62,6 @@ import {
 } from "@/redux/features/payment/payment.api";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
-import { Role } from "@/types/user.types";
 import { UpdatePaymentModal } from "./UpdatePaymentModal";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
@@ -70,14 +69,6 @@ import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 type SortField = "transactionId" | "amount" | "status" | "createdAt";
 type SortDir = "asc" | "desc" | null;
-// type StatusFilter =
-//   | "all"
-//   | "UNPAID"
-//   | "PAID"
-//   | "COMPLETED"
-//   | "FAILED"
-//   | "CANCELLED"
-//   | "REFUNDED";
 
 type StatusFilter =
   | "all"
@@ -88,6 +79,7 @@ type StatusFilter =
   | "CANCELLED"
   | "REFUND_PENDING"
   | "REFUNDED";
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const formatDate = (iso?: string) => {
@@ -386,6 +378,9 @@ export default function PaymentManagement() {
     ...(endDate && { endDate }),
   });
 
+  const userRole = user?.role;
+  console.log("User ", userRole)
+
   const [softDeletePayment, { isLoading: isDeleting }] =
     useSoftDeletePaymentMutation();
   const [initPayment, { isLoading: isInitiating }] =
@@ -531,15 +526,19 @@ export default function PaymentManagement() {
         ]}
         action={
           <div className="flex items-center gap-2">
-            <Link href="/admin/dashboard/payments/trash">
-              <Button
-                variant="default"
-                className="group hover:cursor-pointer border-rose-600 text-white bg-rose-700 hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                <span>Trash</span>
-              </Button>
-            </Link>
+
+            {
+              (userRole === "ADMIN" || userRole === "SUPER_ADMIN") &&
+              <Link href="/admin/dashboard/payments/trash">
+                <Button
+                  variant="default"
+                  className="group hover:cursor-pointer border-rose-600 text-white bg-rose-700 hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  <span>Trash</span>
+                </Button>
+              </Link>
+            }
           </div>
         }
       />
@@ -846,24 +845,31 @@ ${index % 2 === 0
                             >
                               <Eye className="w-3.5 h-3.5" />
                             </Button>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              title="Update status"
-                              onClick={() => openEditDialog(payment)}
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="icon"
-                              className="h-8 w-8"
-                              title="Delete payment"
-                              onClick={() => openDeleteDialog(payment)}
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
+
+                            {
+                              (userRole === "ADMIN" || userRole === "SUPER_ADMIN") &&
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8"
+                                title="Update status"
+                                onClick={() => openEditDialog(payment)}
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </Button>
+                            }
+                            {
+                              (userRole === "ADMIN" || userRole === "SUPER_ADMIN") &&
+                              <Button
+                                variant="destructive"
+                                size="icon"
+                                className="h-8 w-8"
+                                title="Delete payment"
+                                onClick={() => openDeleteDialog(payment)}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            }
                           </div>
                         </TableCell>
                       </TableRow>

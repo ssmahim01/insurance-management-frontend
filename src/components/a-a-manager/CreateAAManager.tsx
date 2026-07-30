@@ -62,7 +62,7 @@ interface Props {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function CreateManagerModal({ onSuccess }: Props) {
+export function CreateAAManagerModal({ onSuccess }: Props) {
   const [open, setOpen] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -166,7 +166,7 @@ export function CreateManagerModal({ onSuccess }: Props) {
         ...(data.email && { email: data.email }),
         ...(data.employeeId && { employeeId: data.employeeId }),
         password: data.password,
-        role: "MANAGER",
+        role: "A_A_MANAGER",
         address: {
           division: data.division || "",
           district: data.district || "",
@@ -178,11 +178,11 @@ export function CreateManagerModal({ onSuccess }: Props) {
       if (imageFile) formData.append("picture", imageFile);
 
       await createUser(formData).unwrap();
-      toast.success("Manager created successfully!");
+      toast.success("Assistant Area Manager created successfully!");
       handleClose();
       onSuccess?.();
     } catch (error: any) {
-      toast.error(error?.data?.message || "Failed to create manager");
+      toast.error(error?.data?.message || "Failed to create assistant area manager");
     }
   };
 
@@ -193,7 +193,7 @@ export function CreateManagerModal({ onSuccess }: Props) {
         className="group hover:cursor-pointer border-indigo-600 text-white bg-indigo-700 hover:bg-indigo-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
       >
         <Plus className="h-4 w-4" />
-        Add A.M. Partnerships
+        Add A.A. Manager
       </Button>
 
       <Dialog
@@ -209,10 +209,10 @@ export function CreateManagerModal({ onSuccess }: Props) {
               <ShieldCheck className="w-6 h-6 text-white" />
             </div>
             <DialogTitle className="text-xl font-bold tracking-widest uppercase">
-              Add New Manager
+              Add New A.A. Manager
             </DialogTitle>
             <DialogDescription className="text-[#96999A] text-sm tracking-wide">
-              Fill in the manager&apos;s information below
+              Fill in the a.a. managers information below
             </DialogDescription>
           </DialogHeader>
 
@@ -540,7 +540,7 @@ export function CreateManagerModal({ onSuccess }: Props) {
               ) : (
                 <span className="flex items-center gap-2">
                   <ShieldCheck className="h-4 w-4" />
-                  Create Manager
+                  Create A.A. Manager
                 </span>
               )}
             </Button>

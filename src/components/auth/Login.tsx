@@ -44,6 +44,9 @@ const redirectByRole = (
     case "Manager":
       router.push("/manager/dashboard");
       break;
+    case "A_A_MANAGER":
+      router.push("/a-a-manager/dashboard");
+      break;
     case "AGENT_LEADER":
       router.push("/agent-leader/dashboard");
       break;

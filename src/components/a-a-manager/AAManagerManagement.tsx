@@ -1,3 +1,4 @@
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -49,6 +50,7 @@ import {
 import {
   useGetAllManagersQuery,
   useDeleteUserMutation,
+  useGetAllAAManagersQuery,
 } from "@/redux/features/user/user.api";
 
 import { PageHeader } from "../shared/PageHeader";
@@ -57,10 +59,10 @@ import { IsActive, IUser, Role } from "@/types/user.types";
 import Link from "next/link";
 
 import { useUser } from "@/context/UserContext";
-import { CreateManagerModal } from "./CreateManager";
-import { UpdateManagerModal } from "./UpdateManager";
-import { ManagerDetailsModal } from "./ManagerDetailsModal";
+import { CreateAAManagerModal } from "./CreateAAManager";
+import { UpdateManagerModal } from "./UpdateAAManager";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { AAManagerDetailsModal } from "./AAManagerDetailsModal";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -105,7 +107,7 @@ const formatDate = (iso?: string) => {
 
 // ─── Skeleton Row ─────────────────────────────────────────────────────────────
 
-function ManagerRowSkeleton() {
+function AAManagerRowSkeleton() {
   return (
     <TableRow>
       <TableCell>
@@ -288,7 +290,7 @@ function SortIcon({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function ManagerManagement() {
+export default function AAManagerManagement() {
   // ── filters & pagination ──
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<IsActive | "all">("all");
@@ -317,7 +319,7 @@ export default function ManagerManagement() {
   }, [searchTerm, statusFilter]);
 
   // ── API ──
-  const { data, isLoading, refetch } = useGetAllManagersQuery({
+  const { data, isLoading, refetch } = useGetAllAAManagersQuery({
     searchTerm: searchTerm || undefined,
     isActive: statusFilter !== "all" ? statusFilter : undefined,
     page,
@@ -406,12 +408,12 @@ export default function ManagerManagement() {
     if (!deletingManager?._id) return;
     try {
       await deleteUser(String(deletingManager._id)).unwrap();
-      toast.success("Manager deleted successfully");
+      toast.success("A.A. Manager deleted successfully");
       setIsDeleteOpen(false);
       setDeletingManager(null);
       refetch();
     } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to delete manager");
+      toast.error(err?.data?.message || "Failed to delete A.A. Manager");
     }
   };
 
@@ -445,15 +447,15 @@ export default function ManagerManagement() {
     <div className="space-y-6">
       {/* Page Header */}
       <PageHeader
-        title="A.M.Partnerships Management"
-        description="Manage all assistant manager partnerships and monitor their activity"
+        title="A.A. Manager Assistant Area Management"
+        description="Manage all assistant area A.A. Managers and monitor their activity"
         breadcrumbs={[
           { label: "Dashboard", href: "/dashboard" },
-          { label: "Manager Management" },
+          { label: "A.A. Manager Management" },
         ]}
         action={
           <div className="flex items-center gap-2">
-            <Link href="/admin/dashboard/managers/trash">
+            <Link href="/admin/dashboard/a-a-managers/trash">
               <Button
                 variant="default"
                 className="group hover:cursor-pointer border-rose-600 text-white bg-rose-700 hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60 hover:scale-105 ease-in-out"
@@ -463,7 +465,7 @@ export default function ManagerManagement() {
               </Button>
             </Link>
 
-            <CreateManagerModal onSuccess={refetch} />
+            <CreateAAManagerModal onSuccess={refetch} />
           </div>
         }
       />
@@ -513,28 +515,28 @@ export default function ManagerManagement() {
         ) : (
           <>
             <StatCard
-              label="Total Managers"
+              label="Total A.A. Managers"
               value={stats?.total ?? 0}
               sub="registered in the system"
               icon={Users}
               color="blue"
             />
             <StatCard
-              label="Active Managers"
+              label="Active A.A. Managers"
               value={stats?.active ?? 0}
               sub={`${stats?.total ? Math.round(((stats?.active ?? 0) / stats.total) * 100) : 0}% of total`}
               icon={UserCheck}
               color="emerald"
             />
             <StatCard
-              label="Inactive Managers"
+              label="Inactive A.A. Managers"
               value={stats?.inactive ?? 0}
               sub="not currently active"
               icon={UserX}
               color="slate"
             />
             <StatCard
-              label="Blocked Managers"
+              label="Blocked A.A. Managers"
               value={stats?.blocked ?? 0}
               sub="access restricted"
               icon={ShieldAlert}
@@ -595,7 +597,7 @@ export default function ManagerManagement() {
             <Table className="min-w-275">
               <TableHeader className="sticky top-0 z-10">
                 <TableRow className="border-none bg-linear-to-r *:text-white from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
-                  <SortableTh field="name" label="Manager" />
+                  <SortableTh field="name" label="A.A. Manager" />
                   <SortableTh field="phone" label="Phone" />
                   <TableHead className="whitespace-nowrap">Employee ID</TableHead>
                   <TableHead className="whitespace-nowrap">
@@ -615,7 +617,7 @@ export default function ManagerManagement() {
               <TableBody>
                 {isLoading ? (
                   Array.from({ length: 6 }).map((_, i) => (
-                    <ManagerRowSkeleton key={i} />
+                    <AAManagerRowSkeleton key={i} />
                   ))
                 ) : sortedManagers.length === 0 ? (
                   <TableRow>
@@ -634,10 +636,10 @@ export default function ManagerManagement() {
                         ) : (
                           <>
                             <p className="text-base font-medium">
-                              No managers added yet
+                              No A.A. Managers added yet
                             </p>
                             <p className="text-sm mt-1">
-                              Click the Add Manager button to get started
+                              Click the Add A.A. Manager button to get started
                             </p>
                           </>
                         )}
@@ -751,7 +753,7 @@ ${index % 2 === 0
                               variant="outline"
                               size="icon"
                               className="h-8 w-8"
-                              title="Edit manager"
+                              title="Edit A.A. Manager"
                               onClick={() => openEditDialog(manager)}
                             >
                               <Edit2 className="w-3.5 h-3.5" />
@@ -760,7 +762,7 @@ ${index % 2 === 0
                               variant="destructive"
                               size="icon"
                               className="h-8 w-8"
-                              title="Delete manager"
+                              title="Delete A.A. Manager"
                               onClick={() => openDeleteDialog(manager)}
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -791,7 +793,7 @@ ${index % 2 === 0
               <span className="font-semibold text-slate-700 dark:text-slate-300">
                 {sortedManagers.length}
               </span>{" "}
-              manager{sortedManagers.length !== 1 ? "s" : ""}
+              A.A. Manager{sortedManagers.length !== 1 ? "s" : ""}
               {hasActiveFilters && " (filtered)"}
             </p>
             {totalPage > 1 && (
@@ -813,7 +815,7 @@ ${index % 2 === 0
         />
       )}
       {viewingManager && (
-        <ManagerDetailsModal
+        <AAManagerDetailsModal
           open={isDetailsOpen}
           onOpenChange={setIsDetailsOpen}
           item={viewingManager}
@@ -824,7 +826,7 @@ ${index % 2 === 0
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Manager</AlertDialogTitle>
+            <AlertDialogTitle>Delete A.A. Manager</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete{" "}
               <strong>{deletingManager?.name}</strong>? This action cannot be

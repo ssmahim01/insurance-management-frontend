@@ -4,7 +4,8 @@ import type { IPopulatedAgentLeader, IPopulatedCreatedBy } from "@/types/user.ty
 const ROLE_LABELS: Record<Role, string> = {
   [Role.SUPER_ADMIN]: "Super Admin",
   [Role.ADMIN]: "Admin",
-  [Role.MANAGER]: "Manager",
+  [Role.MANAGER]: "A.M - Partnerships",
+  [Role.A_A_MANAGER]: "A.A. Manager",
   [Role.AGENT_LEADER]: "Agent Leader",
   [Role.AGENT]: "Agent",
   [Role.CUSTOMER]: "Customer",
