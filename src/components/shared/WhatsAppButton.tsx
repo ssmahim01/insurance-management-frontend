@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { MessageCircle } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 
 export default function WhatsAppButton({
-  phoneNumber = "8801722947932",
+  phoneNumber = "01350775021",
   message = "Hi! I'd like to know more.",
 }: {
   /** WhatsApp number with country code, no + or spaces, e.g. "8801722947932" */

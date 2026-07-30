@@ -203,7 +203,7 @@ function PlanCard({ plan }: { plan: Plan }) {
 export default function PlansSection() {
   const { ref: sectionRef, isVisible: visible } = useInView({
     threshold: 0.1,
-  });
+  }); 
 
   return (
     <section ref={sectionRef} className="bg-[#EFF4FA] py-6 dark:bg-neutral-950 sm:py-20">
