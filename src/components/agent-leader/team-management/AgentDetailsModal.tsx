@@ -101,7 +101,7 @@ export function AgentDetailsModal({ open, onOpenChange, item }: AgentDetailsModa
               {item.name}
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-              {item.customId ?? "—"}
+              {item?.employeeId ?? "—"}
             </p>
             <div className="mt-1">
               <AgentStatusBadge status={item.isActive ?? IsActive.ALL} />

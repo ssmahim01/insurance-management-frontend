@@ -17,9 +17,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <ReduxProvider>
       <Navbar />
         {children}
+        <WhatsAppButton />
+        <ScrollToTopButton />
+        {/* <Footer /> */}
       <WhatsAppButton />
       <ScrollToTopButton />
-      <Footer />
+      {/* <Footer /> */}
     </ReduxProvider>
   );
 }

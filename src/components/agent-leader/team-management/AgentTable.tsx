@@ -184,7 +184,7 @@ export function AgentTable({
                 </TableCell>
                 <TableCell>
                   <div className="text-sm">
-                    <p className="text-foreground">{agent.customId}</p>
+                    <p className="text-foreground">{agent?.employeeId}</p>
                   </div>
                 </TableCell>
                 <TableCell>

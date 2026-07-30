@@ -68,8 +68,14 @@ export const adminNavigation: NavGroup[] = [
     items: [
       {
         id: "managers",
-        label: "Managers",
+        label: "A.M - Partnerships",
         href: "/admin/dashboard/managers",
+        icon: Users,
+      },
+       {
+        id: "a-a-managers",
+        label: "A.A. Managers",
+        href: "/admin/dashboard/a-a-managers",
         icon: Users,
       },
       {

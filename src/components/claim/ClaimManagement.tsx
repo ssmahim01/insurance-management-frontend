@@ -84,10 +84,10 @@ const formatDate = (iso?: string | Date) => {
 };
 
 const getCustomerName = (claim: IClaim) =>
-  typeof claim.customer === "object" ? claim.customer.name : "—";
+  typeof claim.customer === "object" ? claim?.customer?.name : "—";
 
 const getCustomerPhone = (claim: IClaim) =>
-  typeof claim.customer === "object" ? claim.customer.phone : "—";
+  typeof claim.customer === "object" ? claim?.customer?.phone : "—";
 
 // ─── Skeletons ────────────────────────────────────────────────────────────────
 
@@ -187,7 +187,7 @@ function StatCard({
   const c = STAT_COLOR_MAP[color];
   return (
     <div
-      className={`group relative overflow-hidden rounded-xl bg-gradient-to-br ${c.gradient} p-5 shadow-lg ${c.shadow} transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5`}
+      className={`group relative overflow-hidden rounded-xl bg-linear-to-br ${c.gradient} p-5 shadow-lg ${c.shadow} transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5`}
     >
       {/* Decorative wash */}
       <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-xl transition-opacity duration-300 group-hover:opacity-80" />
@@ -292,6 +292,7 @@ export default function ClaimManagement() {
 
   const claims: IClaim[] = data?.data ?? [];
   const stats = data?.stats;
+
   const meta = data?.meta;
   const totalPage = meta?.totalPage ?? 1;
 
@@ -519,9 +520,9 @@ export default function ClaimManagement() {
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
         <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
           <ScrollArea className="w-full whitespace-nowrap">
-            <Table className="min-w-[1100px]">
+            <Table className="min-w-275">
               <TableHeader className="sticky top-0 z-10">
-                <TableRow className="border-none bg-gradient-to-r *:text-white from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
+                <TableRow className="border-none bg-linear-to-r *:text-white from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
                   <SortableTh field="serviceTitle" label="Service" />
                   <TableHead className="whitespace-nowrap">Customer</TableHead>
                   <TableHead className="whitespace-nowrap">
@@ -583,7 +584,7 @@ dark:hover:bg-indigo-950/20
 ${
   index % 2 === 0
     ? "bg-white dark:bg-background"
-    : "bg-gradient-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
+    : "bg-linear-to-r from-slate-50 to-indigo-50/40 dark:from-slate-950 dark:to-indigo-950/10"
 }
 `}
                     >

@@ -52,7 +52,7 @@ export function AgentCard({ agent, onViewDetails, onDelete }: AgentCardProps) {
               {agent.name}
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-              {agent.customId ?? "—"}
+              {agent?.employeeId ?? "—"}
             </p>
           </div>
         </div>

@@ -29,6 +29,11 @@ export const managerRoutes: RouteConfig = {
   patterns: [/^\/manager\/dashboard/],
 };
 
+export const a_a_managerRoutes: RouteConfig = {
+  exact: [],
+  patterns: [/^\/a-a-manager\/dashboard/],
+};
+
 export const agentLeaderRoutes: RouteConfig = {
   exact: [],
   patterns: [/^\/agent-leader\/dashboard/],
@@ -63,6 +68,7 @@ export const getRouteOwner = (pathname: string): UserRole | null => {
   if (isRouteMatches(pathname, superAdminOnlyRoutes)) return Role.SUPER_ADMIN;
   if (isRouteMatches(pathname, adminRoutes)) return Role.ADMIN;
   if (isRouteMatches(pathname, managerRoutes)) return Role.MANAGER;
+  if (isRouteMatches(pathname, a_a_managerRoutes)) return Role.A_A_MANAGER;
   if (isRouteMatches(pathname, agentLeaderRoutes)) return Role.AGENT_LEADER;
   if (isRouteMatches(pathname, agentRoutes)) return Role.AGENT;
   if (isRouteMatches(pathname, customerRoutes)) return Role.CUSTOMER;

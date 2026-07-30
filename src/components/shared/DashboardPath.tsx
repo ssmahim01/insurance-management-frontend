@@ -15,6 +15,8 @@ export const getDashboardPath = (role?: Role | string): string => {
       return "/admin/dashboard";
     case "MANAGER":
       return "/manager/dashboard";
+    case "A_A_MANAGER":
+      return "/a-a-manager/dashboard";
     case "AGENT_LEADER":
       return "/agent-leader/dashboard";
     case "AGENT":

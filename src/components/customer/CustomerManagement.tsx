@@ -82,6 +82,7 @@ import { CreateSubscriptionModal } from "../subscription/CreateSubscriptionModal
 import Link from "next/link";
 import Image from "next/image";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { useUser } from "@/context/UserContext";
 
 type SortField = "name" | "phone" | "isActive" | "createdAt" | "gender";
 type SortDir = "asc" | "desc" | null;
@@ -399,6 +400,10 @@ export default function CustomerManagement() {
   const [isSubscriptionsOpen, setIsSubscriptionsOpen] = useState(false);
   const [passwordCustomer, setPasswordCustomer] = useState<IUser | null>(null);
   const [isPasswordOpen, setIsPasswordOpen] = useState(false);
+
+  const { user } = useUser();
+
+  const userRole = user?.role;
 
   // ── reset page on filter change ──
   useEffect(() => {
@@ -734,53 +739,58 @@ export default function CustomerManagement() {
           // </div>
 
           <div className="flex items-center gap-2">
-  <DropdownMenu>
-    <DropdownMenuTrigger>
-      <Button
-        variant="outline"
-        className="gap-2  cursor-pointer bg-green-500 text-white font-semibold hover:bg-green-600 hover:text-white hover:scale-105 transition-all "
-        disabled={isExporting}
-      >
-        <Download className="h-4 w-4" />
-        {isExporting ? "Exporting..." : "Export"}
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent align="end" className="w-64">
-      <DropdownMenuItem
-        className="cursor-pointer"
-        disabled={selectedCount === 0}
-        onClick={() => handleExport("selected")}
-      >
-        Export Selected ({selectedCount})
-      </DropdownMenuItem>
-      <DropdownMenuItem
-        className="cursor-pointer"
-        onClick={() => handleExport("page")}
-      >
-        Export This Page ({sortedCustomers.length})
-      </DropdownMenuItem>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem
-        className="cursor-pointer"
-        onClick={() => handleExport("all")}
-      >
-        Export All Filtered ({meta?.total ?? 0})
-      </DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button
+                  variant="outline"
+                  className="gap-2  cursor-pointer bg-green-500 text-white font-semibold hover:bg-green-600 hover:text-white hover:scale-105 transition-all "
+                  disabled={isExporting}
+                >
+                  <Download className="h-4 w-4" />
+                  {isExporting ? "Exporting..." : "Export"}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  disabled={selectedCount === 0}
+                  onClick={() => handleExport("selected")}
+                >
+                  Export Selected ({selectedCount})
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => handleExport("page")}
+                >
+                  Export This Page ({sortedCustomers.length})
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => handleExport("all")}
+                >
+                  Export All Filtered ({meta?.total ?? 0})
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-  <Link href="/admin/dashboard/customers/trash">
-    <Button
-      variant="default"
-      className="group hover:cursor-pointer transition-all  border-rose-600 text-white bg-rose-700 hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white cursor-pointer font-bold tracking-widest uppercase disabled:opacity-60 hover:scale-105 ease-in-out"
-    >
-      <Trash2 className="mr-2 h-4 w-4" />
-      <span>Trash</span>
-    </Button>
-  </Link>
+            {
+              (userRole === "ADMIN" || userRole === "SUPER_ADMIN") && <Link href="/admin/dashboard/customers/trash">
+                <Button
+                  variant="default"
+                  className="group hover:cursor-pointer transition-all  border-rose-600 text-white bg-rose-700 hover:bg-rose-800 hover:shadow-xl hover:text-white duration-500 dark:text-white cursor-pointer font-bold tracking-widest uppercase disabled:opacity-60 hover:scale-105 ease-in-out"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  <span>Trash</span>
+                </Button>
+              </Link>
+            }
 
-  <CreateSubscriptionModal onSuccess={refetch} />
-</div>
+            {
+              (userRole === "ADMIN" || userRole === "SUPER_ADMIN") &&
+              <CreateSubscriptionModal onSuccess={refetch} />
+            }
+          </div>
         }
       />
 
@@ -1208,6 +1218,11 @@ ${index % 2 === 0 && !isSelected
                             >
                               <PackageCheck className="w-3.5 h-3.5" />
                             </Button>
+                            {
+
+                              (userRole === "ADMIN" || userRole === "SUPER_ADMIN") &&
+
+                              <>
                             <Button
                               variant="outline"
                               size="icon"
@@ -1217,24 +1232,26 @@ ${index % 2 === 0 && !isSelected
                             >
                               <KeyRound className="w-3.5 h-3.5" />
                             </Button>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              title="Edit customer"
-                              onClick={() => openEditDialog(customer)}
-                            >
-                              <Edit2 className="w-3.5 h-3.5" />
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="icon"
-                              className="h-8 w-8"
-                              title="Delete customer"
-                              onClick={() => openDeleteDialog(customer)}
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  title="Edit customer"
+                                  onClick={() => openEditDialog(customer)}
+                                >
+                                  <Edit2 className="w-3.5 h-3.5" />
+                                </Button>
+                                <Button
+                                  variant="destructive"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  title="Delete customer"
+                                  onClick={() => openDeleteDialog(customer)}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </>
+                            }
                           </div>
                         </TableCell>
                       </TableRow>

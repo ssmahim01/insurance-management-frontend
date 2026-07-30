@@ -152,6 +152,31 @@ export const userApi = baseApi.injectEndpoints({
       }),
       providesTags: ["USERS"],
     }),
+// Super Admin — get all managers
+    getAllAAManagers: builder.query<
+      IUserListResponse,
+      GetUsersParams | undefined
+    >({
+      query: (params) => ({
+        url: "/user/all-a-a-managers",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["USERS"],
+    }),
+
+    // Super Admin — get all soft-deleted managers
+    getAllTrashAAManagers: builder.query<
+      IUserListResponse,
+      GetUsersParams | undefined
+    >({
+      query: (params) => ({
+        url: "/user/all-trash-a-a-managers",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["USERS"],
+    }),
 
     // Super Admin / Admin — get all customers
     getAllCustomers: builder.query<
@@ -352,6 +377,8 @@ export const {
   useGetAllCustomersQuery,
   useGetAllManagersQuery,
   useGetAllTrashManagersQuery,
+  useGetAllAAManagersQuery,
+  useGetAllTrashAAManagersQuery,
   // Role-specific (Admin / Super Admin)
   // Agent Leader — own resources
   useGetMyAgentsQuery,
