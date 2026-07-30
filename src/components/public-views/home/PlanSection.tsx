@@ -7,7 +7,7 @@ import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import Link from "next/link";
+import Link, { LinkProps } from "next/link";
 
 interface Plan {
   id: number;
@@ -20,7 +20,7 @@ interface Plan {
   features: string[];
   perfectFor: string;
   cta: string;
-  href: string;
+  href: LinkProps["href"];
 }
 
 const plans: Plan[] = [
@@ -44,7 +44,12 @@ const plans: Plan[] = [
     ],
     perfectFor: "Students, young professionals and first-time buyers",
     cta: "Learn More",
-    href: "/products",
+      href: {
+      pathname: "/products",
+      query: {
+        plan: "basic",
+      },
+    },
   },
   {
     id: 2,
@@ -65,7 +70,12 @@ const plans: Plan[] = [
     ],
     perfectFor: "Working professionals and growing families",
     cta: "Learn More",
-    href: "/products",
+    href: {
+      pathname: "/products",
+      query: {
+        plan: "plus",
+      },
+    },
   },
   {
     id: 3,
@@ -88,7 +98,12 @@ const plans: Plan[] = [
     ],
     perfectFor: "Families seeking balanced healthcare and financial security",
     cta: "Learn More",
-    href: "/products",
+     href: {
+      pathname: "/products",
+      query: {
+        plan: "standard",
+      },
+    },
   },
   {
     id: 4,
@@ -111,7 +126,12 @@ const plans: Plan[] = [
     ],
     perfectFor: "Health-conscious individuals who value preventive care",
     cta: "Learn More",
-    href: "/products",
+    href: {
+      pathname: "/products",
+      query: {
+        plan: "smart",
+      },
+    },
   },
   {
     id: 5,
@@ -135,7 +155,12 @@ const plans: Plan[] = [
     ],
     perfectFor: "Individuals and families seeking the highest level of protection",
     cta: "Get Started",
-    href: "/products",
+    href: {
+      pathname: "/products",
+      query: {
+        plan: "360",
+      },
+    },
   },
 ];
 
