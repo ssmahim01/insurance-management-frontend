@@ -2,6 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useInView } from "@/components/shared/useInView";
+import { ArrowRight } from "lucide-react";
 
 interface NewsItem {
   id: number;
@@ -87,7 +88,8 @@ export default function NewsAwardsSection() {
           {newsItems.map((item) => (
             <Link
               key={item.id}
-              href={item.href}
+              // href={item.href}
+              href={""}
               className={`group flex flex-col overflow-hidden rounded-2xl bg-white shadow-md shadow-black/5 ring-1 ring-black/5 transition-all duration-700 ease-out hover:-translate-y-1.5 hover:shadow-xl hover:shadow-black/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00A67E] focus-visible:ring-offset-2 dark:bg-neutral-900 dark:ring-white/10 motion-reduce:transition-none motion-reduce:transform-none ${
                 visible
                   ? "opacity-100 translate-y-0"
@@ -121,11 +123,11 @@ export default function NewsAwardsSection() {
                   {item.excerpt}
                 </p>
 
-                {/* <span className="inline-flex w-fit items-center gap-2 text-xs font-semibold uppercase tracking-wide 
+                <span className="inline-flex w-fit items-center gap-2 text-xs font-semibold uppercase tracking-wide 
                 text-[#00A67E] transition-colors duration-300 group-hover:text-[#0F467C]">
                   Read More
                   <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
-                </span> */}
+                </span>
               </div>
             </Link>
           ))}
