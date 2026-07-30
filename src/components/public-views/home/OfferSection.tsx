@@ -176,13 +176,6 @@ const benefits = [
     description:
       "Get cashback on prescribed medicine purchase after consultation with our doctors",
   },
-  {
-    id: 6,
-    icon: ShoppingCart,
-    title: "Health Points",
-    description:
-      "Get 25% of your subscription payment amount as HealthPoints and reimburse for purchase of wide range of healthcare items",
-  },
 ];
 
 export default function OfferSection() {
