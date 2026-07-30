@@ -10,7 +10,7 @@ const companyLinks = [
   { label: "Our Product", href: "/product" },
   { label: "About Us", href: "/about" },
   { label: "Privacy Policy", href: "/privacy-policy" },
-  { label: "Terms & Conditions", href: "/term-of-service" },
+  { label: "Terms & Conditions", href: "/terms-of-condition" },
 ];
 
 const socialLinks = [

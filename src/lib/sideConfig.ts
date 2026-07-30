@@ -5,8 +5,8 @@ export const siteConfig = {
     "Affordable health, life, and disability micro-insurance with tele-doctor consultations, cashless hospital network, and discount partners across Bangladesh.",
   url: "https://www.surokkhahealth.com",
 
-  phone: "01700-000000",
-  whatsapp: "8801XXXXXXXXX",
+  phone: "09639444274",
+  whatsapp: "01350775021",
   email: "info@surokkhahealth.com",
 
   address: {
@@ -29,6 +29,7 @@ export const siteConfig = {
   },
 
   supportHours: "Sunday–Thursday, 9:00 AM – 6:00 PM",
+  website: "https://surokkhahealth.com"
 } as const;
 
 export type SiteConfig = typeof siteConfig;
