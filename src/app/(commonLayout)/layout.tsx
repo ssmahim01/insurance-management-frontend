@@ -5,6 +5,7 @@ import Navbar from '@/components/public-views/layout/Navbar';
 import Footer from '@/components/public-views/layout/Footer';
 import ScrollToTopButton from '@/components/shared/ScrollToTopButton';
 import WhatsAppButton from '@/components/shared/WhatsAppButton';
+import AnnouncementBar from '@/components/public-views/layout/AnnouncementBar';
 
 export const metadata: Metadata = {
   title: 'Shurokkha',
@@ -15,14 +16,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <ReduxProvider>
+      <AnnouncementBar />
       <Navbar />
-        {children}
-        <WhatsAppButton />
-        <ScrollToTopButton />
-        {/* <Footer /> */}
+      {children}
       <WhatsAppButton />
       <ScrollToTopButton />
-      {/* <Footer /> */}
+      <Footer />
     </ReduxProvider>
   );
 }

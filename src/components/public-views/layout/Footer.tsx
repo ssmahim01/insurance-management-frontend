@@ -20,7 +20,7 @@ const socialLinks = [
   {
     id: 4,
     icon: null,
-    href: "https://wa.me/8809610500599",
+    href: "https://wa.me/01350775021",
     label: "WhatsApp",
     bg: "bg-[#25D366]",
     customIcon: true,
@@ -131,7 +131,7 @@ export default function Footer() {
                   Phone
                 </p>
                 <Link
-                  href="tel:+8809610500599"
+                  href="tel:+09639444274"
                   className="mt-1 block text-[15px] text-[#0B1F3A] hover:text-[#00A67E] dark:text-gray-300 dark:hover:text-[#00E0AE]"
                 >
                   {siteConfig.phone}
@@ -154,14 +154,15 @@ export default function Footer() {
 
         {/* Payment partners — static wrapping grid */}
         <div className="mt-5 sm:mt-14 border-t border-black/5 pt-8 dark:border-white/10">
-          <Image
+          {/* <Image
             src="/assets/payment/payment-logo.svg"
             alt="Payment Gateway Logo"
             width={620}
             height={64}
             priority
             className="mx-auto h-auto w-full max-w-350 object-contain"
-          />
+          /> */}
+          <h3 className="font-semibold text-center">SurjoPay</h3>
         </div>
 
         {/* Copyright */}
