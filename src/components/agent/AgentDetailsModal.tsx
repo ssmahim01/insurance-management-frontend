@@ -96,6 +96,12 @@ const STATUS_CONFIG: Record<
     badge:
       "border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
   },
+  [IsActive.CREATED]: {
+    label: "Created",
+    icon: ShieldCheck,
+    badge:
+      "border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
+  },
   [IsActive.BLOCKED]: {
     label: "Blocked",
     icon: ShieldAlert,

@@ -247,6 +247,7 @@ export function UpdateCustomerModal({
     [IsActive.ACTIVE]: { label: "Active", dot: "bg-emerald-500" },
     [IsActive.INACTIVE]: { label: "Inactive", dot: "bg-slate-400" },
     [IsActive.BLOCKED]: { label: "Blocked", dot: "bg-red-500" },
+    [IsActive.CREATED]: { label: "Created", dot: "bg-slate-400" },
     [IsActive.ALL]: { label: "All", dot: "bg-slate-400" },
   };
 

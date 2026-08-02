@@ -73,6 +73,7 @@ type SortDir = "asc" | "desc" | null;
 const STATUS_LABELS: Record<IsActive, string> = {
   [IsActive.ACTIVE]: "Active",
   [IsActive.INACTIVE]: "Inactive",
+  [IsActive.CREATED]: "Created",
   [IsActive.BLOCKED]: "Blocked",
   [IsActive.ALL]: "All",
 };
@@ -81,6 +82,8 @@ const STATUS_STYLES: Record<IsActive, string> = {
   [IsActive.ACTIVE]:
     "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400",
   [IsActive.INACTIVE]:
+    "border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
+  [IsActive.CREATED]:
     "border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400",
   [IsActive.BLOCKED]:
     "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400",
@@ -91,6 +94,7 @@ const STATUS_STYLES: Record<IsActive, string> = {
 const STATUS_DOT: Record<IsActive, string> = {
   [IsActive.ACTIVE]: "bg-emerald-500",
   [IsActive.INACTIVE]: "bg-slate-400",
+  [IsActive.CREATED]: "bg-slate-400",
   [IsActive.BLOCKED]: "bg-red-500",
   [IsActive.ALL]: "bg-slate-500",
 };
