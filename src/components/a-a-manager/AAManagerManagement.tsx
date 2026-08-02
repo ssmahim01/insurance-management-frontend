@@ -447,8 +447,8 @@ export default function AAManagerManagement() {
     <div className="space-y-6">
       {/* Page Header */}
       <PageHeader
-        title="A.A. Manager Assistant Area Management"
-        description="Manage all assistant area A.A. Managers and monitor their activity"
+        title="A.A. Manager Management"
+        description="Manage all assistant area managers and monitor their activity"
         breadcrumbs={[
           { label: "Dashboard", href: "/dashboard" },
           { label: "A.A. Manager Management" },

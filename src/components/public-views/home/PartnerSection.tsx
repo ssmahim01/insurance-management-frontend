@@ -169,7 +169,7 @@ export default function PartnerSection() {
               sizes="(max-width: 768px) 100vw, 896px"
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0B1F3A]/40 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-[#0B1F3A]/40 via-transparent to-transparent" />
           </div>
         </div>
 

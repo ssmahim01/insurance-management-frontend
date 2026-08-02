@@ -8,12 +8,19 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 
+// const partners = [
+//   { id: 1, name: "ShopUp", logo: "/assets/Shopup.webp" },
+//   { id: 2, name: "ShareTrip", logo: "/assets/Sharetrip.webp" },
+//   { id: 3, name: "Grameenphone", logo: "/assets/GP.webp" },
+//   { id: 4, name: "bKash", logo: "/assets/Bkash.webp" },
+//   { id: 5, name: "Brac Health Care", logo: "/assets/Brac.webp" },
+// ];
+
+
 const partners = [
-  { id: 1, name: "ShopUp", logo: "/assets/Shopup.webp" },
-  { id: 2, name: "ShareTrip", logo: "/assets/Sharetrip.webp" },
-  { id: 3, name: "Grameenphone", logo: "/assets/GP.webp" },
-  { id: 4, name: "bKash", logo: "/assets/Bkash.webp" },
-  { id: 5, name: "Brac Health Care", logo: "/assets/Brac.webp" },
+  { id: 1, name: "Zaynax", logo: "/assets/zaynax-logo.svg" },
+  { id: 2, name: "Shurjopay", logo: "/assets/shurjoPay-logo.webp" },
+  { id: 3, name: "Protective", logo: "/assets/protective.png" },
 ];
 
 export default function TrustedPartnersSection() {
@@ -25,7 +32,7 @@ export default function TrustedPartnersSection() {
             Partnerships
           </span>
           <h2 className="text-3xl font-extrabold text-[#0B1F3A] dark:text-white sm:text-4xl">
-            Our Trusted Partners
+            Our Business Partners
           </h2>
           <p className="mt-3 text-gray-500 dark:text-gray-400">
             We partner with leading Bangladeshi companies and multinationals
@@ -58,7 +65,7 @@ export default function TrustedPartnersSection() {
             {partners.map((partner) => (
               <CarouselItem
                 key={partner.id}
-                className="basis-1/2 pl-6 sm:basis-1/3 lg:basis-1/4"
+                className="basis-1/2 pl-6 sm:basis-1/3"
               >
                 <div className="flex h-20 items-center justify-center rounded-2xl border border-black/5 bg-white px-6 shadow-sm dark:border-white/10 dark:bg-neutral-900 sm:h-24">
                   <div className="relative h-10 w-full sm:h-12">
