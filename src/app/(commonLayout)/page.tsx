@@ -26,7 +26,7 @@ function HomePage() {
         <ClaimProcessSection />
         <TrustedPartnersSection />
         <FindPlanSection />
-        <NewsAwardsSection />
+        {/* <NewsAwardsSection /> */}
 
       {/* <Image
         className="w-full h-full cursor-pointer transition-transform duration-300 ease-out group-hover:scale-105 object-cover"

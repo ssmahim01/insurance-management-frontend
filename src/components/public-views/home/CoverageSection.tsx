@@ -41,7 +41,7 @@ const coverageBlocks: CoverageBlock[] = [
     reverse: false,
     stat: {
       icon: HeartHandshake,
-      value: "500+",
+      value: "250+",
       label: "Partner hospitals, up to 50% off",
     },
   },
