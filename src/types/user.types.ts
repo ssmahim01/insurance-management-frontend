@@ -14,7 +14,8 @@ export enum IsActive {
   ACTIVE = "ACTIVE",
   ALL = "ALL",
   INACTIVE = "INACTIVE",
-  BLOCKED = "BLOCKED"
+  BLOCKED = "BLOCKED",
+  CREATED = "CREATED",
 }
 
 // ─── Sub-interfaces ──────────────────────────────────────────────────────────
@@ -52,7 +53,7 @@ export interface IPopulatedCreatedBy {
 export interface IUser {
   _id?: string;
 
-  createdBy?: string | IPopulatedCreatedBy;
+  // createdBy?: string | IPopulatedCreatedBy;
   agentLeader?: string | IPopulatedAgentLeader; // only for agents
   customId?: string;
   employeeId?: string;
@@ -83,7 +84,7 @@ export interface IUser {
   hasPassword?: boolean;
   isDeleted?: boolean;
   lastLoginAt?: string; // ISO string from API
-
+  createdBy?: (IUser & { agentLeader?: IUser | string }) | string;
   // Mongoose timestamps
   createdAt?: string;
   updatedAt?: string;

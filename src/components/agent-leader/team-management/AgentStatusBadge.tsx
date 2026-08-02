@@ -27,6 +27,12 @@ export function AgentStatusBadge({ status }: AgentStatusBadgeProps) {
       "bg-amber-100 text-amber-700 border border-amber-300 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-800",
   },
 
+  [IsActive.CREATED]: {
+    label: "Created",
+    className:
+      "bg-slate-100 text-slate-700 border border-slate-300 dark:bg-slate-500/15 dark:text-slate-400 dark:border-slate-800",
+  },
+
   [IsActive.BLOCKED]: {
     label: "Blocked",
     className:

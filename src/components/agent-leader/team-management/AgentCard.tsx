@@ -17,6 +17,7 @@ interface AgentCardProps {
 const STATUS_TOP_ACCENT: Record<IsActive, string> = {
   [IsActive.ACTIVE]: "bg-emerald-500",
   [IsActive.INACTIVE]: "bg-slate-300 dark:bg-slate-600",
+  [IsActive.CREATED]: "bg-slate-300 dark:bg-slate-600",
   [IsActive.BLOCKED]: "bg-red-500",
   [IsActive.ALL]: "bg-slate-300 dark:bg-slate-600",
 };
@@ -24,6 +25,7 @@ const STATUS_TOP_ACCENT: Record<IsActive, string> = {
 const STATUS_CARD_TINT: Record<IsActive, string> = {
   [IsActive.ACTIVE]: "",
   [IsActive.INACTIVE]: "",
+  [IsActive.CREATED]: "",
   [IsActive.BLOCKED]: "bg-red-50/30 dark:bg-red-950/10",
   [IsActive.ALL]: "",
 };

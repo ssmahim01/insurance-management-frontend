@@ -79,6 +79,7 @@ const handleSortChange = (
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value={IsActive.ACTIVE}>Active</SelectItem>
             <SelectItem value={IsActive.INACTIVE}>Inactive</SelectItem>
+            <SelectItem value={IsActive.CREATED}>Created</SelectItem>
             <SelectItem value={IsActive.BLOCKED}>Blocked</SelectItem>
           </SelectContent>
         </Select>

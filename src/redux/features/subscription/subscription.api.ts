@@ -6,10 +6,18 @@ import {
   ICreateSubscriptionResponse,
   IOverviewResponse,
   ISingleSubscriptionResponse,
+  ISubscription,
   ISubscriptionListResponse,
   IUpdateSubscriptionPayload,
 } from "@/types/subscription.types";
 import { baseApi } from "../baseApi";
+
+
+export interface ICustomerSubscriptionsResponse {
+  success: boolean;
+  message: string;
+  data: ISubscription[];
+}
 
 export const subscriptionApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -168,7 +176,7 @@ export const subscriptionApi = baseApi.injectEndpoints({
       providesTags: ["SUBSCRIPTIONS"],
     }),
 
-    getCustomerSubscriptions: builder.query<ISubscriptionListResponse, string>({
+    getCustomerSubscriptions: builder.query<ICustomerSubscriptionsResponse, string>({
       query: (customerId) => ({
         url: `/subscription/customer/${customerId}`,
         method: "GET",
@@ -240,4 +248,5 @@ export const {
   useSoftDeleteSubscriptionMutation,
   useRestoreSubscriptionMutation,
   usePermanentDeleteSubscriptionMutation,
+  useLazyGetCustomerSubscriptionsQuery
 } = subscriptionApi;
