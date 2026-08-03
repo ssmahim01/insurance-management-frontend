@@ -62,7 +62,7 @@ import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type SortField = "serviceTitle" | "status" | "createdAt";
+type SortField = "claimTitle" | "status" | "createdAt";
 type SortDir = "asc" | "desc" | null;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -304,9 +304,9 @@ export default function ClaimManagement() {
     return [...claims].sort((a, b) => {
       let aVal: string | number = "";
       let bVal: string | number = "";
-      if (sortField === "serviceTitle") {
-        aVal = a.serviceTitle ?? "";
-        bVal = b.serviceTitle ?? "";
+      if (sortField === "claimTitle") {
+        aVal = a.claimTitle ?? "";
+        bVal = b.claimTitle ?? "";
       }
       if (sortField === "status") {
         aVal = a.status ?? "";
@@ -478,7 +478,7 @@ export default function ClaimManagement() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
-            placeholder="Search by service title..."
+            placeholder="Search by claim title..."
             className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -523,7 +523,7 @@ export default function ClaimManagement() {
             <Table className="min-w-275">
               <TableHeader className="sticky top-0 z-10">
                 <TableRow className="border-none bg-linear-to-r *:text-white from-indigo-600 via-blue-600 to-cyan-600 hover:bg-transparent">
-                  <SortableTh field="serviceTitle" label="Service" />
+                  <SortableTh field="claimTitle" label="Service" />
                   <TableHead className="whitespace-nowrap">Customer</TableHead>
                   <TableHead className="whitespace-nowrap">
                     Attachments
@@ -596,7 +596,7 @@ ${
                           </div>
                           <div className="min-w-0">
                             <p className="font-medium text-slate-900 dark:text-white truncate max-w-44">
-                              {claim.serviceTitle}
+                              {claim.claimTitle}
                             </p>
                             <p className="text-xs text-slate-400 truncate max-w-44">
                               {claim.description}
@@ -731,7 +731,7 @@ ${
             <AlertDialogTitle>Move to Trash</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to move claim{" "}
-              <strong>{deletingClaim?.serviceTitle}</strong> to trash? It can be
+              <strong>{deletingClaim?.claimTitle}</strong> to trash? It can be
               restored later.
             </AlertDialogDescription>
           </AlertDialogHeader>

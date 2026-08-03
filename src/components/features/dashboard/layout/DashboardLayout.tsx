@@ -35,6 +35,7 @@ import {
   BriefcaseMedical,
   MapPin,
   Phone,
+  FileCheck2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -157,7 +158,6 @@ function formatRole(role?: string) {
     .join(" ");
 }
 
-/** Premium live clock chip — mounted client-side only to avoid SSR/CSR mismatch. */
 function LiveClock() {
   const [now, setNow] = useState<Date | null>(null);
 
@@ -223,18 +223,11 @@ function LiveClock() {
 }
 
 export function DashboardHeader({
-  // pageTitle,
-  // breadcrumbs,
   user,
   isUserLoading,
   onLogout,
 }: DashboardHeaderProps) {
   const { theme, setTheme } = useTheme();
-
-  // const trail: BreadcrumbTrailItem[] =
-  //   breadcrumbs && breadcrumbs.length > 0
-  //     ? breadcrumbs
-  //     : [{ label: pageTitle ?? "Dashboard" }];
 
   const firstName = user?.name?.split(" ")[0];
   const initials = user?.name?.substring(0, 2).toUpperCase() || "U";
@@ -242,7 +235,9 @@ export function DashboardHeader({
   const role = user?.role;
 
   const roleKnown = !isUserLoading && !!role;
-  const showSidebarChrome = roleKnown && role !== "CUSTOMER";
+  const isClaimsManager = role === "CLAIMS_MANAGER";
+  const isSimplifiedRole = role === "CUSTOMER" || isClaimsManager;
+  const showSidebarChrome = roleKnown && !isSimplifiedRole;
 
   const notificationsHref =
     role === "ADMIN" || role === "SUPER_ADMIN"
@@ -253,7 +248,9 @@ export function DashboardHeader({
           ? "/agent/dashboard/notifications"
           : role === "MANAGER"
             ? "/manager/dashboard/notifications"
-            : "/customer/dashboard/notifications";
+            : isClaimsManager
+              ? "/claims-manager/dashboard/notifications"
+              : "/customer/dashboard/notifications";
 
   const profileHref =
     role === "ADMIN" || role === "SUPER_ADMIN"
@@ -264,7 +261,9 @@ export function DashboardHeader({
           ? "/agent/dashboard/profile"
           : role === "MANAGER"
             ? "/manager/dashboard/profile"
-            : "/customer/dashboard/profile";
+            : isClaimsManager
+              ? "/claims-manager/dashboard/profile"
+              : "/customer/dashboard/profile";
 
   return (
     <header className="sticky top-0 z-20 border-b border-gray-200/80 bg-linear-to-r from-white via-white to-emerald-50/40 dark:from-gray-950 dark:via-gray-950 dark:to-emerald-950/10 backdrop-blur-sm dark:border-gray-800">
@@ -278,7 +277,6 @@ export function DashboardHeader({
         {showSidebarChrome && (
           <>
             <SidebarTrigger className="-ml-1 h-8 w-8 shrink-0 rounded-lg text-gray-500 hover:bg-emerald-50 hover:text-emerald-700 dark:text-gray-400 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400 transition-colors duration-200" />
-            {/* was h-16 — taller than the row itself; now scales with breakpoint */}
             <Separator
               orientation="vertical"
               className="hidden sm:block h-8 sm:h-10 shrink-0 bg-gray-200 dark:bg-gray-700"
@@ -286,14 +284,13 @@ export function DashboardHeader({
           </>
         )}
 
-        {/* ── Brand block: logo + greeting/breadcrumb — the only flexible/truncating region ── */}
         <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
-          {role === "CUSTOMER" && (
+          {(role === "CUSTOMER" || isClaimsManager) && (
             <>
               <Link
-                href="/"
+                href={isClaimsManager ? "/claims-manager/dashboard" : "/"}
                 className="group flex shrink-0 items-center gap-2"
-                aria-label="Go to homepage"
+                aria-label={isClaimsManager ? "Go to Claims Dashboard" : "Go to homepage"}
               >
                 <Image
                   className="h-9 sm:h-11 md:h-12 w-auto object-contain transition-transform duration-300 ease-out group-hover:scale-105"
@@ -308,7 +305,7 @@ export function DashboardHeader({
                     Shurokkha
                   </span>
                   <span className="text-[10px] sm:text-xs font-medium text-emerald-600 dark:text-emerald-400 -mt-0.5">
-                    Health
+                    {isClaimsManager ? "Claims Portal" : "Health"}
                   </span>
                 </span>
               </Link>
@@ -325,76 +322,30 @@ export function DashboardHeader({
                 {getGreeting()}, {firstName}
               </p>
             )}
-
-            {/* <Breadcrumb className="min-w-0">
-              <BreadcrumbList className="flex-nowrap">
-                {trail.map((crumb, idx) => {
-                  const isLast = idx === trail.length - 1;
-                  return (
-                    <React.Fragment key={`${crumb.label}-${idx}`}>
-                 
-                      <BreadcrumbItem className={cn("min-w-0", !isLast && "hidden sm:flex")}>
-                        {isLast || !crumb.href ? (
-                          <BreadcrumbPage className="block truncate text-sm sm:text-[15px] font-semibold text-gray-800 dark:text-gray-200">
-                            {crumb.label}
-                          </BreadcrumbPage>
-                        ) : (
-                          <BreadcrumbLink
-                            href={crumb.href}
-                            className="truncate text-[13.5px] text-gray-400 hover:text-emerald-600 dark:text-gray-500 dark:hover:text-emerald-400 transition-colors"
-                          >
-                            {crumb.label}
-                          </BreadcrumbLink>
-                        )}
-                      </BreadcrumbItem>
-                      {!isLast && <BreadcrumbSeparator className="hidden sm:flex" />}
-                    </React.Fragment>
-                  );
-                })}
-              </BreadcrumbList>
-            </Breadcrumb> */}
           </div>
         </div>
 
-        {/* ── Right cluster: never shrinks, brand block above absorbs all truncation ── */}
         <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2 lg:gap-3">
-          {/* Page-level action portal */}
           <div id="header-actions" className="flex items-center gap-2" />
 
           {/* Live clock — component itself is hidden below lg */}
           <LiveClock />
 
-          {/* Standout CTA — hidden on phones so it never competes with the
-              utility cluster + avatar for space; assumes NearbyBranchesButton
-              has no independent responsive behavior of its own. */}
+          {/* Standout CTA — customer only */}
           {role === "CUSTOMER" && (
             <div className="hidden sm:block">
               <NearbyBranchesButton />
             </div>
           )}
 
-          {/* Utility icon cluster (WhatsApp · Notifications · Theme) */}
           <div className="flex items-center gap-0.5 sm:gap-1 rounded-full border border-gray-200/80 bg-gray-50/60 dark:border-gray-800 dark:bg-gray-900/40 shadow-sm px-0.5">
-            {/* Hidden below 400px so three icon buttons never crowd a
-                narrow phone viewport; assumes WhatsAppSupportButton has no
-                independent responsive behavior of its own. */}
             <div className="hidden min-[400px]:block">
-
-             {
-              role === "CUSTOMER" && 
-              <WhatsAppSupportButton />
-             }
-
+              {role === "CUSTOMER" || isClaimsManager && <WhatsAppSupportButton />}
             </div>
 
-            {role === "CUSTOMER" && (
+            {(role === "CUSTOMER") && (
               <NotificationBell role={role} viewAllHref={notificationsHref} />
             )}
-
-            {/* <span
-              aria-hidden
-              className="hidden min-[400px]:block mx-0.5 h-5 w-px shrink-0 bg-gray-200 dark:bg-gray-700"
-            /> */}
 
             <Button
               variant="ghost"
@@ -408,7 +359,6 @@ export function DashboardHeader({
             </Button>
           </div>
 
-          {/* User dropdown — name/role collapse away below sm, avatar stays */}
           {isUserLoading ? (
             <div className="flex items-center gap-2 pl-1">
               <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-gray-200 dark:bg-gray-800 animate-pulse" />
@@ -496,6 +446,16 @@ export function DashboardHeader({
                     </DropdownMenuItem>
                   </>
                 )}
+                {isClaimsManager && (
+                  <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-sm">
+                    <Link
+                      className="flex items-center gap-2 cursor-pointer"
+                      href={"/claims-manager/dashboard"}
+                    >
+                      <FileCheck2 className="h-3.5 w-3.5" /> Claims Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-sm">
                   <Link
                     className="flex items-center gap-2 cursor-pointer"
@@ -541,7 +501,8 @@ export function DashboardLayoutWrapper({
   const role = user?.data?.role;
 
   const roleKnown = !isLoading && !!role;
-  const showSidebar = roleKnown && role !== "CUSTOMER";
+  const isClaimsManager = role === "CLAIMS_MANAGER";
+  const showSidebar = roleKnown && role !== "CUSTOMER" && !isClaimsManager;
   const showMobileBottomNav = roleKnown && role === "CUSTOMER";
 
   const handleLogout = async () => {
@@ -572,7 +533,6 @@ export function DashboardLayoutWrapper({
           <main
             className={cn(
               "flex-1 overflow-auto bg-gray-50/50 dark:bg-gray-950/50",
-              // reserve space so the fixed bottom nav never overlaps content
               showMobileBottomNav && "pb-16 sm:pb-0",
             )}
           >

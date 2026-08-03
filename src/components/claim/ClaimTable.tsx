@@ -55,7 +55,7 @@ export function ClaimTable({ claims, isLoading, onViewDetails, onEdit }: ClaimTa
               return (
                 <TableRow key={claim._id} className="border-b border-border transition-colors hover:bg-muted/30">
                   <TableCell className="text-sm font-medium text-foreground max-w-48 truncate">
-                    {claim.serviceTitle}
+                    {claim?.claimTitle}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                     {getClaimSubscriptionLabel(claim.subscription)}

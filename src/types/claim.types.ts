@@ -47,53 +47,6 @@ export enum ClaimStatus {
 //   updatedAt: string;
 // }
 
-
-// claim.types.ts — subscription shape updated
-
-export interface IClaim {
-  _id: string;
-
-  customer: string | {
-    _id: string;
-    name: string;
-    phone: string;
-    picture?: string;
-  };
-
-  subscription:  {
-    _id: string;
-    subscriptionId?: string;
-    package?: string | {
-      _id: string;
-      name?: string;
-      title?: string;
-    } | string;
-  };
-
-  serviceTitle: string;
-
-  description: string;
-
-  attachments?: string[];
-
-  status: ClaimStatus;
-
-  adminNote?: string;
-
-  reviewedBy?: string | {
-    _id: string;
-    name: string;
-  };
-
-  reviewedAt?: string;
-
-  isDeleted: boolean;
-
-  createdAt: string;
-  updatedAt: string;
-}
-
-
 // ── STATS ─────────────────────────────────────────────────────────────
 
 export interface IClaimStats {
@@ -114,6 +67,66 @@ export interface GetClaimsParams {
   fields?: string;
   page?: number;
   limit?: number;
+}
+
+export enum ClaimTitle {
+  OPD = "OPD",
+  HOSPITAL_COVERAGE = "HOSPITAL_COVERAGE",
+  PREGNANCY_COVERAGE = "PREGNANCY_COVERAGE",
+  PARTIAL_DISABILITY = "PARTIAL_DISABILITY",
+  PERMANENT_DISABILITY = "PERMANENT_DISABILITY",
+  LIFE_COVERAGE = "LIFE_COVERAGE",
+}
+
+export enum PaymentMethod {
+  BKASH = "BKASH",
+  NAGAD = "NAGAD",
+  BANK = "BANK",
+}
+
+export interface IClaimPaymentInfo {
+  mobileNumber?: string;
+  bankName?: string;
+  accountName?: string;
+  accountNumber?: string;
+  routingNumber?: string;
+  branchName?: string;
+}
+
+export interface IClaim {
+  _id: string;
+  customer:
+    | string
+    | {
+        _id: string;
+        name: string;
+        phone: string;
+        picture?: string;
+      };
+
+  subscription: {
+    _id: string;
+    subscriptionId?: string;
+    package?:
+      | string
+      | {
+          _id: string;
+          name?: string;
+          title?: string;
+        }
+      | string;
+  };
+  claimTitle: ClaimTitle;
+  paymentMethod: PaymentMethod;
+  paymentInfo: IClaimPaymentInfo;
+  description: string;
+  attachments?: string[];
+  status: ClaimStatus;
+  adminNote?: string;
+  reviewedBy?: string | { _id: string; name: string };
+  reviewedAt?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ── RESPONSES ─────────────────────────────────────────────────────────

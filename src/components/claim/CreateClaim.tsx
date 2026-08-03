@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/incompatible-library */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -7,7 +6,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Plus, FileText, ImagePlus, X } from "lucide-react";
+import { Plus, FileText, ImagePlus, X, Wallet } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,32 +22,70 @@ import {
 
 import { useCreateClaimMutation } from "@/redux/features/claim/claim.api";
 import { useGetAllSubscriptionsQuery } from "@/redux/features/subscription/subscription.api";
-import { GetSubscriptionsParams, ISubscription, ISubscriptionListResponse, SubscriptionStatus } from "@/types/subscription.types";
+import {
+  GetSubscriptionsParams,
+  ISubscription,
+  ISubscriptionListResponse,
+  SubscriptionStatus,
+} from "@/types/subscription.types";
+import { ClaimTitle, PaymentMethod } from "@/types/claim.types";
+import { CLAIM_TITLE_LABELS, PAYMENT_METHOD_LABELS } from "@/lib/utils/claim-labels";
 import { useGetMeQuery } from "@/redux/features/user/user.api";
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
-const createClaimSchema = z.object({
-  subscription: z.string().min(1, "Subscription is required"),
-  serviceTitle: z.string().min(2, "Service title must be at least 2 characters"),
-  description:  z.string().min(10, "Description must be at least 10 characters"),
-  customer:  z.string().optional(),
+const paymentInfoSchema = z.object({
+  mobileNumber: z.string().optional(),
+  bankName: z.string().optional(),
+  accountName: z.string().optional(),
+  accountNumber: z.string().optional(),
+  routingNumber: z.string().optional(),
+  branchName: z.string().optional(),
 });
+
+const createClaimSchema = z
+  .object({
+    subscription: z.string().min(1, "Subscription is required"),
+    claimTitle: z.nativeEnum(ClaimTitle, { error: "Claim title is required" }),
+    description: z.string().min(10, "Description must be at least 10 characters"),
+    paymentMethod: z.nativeEnum(PaymentMethod, { error: "Payment method is required" }),
+    paymentInfo: paymentInfoSchema,
+    customer: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.paymentMethod === PaymentMethod.BKASH || data.paymentMethod === PaymentMethod.NAGAD) {
+      if (!data.paymentInfo.mobileNumber?.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["paymentInfo", "mobileNumber"],
+          message: "Mobile number is required.",
+        });
+      }
+    }
+
+    if (data.paymentMethod === PaymentMethod.BANK) {
+      const b = data.paymentInfo;
+      const requiredBankFields: Array<[keyof typeof b, string]> = [
+        ["bankName", "Bank name is required."],
+        ["accountName", "Account holder name is required."],
+        ["accountNumber", "Account number is required."],
+        ["routingNumber", "Routing number is required."],
+        ["branchName", "Branch name is required."],
+      ];
+      for (const [field, message] of requiredBankFields) {
+        if (!b[field]?.trim()) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["paymentInfo", field], message });
+        }
+      }
+    }
+  });
 
 type CreateClaimFormValues = z.infer<typeof createClaimSchema>;
 
-interface CreateClaimModalProps { onSuccess?: () => void; }
-
-const MAX_ATTACHMENTS = 10;
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-const getPackageName = (sub?: ISubscription): string => {
-  if (!sub) return "Select subscription";
-  return typeof sub.package === "object" && sub.package !== null
-    ? sub.package.name
-    : String(sub._id);
-};
+interface CreateClaimModalProps {
+  onSuccess?: () => void;
+  useSubscriptionsQuery?: UseSubscriptionsForClaimQuery;
+}
 
 export interface SubscriptionsQueryResult {
   data?: { data?: { data?: ISubscription[] } } | { data?: ISubscription[] };
@@ -60,12 +97,14 @@ export type UseSubscriptionsForClaimQuery = (
   options: { skip: boolean },
 ) => { data?: ISubscriptionListResponse; isLoading: boolean };
 
-interface CreateClaimModalProps {
-  onSuccess?: () => void;
- 
-  useSubscriptionsQuery?: UseSubscriptionsForClaimQuery;
-}
+const MAX_ATTACHMENTS = 10;
 
+const getPackageName = (sub?: ISubscription): string => {
+  if (!sub) return "Select subscription";
+  return typeof sub.package === "object" && sub.package !== null
+    ? sub.package.name
+    : String(sub._id);
+};
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -75,12 +114,11 @@ export function CreateClaimModal({
 }: CreateClaimModalProps) {
   const [open, setOpen] = useState(false);
   const [createClaim, { isLoading }] = useCreateClaimMutation();
-  const {data:me} = useGetMeQuery(undefined);
+  const { data: me } = useGetMeQuery(undefined);
 
-  // Attachments state
-  const [files, setFiles]       = useState<File[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
-  const fileInputRef            = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: subsData, isLoading: isSubsLoading } = useSubscriptionsQuery(
     { status: SubscriptionStatus.ACTIVE, limit: 100 },
@@ -95,15 +133,23 @@ export function CreateClaimModal({
     formState: { errors }, reset,
   } = useForm<CreateClaimFormValues>({
     resolver: zodResolver(createClaimSchema),
-    defaultValues: { subscription: "", serviceTitle: "", description: "", customer: "" },
+    defaultValues: {
+      subscription: "",
+      claimTitle: undefined as any,
+      description: "",
+      paymentMethod: undefined as any,
+      paymentInfo: {},
+      customer: "",
+    },
   });
 
   const watchedSubscription = watch("subscription");
+  const watchedClaimTitle = watch("claimTitle");
+  const watchedPaymentMethod = watch("paymentMethod");
 
   const handleFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(e.target.files ?? []);
     if (!selected.length) return;
-
     const combined = [...files, ...selected].slice(0, MAX_ATTACHMENTS);
     setFiles(combined);
     setPreviews(combined.map((f) => URL.createObjectURL(f)));
@@ -126,12 +172,13 @@ export function CreateClaimModal({
   const onSubmit = async (data: CreateClaimFormValues) => {
     try {
       const formData = new FormData();
-
       files.forEach((file) => formData.append("attachments", file));
 
       formData.append("subscription", data.subscription);
-      formData.append("serviceTitle", data.serviceTitle);
+      formData.append("claimTitle", data.claimTitle);
       formData.append("description", data.description);
+      formData.append("paymentMethod", data.paymentMethod);
+      formData.append("paymentInfo", JSON.stringify(data.paymentInfo ?? {}));
       formData.append("customer", me?.data?._id ?? "");
 
       await createClaim(formData).unwrap();
@@ -145,7 +192,11 @@ export function CreateClaimModal({
 
   return (
     <>
-      <Button variant="outline" onClick={() => setOpen(true)} className="group hover:cursor-pointer  bg-indigo-600 hover:bg-indigo-700 hover:text-white text-white duration-300 w-full mt-2 cursor-pointer font-bold tracking-widest uppercase transition-colors disabled:opacity-60">
+      <Button
+        variant="outline"
+        onClick={() => setOpen(true)}
+        className="group hover:cursor-pointer bg-indigo-600 hover:bg-indigo-700 hover:text-white text-white duration-300 w-full mt-2 font-bold tracking-widest uppercase transition-colors disabled:opacity-60"
+      >
         <Plus className="h-4 w-4" />
         Submit Claim
       </Button>
@@ -153,11 +204,13 @@ export function CreateClaimModal({
       <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); else setOpen(true); }}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] scrollbar-none overflow-y-auto p-6">
           <DialogHeader className="flex flex-col items-center gap-2 pb-2">
-            <div className="w-12 h-12 rounded-xl bg-indigo-600 hover:bg-indigo-700 hover:text-white text-white flex items-center justify-center shadow-md mb-1">
+            <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center shadow-md mb-1">
               <FileText className="w-6 h-6 text-white" />
             </div>
             <DialogTitle className="text-xl font-bold tracking-widest uppercase">Submit a Claim</DialogTitle>
-            <DialogDescription className="text-[#96999A] text-sm tracking-wide">Fill in the claim details below</DialogDescription>
+            <DialogDescription className="text-muted-foreground text-sm tracking-wide">
+              Fill in the claim details below
+            </DialogDescription>
           </DialogHeader>
 
           <Separator />
@@ -166,10 +219,12 @@ export function CreateClaimModal({
 
             {/* ── Subscription ── */}
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold tracking-widest uppercase">Subscription <span className="text-red-500">*</span></Label>
+              <Label className="text-xs font-semibold tracking-widest uppercase">
+                Subscription <span className="text-red-500">*</span>
+              </Label>
               <Select
                 value={watchedSubscription}
-                onValueChange={(v) => setValue("subscription", v as any, { shouldValidate: true })}
+                onValueChange={(v: any) => setValue("subscription", v, { shouldValidate: true })}
               >
                 <SelectTrigger className="h-9 text-sm w-full">
                   {isSubsLoading ? (
@@ -185,35 +240,153 @@ export function CreateClaimModal({
                     <div className="px-3 py-4 text-center text-xs text-slate-400">No active subscriptions found</div>
                   )}
                   {subscriptions.map((sub) => (
-                    <SelectItem key={sub._id} value={sub._id}>
-                      {getPackageName(sub)}
-                    </SelectItem>
+                    <SelectItem key={sub._id} value={sub._id}>{getPackageName(sub)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {errors.subscription && <p className="text-xs text-red-400">{errors.subscription.message}</p>}
             </div>
 
-            {/* ── Service Title ── */}
+            {/* ── Claim Title ── */}
             <div className="space-y-1.5">
-              <Label htmlFor="c-service" className="text-xs font-semibold tracking-widest uppercase">Service Title <span className="text-red-500">*</span></Label>
-              <Input id="c-service" placeholder="e.g. Hospitalization Claim" {...register("serviceTitle")} />
-              {errors.serviceTitle && <p className="text-xs text-red-400">{errors.serviceTitle.message}</p>}
+              <Label className="text-xs font-semibold tracking-widest uppercase">
+                Claim Title <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                value={watchedClaimTitle}
+                onValueChange={(v) => setValue("claimTitle", v as ClaimTitle, { shouldValidate: true })}
+              >
+                <SelectTrigger className="h-9 text-sm w-full">
+                  <span className={watchedClaimTitle ? "" : "text-slate-400"}>
+                    {watchedClaimTitle ? CLAIM_TITLE_LABELS[watchedClaimTitle] : "Select claim type"}
+                  </span>
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.values(ClaimTitle).map((t) => (
+                    <SelectItem key={t} value={t}>{CLAIM_TITLE_LABELS[t]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.claimTitle && <p className="text-xs text-red-400">{errors.claimTitle.message as string}</p>}
             </div>
 
             {/* ── Description ── */}
             <div className="space-y-1.5">
-              <Label htmlFor="c-desc" className="text-xs font-semibold tracking-widest uppercase">Description <span className="text-red-500">*</span></Label>
+              <Label htmlFor="c-desc" className="text-xs font-semibold tracking-widest uppercase">
+                Description <span className="text-red-500">*</span>
+              </Label>
               <Textarea id="c-desc" rows={4} placeholder="Describe your claim in detail..." {...register("description")} />
               {errors.description && <p className="text-xs text-red-400">{errors.description.message}</p>}
             </div>
 
             <Separator />
 
-            {/* ── Attachments ── */}
+            {/* ── Payment Method ── */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-1.5">
+                <Wallet className="h-3.5 w-3.5 text-slate-400" />
+                <p className="text-xs font-bold tracking-widest uppercase text-slate-400">Receive Payment</p>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold tracking-widest uppercase">
+                  Payment Method <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={watchedPaymentMethod}
+                  onValueChange={(v) => setValue("paymentMethod", v as PaymentMethod, { shouldValidate: true })}
+                >
+                  <SelectTrigger className="h-9 text-sm w-full">
+                    <span className={watchedPaymentMethod ? "" : "text-slate-400"}>
+                      {watchedPaymentMethod ? PAYMENT_METHOD_LABELS[watchedPaymentMethod] : "Select a method"}
+                    </span>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.values(PaymentMethod).map((m) => (
+                      <SelectItem key={m} value={m}>{PAYMENT_METHOD_LABELS[m]}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.paymentMethod && (
+                  <p className="text-xs text-red-400">{errors.paymentMethod.message as string}</p>
+                )}
+              </div>
+
+              {/* ── bKash / Nagad ── */}
+              {(watchedPaymentMethod === PaymentMethod.BKASH || watchedPaymentMethod === PaymentMethod.NAGAD) && (
+                <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <Label className="text-xs font-semibold tracking-widest uppercase">
+                    Mobile Number <span className="text-red-500">*</span>
+                  </Label>
+                  <Input placeholder="01XXXXXXXXX" {...register("paymentInfo.mobileNumber")} />
+                  {errors.paymentInfo?.mobileNumber && (
+                    <p className="text-xs text-red-400">{errors.paymentInfo.mobileNumber.message}</p>
+                  )}
+                </div>
+              )}
+
+              {/* ── Bank Account ── */}
+              {watchedPaymentMethod === PaymentMethod.BANK && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold tracking-widest uppercase">
+                      Bank Name <span className="text-red-500">*</span>
+                    </Label>
+                    <Input {...register("paymentInfo.bankName")} />
+                    {errors.paymentInfo?.bankName && (
+                      <p className="text-xs text-red-400">{errors.paymentInfo.bankName.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold tracking-widest uppercase">
+                      Account Holder Name <span className="text-red-500">*</span>
+                    </Label>
+                    <Input {...register("paymentInfo.accountName")} />
+                    {errors.paymentInfo?.accountName && (
+                      <p className="text-xs text-red-400">{errors.paymentInfo.accountName.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold tracking-widest uppercase">
+                      Account Number <span className="text-red-500">*</span>
+                    </Label>
+                    <Input {...register("paymentInfo.accountNumber")} />
+                    {errors.paymentInfo?.accountNumber && (
+                      <p className="text-xs text-red-400">{errors.paymentInfo.accountNumber.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold tracking-widest uppercase">
+                      Routing Number <span className="text-red-500">*</span>
+                    </Label>
+                    <Input {...register("paymentInfo.routingNumber")} />
+                    {errors.paymentInfo?.routingNumber && (
+                      <p className="text-xs text-red-400">{errors.paymentInfo.routingNumber.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label className="text-xs font-semibold tracking-widest uppercase">
+                      Branch Name <span className="text-red-500">*</span>
+                    </Label>
+                    <Input {...register("paymentInfo.branchName")} />
+                    {errors.paymentInfo?.branchName && (
+                      <p className="text-xs text-red-400">{errors.paymentInfo.branchName.message}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* ── Attachments (unchanged) ── */}
             <div>
               <Label className="text-xs font-semibold tracking-widest uppercase">
-                Attachments <span className="text-[#96999A] normal-case font-normal">(optional, up to {MAX_ATTACHMENTS})</span>
+                Attachments <span className="text-muted-foreground normal-case font-normal">(optional, up to {MAX_ATTACHMENTS})</span>
               </Label>
 
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-2">
@@ -252,8 +425,12 @@ export function CreateClaimModal({
               />
             </div>
 
-            {/* ── Submit ── */}
-            <Button type="submit" variant="outline" disabled={isLoading} className="group hover:cursor-pointer bg-indigo-600 hover:bg-indigo-700 hover:text-white text-white duration-300 cursor-pointer font-bold tracking-widest uppercase transition-colors w-full mt-2 disabled:opacity-60">
+            <Button
+              type="submit"
+              variant="outline"
+              disabled={isLoading}
+              className="group hover:cursor-pointer bg-indigo-600 hover:bg-indigo-700 hover:text-white text-white duration-300 font-bold tracking-widest uppercase transition-colors w-full mt-2 disabled:opacity-60"
+            >
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />

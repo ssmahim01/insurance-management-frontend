@@ -24,7 +24,7 @@ export function ClaimFilters({ filters, onFiltersChange, onReset }: ClaimFilters
       <div className="relative flex-1 min-w-56">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search by service title..."
+          placeholder="Search by claim title..."
           className="pl-9"
           value={filters.searchTerm}
           onChange={(e) => onFiltersChange({ ...filters, searchTerm: e.target.value })}

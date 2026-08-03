@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React from "react";
@@ -110,7 +111,7 @@ function ClaimCard({ claim, onViewDetails, onEdit }: ClaimCardProps) {
               {packageOrSubLabel}
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-              {claim.serviceTitle}
+              {claim.claimTitle}
               {/* {subIdLabel && (
                 <span className="text-slate-400"> · #{subIdLabel.slice?.(-6)}</span>
               )} */}

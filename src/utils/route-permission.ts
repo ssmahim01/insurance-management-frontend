@@ -78,6 +78,7 @@ export function getDefaultDashboardRoute(role: UserRole): string {
     [Role.MANAGER]: "/manager/dashboard",
     [Role.A_A_MANAGER]: "/a-a-manager/dashboard",
     [Role.CUSTOMER]: "/customer/dashboard",
+    [Role.CLAIMS_MANAGER]: "/claims-manager/dashboard",
   };
   return map[role] ?? "/";
 }

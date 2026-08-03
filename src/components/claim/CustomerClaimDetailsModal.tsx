@@ -33,8 +33,8 @@ export function CustomerClaimDetailsModal({ open, onOpenChange, item }: ClaimDet
             <span className="font-medium text-foreground">{getClaimSubscriptionLabel(item.subscription)}</span>
           </div>
           <div className="space-y-1">
-            <span className="text-muted-foreground">Service Title</span>
-            <p className="font-medium text-foreground">{item.serviceTitle}</p>
+            <span className="text-muted-foreground">Claim Title</span>
+            <p className="font-medium text-foreground">{item.claimTitle}</p>
           </div>
           <div className="space-y-1">
             <span className="text-muted-foreground">Description</span>

@@ -29,7 +29,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NavItem } from "./DashboardLayout";
 import Image from "next/image";
-import { ChevronDown, LogOut, Settings, User } from "lucide-react";
+import { ChevronDown, LogOut, User } from "lucide-react";
 import { IUser } from "@/types/user.types";
 import { getDashboardNavigation } from "./navigation";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -173,7 +173,7 @@ export function AppSidebar({ user, onLogout, isLoading }: AppSidebarProps) {
   const navigation = getDashboardNavigation(user?.role);
   const activeHref = getActiveHref(navigation, pathname);
 
-  const dashboardRoot = navigation[0]?.items[0]?.href ?? "";
+  // const dashboardRoot = navigation[0]?.items[0]?.href ?? "";
 
   if (isLoading) return <AppSidebarSkeleton role={user?.role} />;
 

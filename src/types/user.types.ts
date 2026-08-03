@@ -8,6 +8,7 @@ export enum Role {
   CUSTOMER = "CUSTOMER",
   MANAGER = "MANAGER",
   A_A_MANAGER = "A_A_MANAGER",
+  CLAIMS_MANAGER = "CLAIMS_MANAGER",
 }
 
 export enum IsActive {

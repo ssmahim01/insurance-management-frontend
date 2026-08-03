@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect } from "react";
@@ -112,7 +113,7 @@ export function ReviewClaimModal({ open, onOpenChange, item, onSuccess }: Review
         <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-4 bg-slate-50/50 dark:bg-slate-800/30 space-y-2">
           <div className="flex items-center gap-2">
             <FileText className="w-4 h-4 text-slate-400 shrink-0" />
-            <p className="font-medium text-sm text-slate-900 dark:text-white truncate">{item.serviceTitle}</p>
+            <p className="font-medium text-sm text-slate-900 dark:text-white truncate">{item.claimTitle}</p>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-3">{item.description}</p>
           <div className="flex items-center justify-between pt-1 text-xs text-slate-400">

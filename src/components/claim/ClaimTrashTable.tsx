@@ -106,7 +106,7 @@ export function ClaimTrashTable({
                     <FileText className="w-3.5 h-3.5 text-white" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate max-w-44">{item.serviceTitle}</p>
+                    <p className="text-sm font-medium text-foreground truncate max-w-44">{item.claimTitle}</p>
                     <p className="text-xs text-muted-foreground truncate max-w-44">{item.description}</p>
                   </div>
                 </div>

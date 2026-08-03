@@ -53,6 +53,9 @@ const redirectByRole = (
     case "AGENT":
       router.push("/agent/dashboard");
       break;
+    case "CLAIMS_MANAGER":
+      router.push("/claims-manager/dashboard");
+      break;
     default:
       router.push("/customer/dashboard");
   }

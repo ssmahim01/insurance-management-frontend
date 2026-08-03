@@ -13,7 +13,6 @@ import { ITrashFilters } from "@/types/agent-leader";
 import { IClaim } from "@/types/claim.types";
 
 import { PageHeader } from "@/components/shared/PageHeader";
-import { TrashStatsCards } from "@/components/shared/trash/TrashStatsCards";
 import { TrashFilters } from "@/components/shared/trash/TrashFilters";
 import { TrashPagination } from "@/components/shared/trash/TrashPagination";
 import { TrashEmptyState } from "@/components/shared/trash/TrashEmptyState";
@@ -53,8 +52,8 @@ export function ClaimTrash() {
                     : filters.sortBy === "oldest"
                         ? "updatedAt"
                         : filters.sortBy === "name-asc"
-                            ? "serviceTitle"
-                            : "-serviceTitle",
+                            ? "claimTitle"
+                            : "-claimTitle",
             startDate: filters.startDate,
             endDate: filters.endDate,
         }),
@@ -154,11 +153,11 @@ export function ClaimTrash() {
                         isLoading={isLoading}
                         onRestore={(id) => {
                             const item = claims.find((c) => c._id === id);
-                            if (item) handleRestoreClick(id, item.serviceTitle);
+                            if (item) handleRestoreClick(id, item?.claimTitle ?? "");
                         }}
                         onPermanentDelete={(id) => {
                             const item = claims.find((c) => c._id === id);
-                            if (item) handleDeleteClick(id, item.serviceTitle);
+                            if (item) handleDeleteClick(id, item?.claimTitle ?? "");
                         }}
                     />
                     <TrashPagination

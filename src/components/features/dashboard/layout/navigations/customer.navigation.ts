@@ -4,7 +4,6 @@ import {
   Building2,
   LayoutDashboard,
   MessageSquare,
-  Settings,
   ShieldCheck,
   User,
   User2Icon,

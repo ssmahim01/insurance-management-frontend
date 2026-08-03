@@ -7,6 +7,7 @@ import { superAdminNavigation } from "./navigations/superAdmin.navigation";
 import { managerNavigation } from "./navigations/manager.navigation";
 import { customerNavigation } from "./navigations/customer.navigation";
 import { AAManagerNavigation } from "./navigations/a-a-manager.navigation";
+import { claimManagerNavigation } from "./navigations/claims-manager.navigation";
 
 export const getDashboardNavigation = (role?: Role) => {
   switch (role) {
@@ -30,6 +31,9 @@ export const getDashboardNavigation = (role?: Role) => {
 
     case Role.CUSTOMER:
       return customerNavigation;
+
+    case Role.CLAIMS_MANAGER:
+      return claimManagerNavigation;
 
     default:
       return [];

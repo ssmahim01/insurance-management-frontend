@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, Check, Circle, FileText, UploadCloud } from "lucide-react";
+import { Check, Circle, CreditCard, FileText, UploadCloud } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,11 +11,9 @@ import {
   useGetSingleClaimQuery,
   useUpdateClaimMutation,
 } from "@/redux/features/claim/claim.api";
-import { CustomerPortalHeader } from "./CustomerPortalHeader";
 import { formatDateTime } from "@/lib/utils/customer-portal-format";
-import { ClaimStatus } from "@/types/claim.types";
-import Link from "next/link";
-import { BackToDashboardSection } from "@/components/shared/dashboard/BackToDashboardSection";
+import { ClaimStatus, IClaim, PaymentMethod } from "@/types/claim.types";
+import { CLAIM_TITLE_LABELS, PAYMENT_METHOD_LABELS } from "@/lib/utils/claim-labels";
 
 interface ClaimDetailsPageProps {
   id: string;
@@ -27,7 +25,6 @@ export function ClaimDetailsPage({ id }: ClaimDetailsPageProps) {
 
   return (
     <div className="min-h-screen">
-        
       <div className="mx-auto container p-4">
         {isLoading ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -39,23 +36,23 @@ export function ClaimDetailsPage({ id }: ClaimDetailsPageProps) {
             Couldn&apos;t load this claim. It may have been removed.
           </div>
         ) : (
-          <>
-           {/* <BackToDashboardSection /> */}
-            <ClaimDetailsContent claim={claim as any} />
-          </>
+          <ClaimDetailsContent claim={claim as any} />
         )}
       </div>
     </div>
   );
 }
 
-function ClaimDetailsContent({ claim }: { claim: any }) {
+function ClaimDetailsContent({ claim }: { claim: IClaim }) {
   const [files, setFiles] = useState<File[]>([]);
   const [updateClaim, { isLoading: isUploading }] = useUpdateClaimMutation();
 
   const subscription = claim.subscription;
-  const pkg = subscription?.package;
-  const customer = claim.customer;
+  const pkg = subscription?.package as any;
+  const customer = claim.customer as any;
+  const claimTitleLabel = CLAIM_TITLE_LABELS[claim.claimTitle] ?? claim.claimTitle;
+  const paymentMethodLabel =
+    PAYMENT_METHOD_LABELS[claim.paymentMethod as PaymentMethod] ?? claim.paymentMethod;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const list = e.target.files;
@@ -82,25 +79,19 @@ function ClaimDetailsContent({ claim }: { claim: any }) {
         <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
           <div className="flex items-center justify-between bg-linear-to-r from-indigo-600 to-blue-600 px-5 py-4">
             <h3 className="text-base font-bold text-white truncate pr-2">
-              {claim.serviceTitle}
+              {claimTitleLabel}
             </h3>
             <ClaimStatusBadge status={claim.status} />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-5">
             <Field label="Id" value={String(claim._id).slice(-6)} />
-            <Field label="Insurance For" value={customer?.name} />
-            <Field label="Package Title" value={pkg?.name} />
+            <Field label="Insurance For" value={customer?.name ?? customer} />
+            <Field label="Package Title" value={pkg?.name ?? pkg} />
             <Field label="Claim Date" value={formatDateTime(claim.createdAt)} />
-            <Field
-              label="Last Updated"
-              value={formatDateTime(claim.updatedAt)}
-            />
+            <Field label="Last Updated" value={formatDateTime(claim.updatedAt)} />
             {claim.reviewedAt && (
-              <Field
-                label="Reviewed At"
-                value={formatDateTime(claim.reviewedAt)}
-              />
+              <Field label="Reviewed At" value={formatDateTime(claim.reviewedAt)} />
             )}
           </div>
 
@@ -118,9 +109,7 @@ function ClaimDetailsContent({ claim }: { claim: any }) {
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">
                 Admin Note
               </p>
-              <p className="text-sm text-slate-700 dark:text-slate-300">
-                {claim.adminNote}
-              </p>
+              <p className="text-sm text-slate-700 dark:text-slate-300">{claim.adminNote}</p>
             </div>
           )}
 
@@ -147,6 +136,32 @@ function ClaimDetailsContent({ claim }: { claim: any }) {
               </div>
             ) : (
               <p className="text-sm text-slate-400">No documents attached.</p>
+            )}
+          </div>
+        </div>
+
+        {/* ── Payment Method + Payment Info ── */}
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
+          <div className="flex items-center gap-2 bg-linear-to-r from-indigo-600 to-blue-600 px-5 py-3.5">
+            <CreditCard className="h-4 w-4 text-white" />
+            <h3 className="text-sm font-bold uppercase tracking-wide text-white">
+              Payment Details
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5">
+            <Field label="Payment Method" value={paymentMethodLabel} />
+            {(claim.paymentMethod === PaymentMethod.BKASH ||
+              claim.paymentMethod === PaymentMethod.NAGAD) && (
+              <Field label="Mobile Number" value={claim.paymentInfo?.mobileNumber} />
+            )}
+            {claim.paymentMethod === PaymentMethod.BANK && (
+              <>
+                <Field label="Bank Name" value={claim.paymentInfo?.bankName} />
+                <Field label="Account Holder Name" value={claim.paymentInfo?.accountName} />
+                <Field label="Account Number" value={claim.paymentInfo?.accountNumber} />
+                <Field label="Routing Number" value={claim.paymentInfo?.routingNumber} />
+                <Field label="Branch Name" value={claim.paymentInfo?.branchName} />
+              </>
             )}
           </div>
         </div>
@@ -204,9 +219,7 @@ function ClaimDetailsContent({ claim }: { claim: any }) {
 function Field({ label, value }: { label: string; value?: string }) {
   return (
     <div>
-      <p className="text-[11px] text-slate-400 uppercase tracking-wide">
-        {label}
-      </p>
+      <p className="text-[11px] text-slate-400 uppercase tracking-wide">{label}</p>
       <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
         {value ?? "—"}
       </p>
@@ -250,11 +263,7 @@ function ClaimProgressStepper({ status }: { status: ClaimStatus }) {
     { label: "Submitted", done: true, isFinal: false },
     { label: "Under Review", done: isResolved, isFinal: false },
     {
-      label: isRejected
-        ? "Rejected"
-        : isApproved
-          ? "Approved"
-          : "Awaiting Decision",
+      label: isRejected ? "Rejected" : isApproved ? "Approved" : "Awaiting Decision",
       done: isResolved,
       isFinal: true,
     },
@@ -284,8 +293,7 @@ function ClaimProgressStepper({ status }: { status: ClaimStatus }) {
                   ? "text-slate-900 dark:text-white"
                   : "text-slate-400";
 
-          const showCheck =
-            step.done && (!step.isFinal || isApproved || isRejected);
+          const showCheck = step.done && (!step.isFinal || isApproved || isRejected);
 
           return (
             <div key={i} className="relative flex items-center gap-3">
@@ -298,9 +306,7 @@ function ClaimProgressStepper({ status }: { status: ClaimStatus }) {
                   <Circle className="h-2.5 w-2.5 fill-current text-white" />
                 )}
               </div>
-              <span className={`text-sm font-semibold ${textColor}`}>
-                {step.label}
-              </span>
+              <span className={`text-sm font-semibold ${textColor}`}>{step.label}</span>
             </div>
           );
         })}
