@@ -16,7 +16,7 @@ import React from 'react'
 function HomePage() {
   return (
     <div className='bg-color'>
-        {/* <HeroSection /> 
+        <HeroSection /> 
         <CallSection />
         <OfferSection />
         <PlansSection />
@@ -25,9 +25,9 @@ function HomePage() {
         <WhyChooseUsSection />
         <ClaimProcessSection />
         <TrustedPartnersSection />
-        <FindPlanSection /> */}
+        <FindPlanSection />
         {/* <NewsAwardsSection /> */}
-
+{/* 
       <Image
         className="w-full h-full cursor-pointer transition-transform duration-300 ease-out group-hover:scale-105 object-cover"
         src="/assets/comming-soon-banner-image.png"
@@ -35,7 +35,7 @@ function HomePage() {
         width={1920}
         height={400}
         priority
-      />
+      /> */}
     </div>
   )
 }
