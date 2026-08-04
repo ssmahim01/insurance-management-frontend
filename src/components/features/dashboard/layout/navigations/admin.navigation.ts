@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   MessageSquare,
   Package,
+  PersonStanding,
   ShieldCheck,
   User,
   Users,
@@ -71,6 +72,12 @@ export const adminNavigation: NavGroup[] = [
         label: "A.M - Partnerships",
         href: "/admin/dashboard/managers",
         icon: Users,
+      },
+       {
+        id: "claims-managers",
+        label: "Claims Managers",
+        href: "/admin/dashboard/claims-managers",
+        icon: PersonStanding,
       },
        {
         id: "a-a-managers",

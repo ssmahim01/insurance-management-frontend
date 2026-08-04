@@ -6,7 +6,7 @@ import {
   LayoutDashboard,
   MessageSquare,
   Package,
-  Settings,
+  PersonStanding,
   ShieldCheck,
   User,
   Users,
@@ -73,6 +73,12 @@ export const superAdminNavigation: NavGroup[] = [
         icon: Users,
       },
       {
+        id: "claims-managers",
+        label: "Claims Managers",
+        href: "/admin/dashboard/claims-managers",
+        icon: PersonStanding,
+      },
+      {
         id: "a-a-managers",
         label: "A.A. Managers",
         href: "/admin/dashboard/a-a-managers",
@@ -120,7 +126,6 @@ export const superAdminNavigation: NavGroup[] = [
         href: "/admin/dashboard/payments",
         icon: BadgeDollarSign,
       },
-
     ],
-  }
+  },
 ];

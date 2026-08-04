@@ -128,6 +128,16 @@ export interface IUserListResponse {
   stats: IStats;
 }
 
+export interface IClaimsManagerListResponse {
+  success: boolean;
+  message: string;
+  data: {
+    data: IUser[]
+    meta: IPaginationMeta;
+    stats: IStats;
+  };
+}
+
 export interface IAllUsersResponse {
   success: boolean;
   message: string;

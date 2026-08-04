@@ -1,6 +1,7 @@
 import {
   GetUsersParams,
   IAllUsersResponse,
+  IClaimsManagerListResponse,
   ISingleUserResponse,
   IUserListResponse,
 } from "@/types/user.types";
@@ -140,6 +141,32 @@ export const userApi = baseApi.injectEndpoints({
       providesTags: ["USERS"],
     }),
 
+    // Super Admin / Admin — get all claims managers
+    getAllClaimsManagers: builder.query<
+      IClaimsManagerListResponse,
+      GetUsersParams | undefined
+    >({
+      query: (params) => ({
+        url: "/user/claims-managers",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["USERS"],
+    }),
+
+    // Super Admin / Admin — get all soft-deleted claims managers
+    getAllTrashClaimsManagers: builder.query<
+      IClaimsManagerListResponse,
+      GetUsersParams | undefined
+    >({
+      query: (params) => ({
+        url: "/user/trash/claims-managers",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["USERS"],
+    }),
+
     // Super Admin — get all soft-deleted managers
     getAllTrashManagers: builder.query<
       IUserListResponse,
@@ -152,7 +179,7 @@ export const userApi = baseApi.injectEndpoints({
       }),
       providesTags: ["USERS"],
     }),
-// Super Admin — get all managers
+    // Super Admin — get all managers
     getAllAAManagers: builder.query<
       IUserListResponse,
       GetUsersParams | undefined
@@ -392,6 +419,8 @@ export const {
   // Admin / Super Admin — scoped
   useGetAgentLeaderCustomersQuery,
   useGetAgentCustomersQuery,
+  useGetAllClaimsManagersQuery,
+  useGetAllTrashClaimsManagersQuery,
   // Single / Update / Delete
   useGetSingleUserQuery,
   useRestoreUserMutation,
