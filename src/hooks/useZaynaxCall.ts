@@ -43,7 +43,7 @@ interface IncomingCall {
   orderID: string;
 }
 
-const ZAYNAX_SOCKET_URL = process.env.NEXT_PUBLIC_ZAYNAX_SOCKET_URL || "https://api.zaynax.health";
+const ZAYNAX_SOCKET_URL = process.env.NEXT_PUBLIC_ZAYNAX_SOCKET_URL || "https://api.zaynaxhealth.com";
 const RING_TIMEOUT_MS = 30_000;
 // How long we'll keep polling for the Jitsi container div to appear in the
 // DOM before giving up. This covers the gap between setStageBoth("accepted")
